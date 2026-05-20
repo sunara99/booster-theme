@@ -1,0 +1,1079 @@
+{%- doc -%}
+  Renders a free shipping progress bar for the cart drawer.
+  
+  @param {number} [threshold] - The free shipping threshold amount (in cents)
+  @param {number} [current_total] - The current cart total (in cents)
+  @param {string} [message] - Custom message to display
+{%- enddoc -%}
+
+<script
+  src="{{ 'free-shipping-progress.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{%- liquid
+  # Get customer's country and currency
+  assign customer_country = customer.default_address.country_code
+  if customer_country == blank
+    assign customer_country = shop.address.country_code
+  endif
+  assign shop_currency = cart.currency.iso_code
+  
+  # Parse country-specific thresholds
+  assign country_threshold = null
+  assign currency_threshold = null
+  assign threshold_currency = shop_currency
+  
+  if settings.free_shipping_thresholds != blank
+    # First try to split by newlines
+    assign thresholds_text = settings.free_shipping_thresholds | replace: '\r\n', '\n'
+    assign thresholds_lines = thresholds_text | split: '\n'
+    
+    # If we only have one line, try splitting by spaces as well
+    if thresholds_lines.size == 1
+      assign single_line = thresholds_lines[0] | strip
+      if single_line != blank
+        # Split by spaces to handle space-separated thresholds
+        assign thresholds_lines = single_line | split: ' '
+      endif
+    endif
+    
+    for line in thresholds_lines
+      assign line = line | strip
+      if line == blank
+        continue
+      endif
+      
+      assign parts = line | split: ':'
+      if parts.size == 2
+        # Format: CURRENCY:AMOUNT
+        assign currency = parts[0] | strip
+        assign amount = parts[1] | strip
+        if currency == shop_currency
+          assign currency_threshold = amount
+          assign threshold_currency = currency
+        endif
+      elsif parts.size == 3
+        # Format: COUNTRY:CURRENCY:AMOUNT
+        assign country = parts[0] | strip
+        assign currency = parts[1] | strip
+        assign amount = parts[2] | strip
+        if country == customer_country and currency == shop_currency
+          assign country_threshold = amount
+          assign threshold_currency = currency
+        endif
+      endif
+    endfor
+  endif
+  
+  # Use country-specific threshold if available, otherwise currency threshold, otherwise default
+  if country_threshold != null
+    assign threshold_value = country_threshold
+  elsif currency_threshold != null
+    assign threshold_value = currency_threshold
+  else
+    assign threshold_value = threshold
+  endif
+  
+  assign threshold = threshold_value | times: 100
+  assign current_total = current_total | default: cart.total_price
+  assign remaining = threshold | minus: current_total
+  
+  if remaining <= 0
+    assign progress_percentage = 100
+    assign is_qualified = true
+  else
+    assign progress_percentage = current_total | times: 100 | divided_by: threshold
+    assign is_qualified = false
+  endif
+  
+  assign remaining_money = remaining | money
+  assign threshold_money = threshold | money
+  
+  # Build tiers from settings (type + threshold, skip none)
+  assign tier_1_type = settings.tier_1_type | default: 'free_shipping'
+  assign tier_2_type = settings.tier_2_type | default: 'discount'
+  assign tier_3_type = settings.tier_3_type | default: 'free_gift'
+  
+  assign tier_1_use_store = settings.tier_1_use_store_threshold
+  assign tier_2_use_store = settings.tier_2_use_store_threshold
+  assign tier_3_use_store = settings.tier_3_use_store_threshold
+  
+  comment
+    Parse tier thresholds (COUNTRY:CURRENCY:AMOUNT or CURRENCY:AMOUNT format)
+  endcomment
+  assign tier_1_threshold_cents = 0
+  assign tier_2_threshold_cents = 0
+  assign tier_3_threshold_cents = 0
+  
+  if tier_1_type != 'none'
+    if tier_1_type == 'free_shipping' and tier_1_use_store
+      assign tier_1_threshold_cents = threshold
+    else
+      assign t1_country = null
+      assign t1_currency = null
+      assign t1_first = null
+    if settings.tier_1_thresholds != blank
+      assign t1_text = settings.tier_1_thresholds | replace: '\r\n', '\n'
+      assign t1_lines = t1_text | split: '\n'
+      if t1_lines.size == 1
+        assign t1_single = t1_lines[0] | strip
+        if t1_single != blank
+          assign t1_lines = t1_single | split: ' '
+        endif
+      endif
+      for t1_line in t1_lines
+        assign t1_line = t1_line | strip
+        if t1_line == blank
+          continue
+        endif
+        assign t1_parts = t1_line | split: ':'
+        if t1_parts.size == 2
+          assign t1_c = t1_parts[0] | strip
+          assign t1_a = t1_parts[1] | strip
+          if t1_first == null
+            assign t1_first = t1_a
+          endif
+          if t1_c == shop_currency
+            assign t1_currency = t1_a
+          endif
+        elsif t1_parts.size == 3
+          assign t1_co = t1_parts[0] | strip
+          assign t1_cu = t1_parts[1] | strip
+          assign t1_a = t1_parts[2] | strip
+          if t1_first == null
+            assign t1_first = t1_a
+          endif
+          if t1_co == customer_country and t1_cu == shop_currency
+            assign t1_country = t1_a
+          endif
+        endif
+      endfor
+    endif
+    if t1_country != null
+      assign tier_1_threshold_cents = t1_country | times: 100
+    elsif t1_currency != null
+      assign tier_1_threshold_cents = t1_currency | times: 100
+    elsif t1_first != null
+      assign tier_1_threshold_cents = t1_first | times: 100
+    endif
+    endif
+  endif
+  
+  if tier_2_type != 'none'
+    if tier_2_type == 'free_shipping' and tier_2_use_store
+      assign tier_2_threshold_cents = threshold
+    else
+      assign t2_country = null
+      assign t2_currency = null
+      assign t2_first = null
+    if settings.tier_2_thresholds != blank
+      assign t2_text = settings.tier_2_thresholds | replace: '\r\n', '\n'
+      assign t2_lines = t2_text | split: '\n'
+      if t2_lines.size == 1
+        assign t2_single = t2_lines[0] | strip
+        if t2_single != blank
+          assign t2_lines = t2_single | split: ' '
+        endif
+      endif
+      for t2_line in t2_lines
+        assign t2_line = t2_line | strip
+        if t2_line == blank
+          continue
+        endif
+        assign t2_parts = t2_line | split: ':'
+        if t2_parts.size == 2
+          assign t2_c = t2_parts[0] | strip
+          assign t2_a = t2_parts[1] | strip
+          if t2_first == null
+            assign t2_first = t2_a
+          endif
+          if t2_c == shop_currency
+            assign t2_currency = t2_a
+          endif
+        elsif t2_parts.size == 3
+          assign t2_co = t2_parts[0] | strip
+          assign t2_cu = t2_parts[1] | strip
+          assign t2_a = t2_parts[2] | strip
+          if t2_first == null
+            assign t2_first = t2_a
+          endif
+          if t2_co == customer_country and t2_cu == shop_currency
+            assign t2_country = t2_a
+          endif
+        endif
+      endfor
+    endif
+    if t2_country != null
+      assign tier_2_threshold_cents = t2_country | times: 100
+    elsif t2_currency != null
+      assign tier_2_threshold_cents = t2_currency | times: 100
+    elsif t2_first != null
+      assign tier_2_threshold_cents = t2_first | times: 100
+    endif
+    endif
+  endif
+  
+  if tier_3_type != 'none'
+    if tier_3_type == 'free_shipping' and tier_3_use_store
+      assign tier_3_threshold_cents = threshold
+    else
+      assign t3_country = null
+      assign t3_currency = null
+      assign t3_first = null
+    if settings.tier_3_thresholds != blank
+      assign t3_text = settings.tier_3_thresholds | replace: '\r\n', '\n'
+      assign t3_lines = t3_text | split: '\n'
+      if t3_lines.size == 1
+        assign t3_single = t3_lines[0] | strip
+        if t3_single != blank
+          assign t3_lines = t3_single | split: ' '
+        endif
+      endif
+      for t3_line in t3_lines
+        assign t3_line = t3_line | strip
+        if t3_line == blank
+          continue
+        endif
+        assign t3_parts = t3_line | split: ':'
+        if t3_parts.size == 2
+          assign t3_c = t3_parts[0] | strip
+          assign t3_a = t3_parts[1] | strip
+          if t3_first == null
+            assign t3_first = t3_a
+          endif
+          if t3_c == shop_currency
+            assign t3_currency = t3_a
+          endif
+        elsif t3_parts.size == 3
+          assign t3_co = t3_parts[0] | strip
+          assign t3_cu = t3_parts[1] | strip
+          assign t3_a = t3_parts[2] | strip
+          if t3_first == null
+            assign t3_first = t3_a
+          endif
+          if t3_co == customer_country and t3_cu == shop_currency
+            assign t3_country = t3_a
+          endif
+        endif
+      endfor
+    endif
+    if t3_country != null
+      assign tier_3_threshold_cents = t3_country | times: 100
+    elsif t3_currency != null
+      assign tier_3_threshold_cents = t3_currency | times: 100
+    elsif t3_first != null
+      assign tier_3_threshold_cents = t3_first | times: 100
+    endif
+    endif
+  endif
+  
+  assign tier_1_discount_percent = settings.tier_1_discount_percent | default: 15
+  assign tier_2_discount_percent = settings.tier_2_discount_percent | default: 15
+  assign tier_3_discount_percent = settings.tier_3_discount_percent | default: 15
+  assign tier_1_gift_label = settings.tier_1_gift_label | default: 'Free gift'
+  assign tier_2_gift_label = settings.tier_2_gift_label | default: 'Free gift'
+  assign tier_3_gift_label = settings.tier_3_gift_label | default: 'Free gift'
+  
+  assign tier1_visible = false
+  assign tier2_visible = false
+  assign tier3_visible = false
+  if tier_1_type != 'none'
+    assign tier1_visible = true
+  endif
+  if tier_2_type != 'none'
+    assign tier2_visible = true
+  endif
+  if tier_3_type != 'none'
+    assign tier3_visible = true
+  endif
+  
+  assign tier1_qualified = false
+  assign tier2_qualified = false
+  assign tier3_qualified = false
+  assign tier1_progress = 0
+  assign tier2_progress = 0
+  assign tier3_progress = 0
+  
+  assign tier_2_prev = 0
+  if tier1_visible
+    assign tier_2_prev = tier_1_threshold_cents
+  endif
+  assign tier_3_prev = 0
+  if tier2_visible
+    assign tier_3_prev = tier_2_threshold_cents
+  elsif tier1_visible
+    assign tier_3_prev = tier_1_threshold_cents
+  endif
+  
+  if tier1_visible and current_total >= tier_1_threshold_cents
+    assign tier1_qualified = true
+    assign tier1_progress = 100
+  elsif tier1_visible
+    assign tier1_progress = current_total | times: 100 | divided_by: tier_1_threshold_cents
+    if tier1_progress > 100
+      assign tier1_progress = 100
+    endif
+  endif
+  
+  if tier2_visible and current_total >= tier_2_threshold_cents
+    assign tier2_qualified = true
+    assign tier2_progress = 100
+  elsif tier2_visible and current_total >= tier_2_prev
+    assign tier_2_range = tier_2_threshold_cents | minus: tier_2_prev
+    if tier_2_range > 0
+      assign tier_2_current = current_total | minus: tier_2_prev
+      assign tier2_progress = tier_2_current | times: 100 | divided_by: tier_2_range
+      if tier2_progress > 100
+        assign tier2_progress = 100
+      endif
+    else
+      assign tier2_progress = 100
+    endif
+  endif
+  
+  if tier3_visible and current_total >= tier_3_threshold_cents
+    assign tier3_qualified = true
+    assign tier3_progress = 100
+  elsif tier3_visible and current_total >= tier_3_prev
+    assign tier_3_range = tier_3_threshold_cents | minus: tier_3_prev
+    if tier_3_range > 0
+      assign tier_3_current = current_total | minus: tier_3_prev
+      assign tier3_progress = tier_3_current | times: 100 | divided_by: tier_3_range
+      if tier3_progress > 100
+        assign tier3_progress = 100
+      endif
+    else
+      assign tier3_progress = 100
+    endif
+  endif
+  
+  assign active_tier_count = 0
+  if tier1_visible
+    assign active_tier_count = active_tier_count | plus: 1
+  endif
+  if tier2_visible
+    assign active_tier_count = active_tier_count | plus: 1
+  endif
+  if tier3_visible
+    assign active_tier_count = active_tier_count | plus: 1
+  endif
+  assign show_progressive = false
+  if active_tier_count >= 2
+    assign show_progressive = true
+  endif
+  assign next_tier = 'all'
+  assign next_remaining = 0
+  assign next_remaining_money = 0 | money
+  assign next_reward_label = ''
+  
+  if show_progressive
+    if tier1_visible and tier1_qualified == false
+      assign next_tier = 'tier1'
+      assign next_remaining = tier_1_threshold_cents | minus: current_total
+      assign next_remaining_money = next_remaining | money
+      if tier_1_type == 'free_shipping'
+        assign next_reward_label = 'Free shipping'
+      elsif tier_1_type == 'discount'
+        assign next_reward_label = tier_1_discount_percent | append: '% discount'
+      else
+        assign next_reward_label = tier_1_gift_label
+      endif
+    elsif tier2_visible and tier2_qualified == false
+      assign next_tier = 'tier2'
+      assign next_remaining = tier_2_threshold_cents | minus: current_total
+      assign next_remaining_money = next_remaining | money
+      if tier_2_type == 'free_shipping'
+        assign next_reward_label = 'Free shipping'
+      elsif tier_2_type == 'discount'
+        assign next_reward_label = tier_2_discount_percent | append: '% discount'
+      else
+        assign next_reward_label = tier_2_gift_label
+      endif
+    elsif tier3_visible and tier3_qualified == false
+      assign next_tier = 'tier3'
+      assign next_remaining = tier_3_threshold_cents | minus: current_total
+      assign next_remaining_money = next_remaining | money
+      if tier_3_type == 'free_shipping'
+        assign next_reward_label = 'Free shipping'
+      elsif tier_3_type == 'discount'
+        assign next_reward_label = tier_3_discount_percent | append: '% discount'
+      else
+        assign next_reward_label = tier_3_gift_label
+      endif
+    endif
+  endif
+
+  assign simple_bar_progress_default = 'Add {amount} more for free shipping'
+  assign simple_bar_qualified_default = 'You qualify for free shipping!'
+
+  comment
+    Single-tier mode uses the simple bar but must read the active tier's threshold.
+    Otherwise global free_shipping_thresholds / blank render param yields threshold 0 → false "qualified" and €0 goal labels.
+  endcomment
+  if show_progressive == false and active_tier_count == 1
+    if tier1_visible
+      assign threshold = tier_1_threshold_cents
+    elsif tier2_visible
+      assign threshold = tier_2_threshold_cents
+    elsif tier3_visible
+      assign threshold = tier_3_threshold_cents
+    endif
+    assign remaining = threshold | minus: current_total
+    if threshold > 0
+      if remaining <= 0
+        assign progress_percentage = 100
+        assign is_qualified = true
+      else
+        assign progress_percentage = current_total | times: 100 | divided_by: threshold
+        assign is_qualified = false
+      endif
+    else
+      assign progress_percentage = 0
+      assign is_qualified = false
+    endif
+    assign remaining_money = remaining | money
+    assign threshold_money = threshold | money
+
+    if tier1_visible
+      if tier_1_type == 'discount'
+        assign simple_bar_progress_default = 'Add {amount} more for ' | append: tier_1_discount_percent | append: '% discount'
+        assign simple_bar_qualified_default = 'You qualify for ' | append: tier_1_discount_percent | append: '% discount!'
+      elsif tier_1_type == 'free_gift'
+        assign simple_bar_progress_default = 'Add {amount} more for ' | append: tier_1_gift_label
+        assign simple_bar_qualified_default = 'You qualify for ' | append: tier_1_gift_label | append: '!'
+      endif
+    elsif tier2_visible
+      if tier_2_type == 'discount'
+        assign simple_bar_progress_default = 'Add {amount} more for ' | append: tier_2_discount_percent | append: '% discount'
+        assign simple_bar_qualified_default = 'You qualify for ' | append: tier_2_discount_percent | append: '% discount!'
+      elsif tier_2_type == 'free_gift'
+        assign simple_bar_progress_default = 'Add {amount} more for ' | append: tier_2_gift_label
+        assign simple_bar_qualified_default = 'You qualify for ' | append: tier_2_gift_label | append: '!'
+      endif
+    elsif tier3_visible
+      if tier_3_type == 'discount'
+        assign simple_bar_progress_default = 'Add {amount} more for ' | append: tier_3_discount_percent | append: '% discount'
+        assign simple_bar_qualified_default = 'You qualify for ' | append: tier_3_discount_percent | append: '% discount!'
+      elsif tier_3_type == 'free_gift'
+        assign simple_bar_progress_default = 'Add {amount} more for ' | append: tier_3_gift_label
+        assign simple_bar_qualified_default = 'You qualify for ' | append: tier_3_gift_label | append: '!'
+      endif
+    endif
+  endif
+  
+  assign custom_message = message | default: simple_bar_progress_default
+  assign qualified_message = simple_bar_qualified_default
+  if custom_message contains '{amount}'
+    assign custom_message = custom_message | replace: '{amount}', remaining_money
+  endif
+  
+  assign progressive_message = settings.free_shipping_progressive_message | default: 'You are {amount} away from getting {reward}!'
+  assign progressive_message = progressive_message | replace: '{amount}', next_remaining_money | replace: '{reward}', next_reward_label
+  assign progressive_success_message = settings.free_shipping_progressive_success_message | default: "Congratulations! You've unlocked all rewards!"
+  
+  assign gift_variant_ids = ''
+  assign gift_thresholds = ''
+  assign tier_1_gift_product = settings.tier_1_gift_product
+  assign tier_2_gift_product = settings.tier_2_gift_product
+  assign tier_3_gift_product = settings.tier_3_gift_product
+  if tier_1_type == 'free_gift' and tier_1_gift_product != blank
+    assign tier_1_gift_variant = tier_1_gift_product.selected_or_first_available_variant
+    if tier_1_gift_variant.available
+      assign gift_variant_ids = tier_1_gift_variant.id | append: ''
+      assign gift_thresholds = tier_1_threshold_cents | append: ''
+    endif
+  endif
+  if tier_2_type == 'free_gift' and tier_2_gift_product != blank
+    assign tier_2_gift_variant = tier_2_gift_product.selected_or_first_available_variant
+    if tier_2_gift_variant.available
+      if gift_variant_ids != blank
+        assign gift_variant_ids = gift_variant_ids | append: ',' | append: tier_2_gift_variant.id
+        assign gift_thresholds = gift_thresholds | append: ',' | append: tier_2_threshold_cents
+      else
+        assign gift_variant_ids = tier_2_gift_variant.id | append: ''
+        assign gift_thresholds = tier_2_threshold_cents | append: ''
+      endif
+    endif
+  endif
+  if tier_3_type == 'free_gift' and tier_3_gift_product != blank
+    assign tier_3_gift_variant = tier_3_gift_product.selected_or_first_available_variant
+    if tier_3_gift_variant.available
+      if gift_variant_ids != blank
+        assign gift_variant_ids = gift_variant_ids | append: ',' | append: tier_3_gift_variant.id
+        assign gift_thresholds = gift_thresholds | append: ',' | append: tier_3_threshold_cents
+      else
+        assign gift_variant_ids = tier_3_gift_variant.id | append: ''
+        assign gift_thresholds = tier_3_threshold_cents | append: ''
+      endif
+    endif
+  endif
+-%}
+
+{%- liquid
+  assign padding_block_start = settings.free_shipping_padding_block_start
+  assign padding_block_end = settings.free_shipping_padding_block_end
+  assign padding_inline_start = settings.free_shipping_padding_inline_start
+  assign padding_inline_end = settings.free_shipping_padding_inline_end
+  assign margin_block_start = settings.free_shipping_margin_block_start
+  assign margin_block_end = settings.free_shipping_margin_block_end
+  assign margin_inline_start = settings.free_shipping_margin_inline_start
+  assign margin_inline_end = settings.free_shipping_margin_inline_end
+  
+  # Check if margins are greater than 0 for conditional border application
+  assign show_left_border = false
+  assign show_right_border = false
+  
+  if margin_inline_start != blank and margin_inline_start > 0
+    assign show_left_border = true
+  endif
+  
+  if margin_inline_end != blank and margin_inline_end > 0
+    assign show_right_border = true
+  endif
+-%}
+<div class="free-shipping-progress{% if is_qualified %} free-shipping-progress--qualified{% endif %}{% if show_progressive %} free-shipping-progress--progressive{% endif %}{% if show_progressive and next_tier == 'all' %} free-shipping-progress--all-qualified{% endif %}" 
+     data-free-shipping-threshold="{{ threshold }}"
+     data-free-shipping-message="{{ custom_message }}"
+     data-free-shipping-qualified-message="{{ qualified_message }}"
+     {% if gift_variant_ids != blank %}data-gift-variant-ids="{{ gift_variant_ids }}" data-gift-thresholds="{{ gift_thresholds }}"{% endif %}
+     {% if padding_block_start != blank or padding_block_end != blank or padding_inline_start != blank or padding_inline_end != blank or margin_block_start != blank or margin_block_end != blank or margin_inline_start != blank or margin_inline_end != blank %}
+     style="
+       {% if padding_block_start != blank %}--free-shipping-padding-block-start: {{ padding_block_start }}px;{% endif %}
+       {% if padding_block_end != blank %}--free-shipping-padding-block-end: {{ padding_block_end }}px;{% endif %}
+       {% if padding_inline_start != blank %}--free-shipping-padding-inline-start: {{ padding_inline_start }}px;{% endif %}
+       {% if padding_inline_end != blank %}--free-shipping-padding-inline-end: {{ padding_inline_end }}px;{% endif %}
+       {% if margin_block_start != blank %}--free-shipping-margin-block-start: {{ margin_block_start }}px;{% endif %}
+       {% if margin_block_end != blank %}--free-shipping-margin-block-end: {{ margin_block_end }}px;{% endif %}
+       {% if margin_inline_start != blank %}--free-shipping-margin-inline-start: {{ margin_inline_start }}px;{% endif %}
+       {% if margin_inline_end != blank %}--free-shipping-margin-inline-end: {{ margin_inline_end }}px;{% endif %}
+     "
+     {% endif %}>
+  {% if show_progressive and next_tier == 'all' %}
+  <div class="free-shipping-progress__confetti" aria-hidden="true">
+    {% for i in (1..28) %}
+    <span class="free-shipping-progress__confetti-piece free-shipping-progress__confetti-piece--{{ i | modulo: 6 }}" style="--confetti-delay: {{ i | times: 0.04 }}s; --confetti-x: {{ i | modulo: 7 | times: 14 }}%; --confetti-rotation: {{ i | times: 60 }}deg; --confetti-duration: {{ 1.2 | plus: i | modulo: 5 | times: 0.2 }}s;"></span>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="free-shipping-progress__content">
+    {% if show_progressive %}
+      {% if next_tier == 'all' or next_reward_label == blank %}
+        <div class="free-shipping-progress__message free-shipping-progress__message--qualified">
+          <span class="svg-wrapper">
+            {{- 'icon-checkmark.svg' | inline_asset_content -}}
+          </span>
+          <span class="free-shipping-progress__text">
+            {{ progressive_success_message }}
+          </span>
+        </div>
+      {% else %}
+        <div class="free-shipping-progress__message">
+          <span class="free-shipping-progress__text">
+            {{ progressive_message }}
+          </span>
+        </div>
+      {% endif %}
+    {% else %}
+      {% if is_qualified %}
+        <div class="free-shipping-progress__message free-shipping-progress__message--qualified">
+          <span class="svg-wrapper">
+            {{- 'icon-checkmark.svg' | inline_asset_content -}}
+          </span>
+          <span class="free-shipping-progress__text">
+            {{ qualified_message }}
+          </span>
+        </div>
+      {% else %}
+        <div class="free-shipping-progress__message">
+          <span class="free-shipping-progress__text">
+            {{ custom_message }}
+          </span>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+  
+  {% if show_progressive %}
+    <div class="free-shipping-progress__tiers">
+      {% if tier1_visible %}
+      <div class="free-shipping-progress__tier{% if tier1_qualified %} free-shipping-progress__tier--qualified{% endif %}">
+        <div class="free-shipping-progress__tier-bar">
+          <div class="free-shipping-progress__tier-fill" style="width: {{ tier1_progress }}%"></div>
+        </div>
+        <div class="free-shipping-progress__tier-label">
+          {% if tier1_qualified %}
+            <span class="free-shipping-progress__tier-check">
+              {{- 'icon-checkmark.svg' | inline_asset_content -}}
+            </span>
+          {% endif %}
+          <span>{% if tier_1_type == 'free_shipping' %}Free shipping{% elsif tier_1_type == 'discount' %}{{ tier_1_discount_percent }}% discount{% else %}{{ tier_1_gift_label }}{% endif %}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if tier2_visible %}
+      <div class="free-shipping-progress__tier{% if tier2_qualified %} free-shipping-progress__tier--qualified{% endif %}">
+        <div class="free-shipping-progress__tier-bar">
+          <div class="free-shipping-progress__tier-fill" style="width: {{ tier2_progress }}%"></div>
+        </div>
+        <div class="free-shipping-progress__tier-label">
+          {% if tier2_qualified %}
+            <span class="free-shipping-progress__tier-check">
+              {{- 'icon-checkmark.svg' | inline_asset_content -}}
+            </span>
+          {% endif %}
+          <span>{% if tier_2_type == 'free_shipping' %}Free shipping{% elsif tier_2_type == 'discount' %}{{ tier_2_discount_percent }}% discount{% else %}{{ tier_2_gift_label }}{% endif %}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if tier3_visible %}
+      <div class="free-shipping-progress__tier{% if tier3_qualified %} free-shipping-progress__tier--qualified{% endif %}">
+        <div class="free-shipping-progress__tier-bar">
+          <div class="free-shipping-progress__tier-fill" style="width: {{ tier3_progress }}%"></div>
+        </div>
+        <div class="free-shipping-progress__tier-label">
+          {% if tier3_qualified %}
+            <span class="free-shipping-progress__tier-check">
+              {{- 'icon-checkmark.svg' | inline_asset_content -}}
+            </span>
+          {% endif %}
+          <span>{% if tier_3_type == 'free_shipping' %}Free shipping{% elsif tier_3_type == 'discount' %}{{ tier_3_discount_percent }}% discount{% else %}{{ tier_3_gift_label }}{% endif %}</span>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="free-shipping-progress__bar">
+      <div 
+        class="free-shipping-progress__fill" 
+        style="width: {{ progress_percentage }}%"
+        data-progress="{{ progress_percentage }}"
+      ></div>
+    </div>
+    
+    {% if settings.show_free_shipping_labels %}
+    <div class="free-shipping-progress__labels">
+      <span class="free-shipping-progress__current"><span class="money">{% render 'price-split', cents: current_total, context: 'cart' %}</span></span>
+      <span class="free-shipping-progress__threshold">
+        <span class="money">{% render 'price-split', cents: threshold, context: 'cart' %}</span>
+      </span>
+    </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<style>
+  .free-shipping-progress {
+    position: relative;
+    overflow: visible;
+    margin-block-start: var(--free-shipping-margin-block-start, 0);
+    margin-block-end: var(--free-shipping-margin-block-end, var(--margin-sm));
+    margin-inline-start: var(--free-shipping-margin-inline-start, 0);
+    margin-inline-end: var(--free-shipping-margin-inline-end, 0);
+    padding-block-start: var(--free-shipping-padding-block-start, var(--cart-drawer-padding));
+    padding-block-end: var(--free-shipping-padding-block-end, var(--cart-drawer-padding));
+    padding-inline-start: var(--free-shipping-padding-inline-start, var(--cart-drawer-padding));
+    padding-inline-end: var(--free-shipping-padding-inline-end, var(--cart-drawer-padding));
+    background-color: {{ settings.free_shipping_background_color | default: 'var(--color-background)' }};
+    border-top: {{ settings.free_shipping_border_width | default: 1 }}px solid {{ settings.free_shipping_border_top_color | default: 'var(--color-border)' }};
+    border-bottom: {{ settings.free_shipping_border_width | default: 1 }}px solid {{ settings.free_shipping_border_bottom_color | default: 'var(--color-border)' }};
+    {% if show_left_border %}border-left: {{ settings.free_shipping_border_width | default: 1 }}px solid {{ settings.free_shipping_border_left_color | default: '#e9ecef' }};{% endif %}
+    {% if show_right_border %}border-right: {{ settings.free_shipping_border_width | default: 1 }}px solid {{ settings.free_shipping_border_right_color | default: '#e9ecef' }};{% endif %}
+    border-radius: {{ settings.free_shipping_border_radius | default: 0 }}px;
+    
+    @media screen and (min-width: 750px) {
+      padding-block-start: var(--free-shipping-padding-block-start, 0.5rem);
+      padding-block-end: var(--free-shipping-padding-block-end, 0.5rem);
+      padding-inline-start: var(--free-shipping-padding-inline-start, 1.25rem);
+      padding-inline-end: var(--free-shipping-padding-inline-end, 1.25rem);
+    }
+  }
+
+  /* Confetti animation - all thresholds achieved */
+  .free-shipping-progress__confetti {
+    position: absolute;
+    inset: -10px -20px -20px -20px;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 2;
+  }
+
+  .free-shipping-progress__confetti-piece {
+    position: absolute;
+    top: -6px;
+    left: var(--confetti-x, 50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    animation: confettiFall var(--confetti-duration, 1.5s) ease-in var(--confetti-delay, 0s) both;
+    transform-origin: center top;
+  }
+
+  .free-shipping-progress__confetti-piece--0 { background: #00a650; }
+  .free-shipping-progress__confetti-piece--1 { background: #ff6b6b; width: 4px; height: 4px; }
+  .free-shipping-progress__confetti-piece--2 { background: #4ecdc4; width: 8px; height: 4px; }
+  .free-shipping-progress__confetti-piece--3 { background: #ffe66d; width: 5px; height: 5px; }
+  .free-shipping-progress__confetti-piece--4 { background: #a78bfa; width: 4px; height: 8px; }
+  .free-shipping-progress__confetti-piece--5 { background: #f472b6; width: 6px; height: 6px; }
+
+  @keyframes confettiFall {
+    0% {
+      opacity: 1;
+      transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+    }
+    25% {
+      transform: translateY(20px) translateX(5px) rotate(90deg) scale(1);
+    }
+    50% {
+      transform: translateY(40px) translateX(-3px) rotate(180deg) scale(1);
+    }
+    75% {
+      transform: translateY(60px) translateX(4px) rotate(270deg) scale(0.8);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(100px) translateX(0) rotate(var(--confetti-rotation, 360deg)) scale(0.5);
+    }
+  }
+
+  .free-shipping-progress__content {
+    position: relative;
+    z-index: 1;
+    margin-bottom: var(--margin-sm);
+  }
+
+  .free-shipping-progress__message {
+    display: flex;
+    justify-content: {% if settings.free_shipping_message_text_alignment == 'center' %}center{% elsif settings.free_shipping_message_text_alignment == 'left' %}flex-start{% elsif settings.free_shipping_message_text_alignment == 'right' %}flex-end{% endif %};
+    align-items: center;
+    gap: var(--gap-xs);
+    font-size: {{ settings.free_shipping_message_font_size | default: 14 }}px;
+    color: {{ settings.free_shipping_text_color | default: 'var(--color-foreground)' }};
+    margin-bottom: var(--margin-xs);
+  }
+
+  .free-shipping-progress__message--qualified {
+    color: {{ settings.free_shipping_qualified_color | default: '#00a650' }};
+  }
+
+  .free-shipping-progress__message .svg-wrapper {
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    flex-shrink: 0;
+  }
+
+  .free-shipping-progress__text {
+    line-height: 1.4;
+  }
+
+  .free-shipping-progress__text :is(a) {
+    color: inherit;
+    text-underline-offset: 0.12em;
+  }
+
+  .free-shipping-progress__bar {
+    width: 100%;
+    height: {{ settings.free_shipping_progress_bar_height | default: 6 }}px;
+    background-color: {{ settings.free_shipping_progress_bg_color | default: 'var(--color-border)' }};
+    border-radius: {{ settings.free_shipping_progress_bar_border_radius | default: 3 }}px;
+    overflow: hidden;
+    margin-bottom: var(--margin-sm);
+  }
+
+  .free-shipping-progress__fill {
+    height: 100%;
+    background: {{ settings.free_shipping_progress_color | default: '#007bff' }};
+    border-radius: {{ settings.free_shipping_progress_bar_border_radius | default: 3 }}px;
+    transition: width 0.3s ease;
+    position: relative;
+  }
+
+  .free-shipping-progress__labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--cart-font-size--xs);
+    color: {{ settings.free_shipping_labels_color | default: 'var(--color-foreground-subdued, rgb(var(--color-foreground-rgb) / 0.6))' }};
+  }
+
+  .free-shipping-progress__current {
+    font-weight: var(--font-weight-medium, 500);
+  }
+
+  .free-shipping-progress__threshold {
+    font-weight: var(--font-weight-normal, 400);
+  }
+
+  .free-shipping-progress__labels .money {
+    font-family: var(--font-family-mono, monospace);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Progressive rewards tiers */
+  .free-shipping-progress__tiers {
+    display: flex;
+    gap: var(--gap-sm, 0.75rem);
+    justify-content: space-between;
+    margin-top: var(--margin-sm);
+  }
+
+  .free-shipping-progress__tier {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-xs, 0.25rem);
+  }
+
+  .free-shipping-progress__tier-bar {
+    width: 100%;
+    height: {{ settings.free_shipping_progress_bar_height | default: 6 }}px;
+    background-color: {{ settings.free_shipping_progress_bg_color | default: 'var(--color-border)' }};
+    border-radius: {{ settings.free_shipping_progress_bar_border_radius | default: 3 }}px;
+    overflow: hidden;
+  }
+
+  .free-shipping-progress__tier-fill {
+    height: 100%;
+    background-color: {{ settings.free_shipping_progress_color | default: '#007bff' }};
+    border-radius: {{ settings.free_shipping_progress_bar_border_radius | default: 3 }}px;
+    transition: width 0.3s ease;
+  }
+
+  .free-shipping-progress__tier--qualified {
+    animation: tierUnlockContainer 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .free-shipping-progress__tier--qualified .free-shipping-progress__tier-fill {
+    background-color: {{ settings.free_shipping_qualified_progress_color | default: '#00a650' }};
+    animation: tierUnlockFill 0.7s ease-out both;
+  }
+
+  .free-shipping-progress__tier--qualified .free-shipping-progress__tier-check {
+    animation: tierUnlockCheck 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  }
+
+  .free-shipping-progress__tier--qualified .free-shipping-progress__tier-label {
+    animation: tierUnlockLabel 0.5s ease-out 0.25s both;
+  }
+
+  @keyframes tierUnlockContainer {
+    0% {
+      transform: scale(0.95);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes tierUnlockFill {
+    0% {
+      box-shadow: 0 0 0 0 {{ settings.free_shipping_qualified_progress_color | default: '#00a650' | color_modify: 'alpha', 0.8 }};
+      filter: brightness(1.4);
+    }
+    40% {
+      box-shadow: 0 0 0 12px {{ settings.free_shipping_qualified_progress_color | default: '#00a650' | color_modify: 'alpha', 0.3 }};
+      filter: brightness(1.4);
+    }
+    70% {
+      box-shadow: 0 0 0 16px {{ settings.free_shipping_qualified_progress_color | default: '#00a650' | color_modify: 'alpha', 0 }};
+      filter: brightness(1.2);
+    }
+    100% {
+      box-shadow: 0 0 0 0 {{ settings.free_shipping_qualified_progress_color | default: '#00a650' | color_modify: 'alpha', 0 }};
+      filter: brightness(1);
+    }
+  }
+
+  @keyframes tierUnlockCheck {
+    0% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    60% {
+      transform: scale(1.25);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes tierUnlockLabel {
+    0% {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .free-shipping-progress__tier-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-3xs, 0.25rem);
+    font-size: {{ settings.free_shipping_tier_label_font_size | default: 12 }}px;
+    line-height: 1.1;
+    color: {{ settings.free_shipping_text_color | default: 'var(--color-foreground)' }};
+    text-align: center;
+  }
+
+  .free-shipping-progress__tier--qualified .free-shipping-progress__tier-label {
+    color: {{ settings.free_shipping_qualified_color | default: '#00a650' }};
+  }
+
+  .free-shipping-progress__tier-check {
+    width: {{ settings.free_shipping_tier_label_font_size | default: 12 }}px;
+    height: {{ settings.free_shipping_tier_label_font_size | default: 12 }}px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .free-shipping-progress__tier-check svg {
+    width: 100%;
+    height: 100%;
+    color: {{ settings.free_shipping_qualified_color | default: '#00a650' }};
+  }
+
+  .free-shipping-progress__country-indicator {
+    font-size: 0.7em;
+    opacity: 0.7;
+    margin-left: 0.25em;
+    font-weight: normal;
+  }
+
+  /* Animation for progress bar fill */
+  .free-shipping-progress__fill {
+    animation: progressFill 0.6s ease-out;
+  }
+
+  .free-shipping-progress__fill--updating {
+    transition: width 0.3s ease;
+  }
+
+  .free-shipping-progress--qualified .free-shipping-progress__fill {
+    background: {{ settings.free_shipping_qualified_progress_color | default: '#00a650' }};
+    animation: qualifiedPulse 2s ease-in-out infinite;
+  }
+
+  /* All thresholds achieved - celebration animation */
+  .free-shipping-progress--all-qualified .free-shipping-progress__content {
+    animation: allQualifiedReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .free-shipping-progress--all-qualified .free-shipping-progress__message--qualified {
+    animation: allQualifiedMessage 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  }
+
+  .free-shipping-progress--all-qualified .free-shipping-progress__message--qualified .svg-wrapper {
+    animation: allQualifiedCheckBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+  }
+
+  @keyframes allQualifiedCheckBounce {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .free-shipping-progress--all-qualified .free-shipping-progress__tiers {
+    animation: allQualifiedTiers 0.5s ease-out 0.3s both;
+  }
+
+  .free-shipping-progress--all-qualified .free-shipping-progress__tier--qualified .free-shipping-progress__tier-fill {
+    animation: allQualifiedTierPulse 1.5s ease-in-out 0.5s both;
+  }
+
+  @keyframes allQualifiedReveal {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes allQualifiedMessage {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(-8px);
+    }
+    60% {
+      transform: scale(1.05) translateY(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes allQualifiedTiers {
+    0% {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes allQualifiedTierPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 {{ settings.free_shipping_qualified_progress_color | default: '#00a650' | color_modify: 'alpha', 0.4 }};
+    }
+    50% {
+      box-shadow: 0 0 0 4px {{ settings.free_shipping_qualified_progress_color | default: '#00a650' | color_modify: 'alpha', 0 }};
+    }
+  }
+
+  @keyframes qualifiedPulse {
+    0%, 100% {
+      box-shadow: none;
+    }
+    50% {
+      box-shadow: 0 0 0 2px {{ settings.free_shipping_qualified_progress_color | default: '#00a650' | color_modify: 'alpha', 0.1 }};
+    }
+  }
+
+  @keyframes progressFill {
+    from {
+      width: 0%;
+    }
+    to {
+      width: var(--progress-width, 0%);
+    }
+  }
+
+  /* Match cart drawer spacing and typography */
+  .free-shipping-progress {
+    --cart-font-size--sm: var(--cart-font-size--sm, 0.875rem);
+    --cart-font-size--xs: var(--cart-font-size--xs, 0.75rem);
+  }
+
+  /* Responsive adjustments */
+  @media screen and (max-width: 749px) {
+    .free-shipping-progress {
+      padding-block-start: var(--free-shipping-padding-block-start, var(--cart-drawer-padding));
+      padding-block-end: var(--free-shipping-padding-block-end, var(--cart-drawer-padding));
+      padding-inline-start: var(--free-shipping-padding-inline-start, var(--cart-drawer-padding));
+      padding-inline-end: var(--free-shipping-padding-inline-end, var(--cart-drawer-padding));
+    }
+  }
+</style>

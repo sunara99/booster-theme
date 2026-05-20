@@ -1,0 +1,4506 @@
+
+{% liquid
+  assign block_settings = block.settings
+  comment
+    Main product for quantity break pricing. closest.product can resolve to gift_1_product
+    when the block has gift product settings, so we use template product first.
+  endcomment
+  assign product = product | default: closest.product
+  assign variant = product.selected_or_first_available_variant
+  
+  # Get base price and compare at price
+  assign base_price = variant.price
+  assign base_compare_at_price = variant.compare_at_price
+  if base_compare_at_price == blank or base_compare_at_price == 0
+    assign base_compare_at_price = base_price
+  endif
+  
+  # Determine image to use for each option
+  # Priority: custom image > variant image > product featured image
+  if block_settings.show_images == true
+    assign show_images = true
+  else
+    assign show_images = false
+  endif
+  
+  # Get variant image (try featured_media.preview_image first, then featured_image)
+  assign variant_image = blank
+  if variant.featured_media != blank and variant.featured_media.preview_image != blank
+    assign variant_image = variant.featured_media.preview_image
+  elsif variant.featured_image != blank
+    assign variant_image = variant.featured_image
+  elsif product.featured_image != blank
+    assign variant_image = product.featured_image
+  endif
+  
+  # Option 1 image
+  if block_settings.option_1_custom_image != blank
+    assign option_1_image = block_settings.option_1_custom_image
+  elsif variant_image != blank
+    assign option_1_image = variant_image
+  else
+    assign option_1_image = blank
+  endif
+  
+  # Option 2 image
+  if block_settings.option_2_custom_image != blank
+    assign option_2_image = block_settings.option_2_custom_image
+  elsif variant_image != blank
+    assign option_2_image = variant_image
+  else
+    assign option_2_image = blank
+  endif
+  
+  # Option 3 image
+  if block_settings.option_3_custom_image != blank
+    assign option_3_image = block_settings.option_3_custom_image
+  elsif variant_image != blank
+    assign option_3_image = variant_image
+  else
+    assign option_3_image = blank
+  endif
+  
+  # Option 4 image
+  if block_settings.option_4_custom_image != blank
+    assign option_4_image = block_settings.option_4_custom_image
+  elsif variant_image != blank
+    assign option_4_image = variant_image
+  else
+    assign option_4_image = blank
+  endif
+  
+  # Option 5 image
+  if block_settings.option_5_custom_image != blank
+    assign option_5_image = block_settings.option_5_custom_image
+  elsif variant_image != blank
+    assign option_5_image = variant_image
+  else
+    assign option_5_image = blank
+  endif
+  
+  # Option 6 image
+  if block_settings.option_6_custom_image != blank
+    assign option_6_image = block_settings.option_6_custom_image
+  elsif variant_image != blank
+    assign option_6_image = variant_image
+  else
+    assign option_6_image = blank
+  endif
+  
+  # Calculate image size for URL (2x for retina)
+  assign image_size = block_settings.image_size | default: 60
+  assign image_url_width = image_size | times: 2
+  
+  # Define quantity options (can be configured in settings)
+  assign option_1_enabled = block_settings.option_1_enabled
+  assign option_1_quantity = block_settings.option_1_quantity | default: 1
+  assign option_1_discount_type = block_settings.option_1_discount_type | default: 'percentage'
+  assign option_1_discount = block_settings.option_1_discount | default: 0
+  assign option_1_discount_amount = block_settings.option_1_discount_amount | default: 0
+  assign preselected_option = block_settings.preselected_option | default: 'option_2'
+  assign option_1_recommended = false
+  if preselected_option == 'option_1'
+    assign option_1_recommended = true
+  endif
+  
+  assign option_2_enabled = block_settings.option_2_enabled
+  assign option_2_quantity = block_settings.option_2_quantity | default: 2
+  assign option_2_discount_type = block_settings.option_2_discount_type | default: 'percentage'
+  assign option_2_discount = block_settings.option_2_discount | default: 10
+  assign option_2_discount_amount = block_settings.option_2_discount_amount | default: 0
+  assign option_2_recommended = false
+  if preselected_option == 'option_2'
+    assign option_2_recommended = true
+  endif
+  
+  assign option_3_enabled = block_settings.option_3_enabled
+  assign option_3_quantity = block_settings.option_3_quantity | default: 3
+  assign option_3_discount_type = block_settings.option_3_discount_type | default: 'percentage'
+  assign option_3_discount = block_settings.option_3_discount | default: 15
+  assign option_3_discount_amount = block_settings.option_3_discount_amount | default: 0
+  assign option_3_recommended = false
+  if preselected_option == 'option_3'
+    assign option_3_recommended = true
+  endif
+  
+  assign option_4_enabled = block_settings.option_4_enabled
+  assign option_4_quantity = block_settings.option_4_quantity | default: 0
+  assign option_4_discount_type = block_settings.option_4_discount_type | default: 'percentage'
+  assign option_4_discount = block_settings.option_4_discount | default: 0
+  assign option_4_discount_amount = block_settings.option_4_discount_amount | default: 0
+  assign option_4_recommended = false
+  if preselected_option == 'option_4'
+    assign option_4_recommended = true
+  endif
+  
+  assign option_5_enabled = block_settings.option_5_enabled
+  assign option_5_quantity = block_settings.option_5_quantity | default: 0
+  assign option_5_discount_type = block_settings.option_5_discount_type | default: 'percentage'
+  assign option_5_discount = block_settings.option_5_discount | default: 0
+  assign option_5_discount_amount = block_settings.option_5_discount_amount | default: 0
+  assign option_5_recommended = false
+  if preselected_option == 'option_5'
+    assign option_5_recommended = true
+  endif
+  
+  assign option_6_enabled = block_settings.option_6_enabled
+  assign option_6_quantity = block_settings.option_6_quantity | default: 0
+  assign option_6_discount_type = block_settings.option_6_discount_type | default: 'percentage'
+  assign option_6_discount = block_settings.option_6_discount | default: 0
+  assign option_6_discount_amount = block_settings.option_6_discount_amount | default: 0
+  assign option_6_recommended = false
+  if preselected_option == 'option_6'
+    assign option_6_recommended = true
+  endif
+  
+  assign option_1_sold_out = block_settings.option_1_sold_out | default: false
+  assign option_2_sold_out = block_settings.option_2_sold_out | default: false
+  assign option_3_sold_out = block_settings.option_3_sold_out | default: false
+  assign option_4_sold_out = block_settings.option_4_sold_out | default: false
+  assign option_5_sold_out = block_settings.option_5_sold_out | default: false
+  assign option_6_sold_out = block_settings.option_6_sold_out | default: false
+  
+  # Variant picker for all quantity options
+  assign show_variant_picker = block_settings.show_variant_picker | default: false
+  assign hide_variant_picker_when_quantity_1 = block_settings.hide_variant_picker_when_quantity_1 | default: false
+  assign show_variant_pickers_heading = block_settings.show_variant_pickers_heading
+  if show_variant_pickers_heading == nil
+    assign show_variant_pickers_heading = true
+  endif
+  assign show_variant_picker_row_numbers = block_settings.show_variant_picker_row_numbers
+  if show_variant_picker_row_numbers == nil
+    assign show_variant_picker_row_numbers = true
+  endif
+  assign show_quantity_breaks_radio_indicator = block_settings.show_quantity_breaks_radio_indicator
+  if show_quantity_breaks_radio_indicator == nil
+    assign show_quantity_breaks_radio_indicator = true
+  endif
+  assign product_has_variants = false
+  if product.has_only_default_variant == false
+    assign product_has_variants = true
+  endif
+  
+  # Determine compare price type
+  assign compare_price_type = block_settings.compare_price_type | default: 'calculated'
+  assign show_compare_when_original = false
+  if compare_price_type == 'original' and base_compare_at_price > base_price
+    assign show_compare_when_original = true
+  endif
+  
+  # Calculate prices (round final to match Shopify cart - add 1 cent when discount remainder >= 50)
+  assign option_1_total = base_price | times: option_1_quantity
+  if option_1_discount_type == 'fixed'
+    assign option_1_discount_calculated = option_1_discount_amount
+  else
+    assign option_1_discount_raw = option_1_total | times: option_1_discount
+    assign option_1_discount_calculated = option_1_discount_raw | divided_by: 100
+  endif
+  assign option_1_final_price = option_1_total | minus: option_1_discount_calculated
+  if option_1_discount_type != 'fixed'
+    assign option_1_discount_remainder = option_1_discount_raw | modulo: 100
+    if option_1_discount_remainder >= 1
+      assign option_1_final_price = option_1_final_price | plus: 1
+    endif
+  endif
+  # Calculate effective discount percentage for display
+  if option_1_discount_type == 'fixed' and option_1_total > 0
+    assign option_1_effective_discount = option_1_discount_calculated | times: 100 | divided_by: option_1_total
+  else
+    assign option_1_effective_discount = option_1_discount
+  endif
+  if compare_price_type == 'original'
+    assign option_1_compare_price = base_compare_at_price | times: option_1_quantity
+  else
+    assign option_1_compare_price = option_1_total
+  endif
+  
+  assign option_2_total = base_price | times: option_2_quantity
+  if option_2_discount_type == 'fixed'
+    assign option_2_discount_calculated = option_2_discount_amount
+  else
+    assign option_2_discount_raw = option_2_total | times: option_2_discount
+    assign option_2_discount_calculated = option_2_discount_raw | divided_by: 100
+  endif
+  assign option_2_final_price = option_2_total | minus: option_2_discount_calculated
+  if option_2_discount_type != 'fixed'
+    assign option_2_discount_remainder = option_2_discount_raw | modulo: 100
+    if option_2_discount_remainder >= 1
+      assign option_2_final_price = option_2_final_price | plus: 1
+    endif
+  endif
+  # Calculate effective discount percentage for display
+  if option_2_discount_type == 'fixed' and option_2_total > 0
+    assign option_2_effective_discount = option_2_discount_calculated | times: 100 | divided_by: option_2_total
+  else
+    assign option_2_effective_discount = option_2_discount
+  endif
+  if compare_price_type == 'original'
+    assign option_2_compare_price = base_compare_at_price | times: option_2_quantity
+  else
+    assign option_2_compare_price = option_2_total
+  endif
+  
+  assign option_3_total = base_price | times: option_3_quantity
+  if option_3_discount_type == 'fixed'
+    assign option_3_discount_calculated = option_3_discount_amount
+  else
+    assign option_3_discount_raw = option_3_total | times: option_3_discount
+    assign option_3_discount_calculated = option_3_discount_raw | divided_by: 100
+  endif
+  assign option_3_final_price = option_3_total | minus: option_3_discount_calculated
+  if option_3_discount_type != 'fixed'
+    assign option_3_discount_remainder = option_3_discount_raw | modulo: 100
+    if option_3_discount_remainder >= 1
+      assign option_3_final_price = option_3_final_price | plus: 1
+    endif
+  endif
+  # Calculate effective discount percentage for display
+  if option_3_discount_type == 'fixed' and option_3_total > 0
+    assign option_3_effective_discount = option_3_discount_calculated | times: 100 | divided_by: option_3_total
+  else
+    assign option_3_effective_discount = option_3_discount
+  endif
+  if compare_price_type == 'original'
+    assign option_3_compare_price = base_compare_at_price | times: option_3_quantity
+  else
+    assign option_3_compare_price = option_3_total
+  endif
+  
+  assign option_4_total = base_price | times: option_4_quantity
+  if option_4_discount_type == 'fixed'
+    assign option_4_discount_calculated = option_4_discount_amount
+  else
+    assign option_4_discount_raw = option_4_total | times: option_4_discount
+    assign option_4_discount_calculated = option_4_discount_raw | divided_by: 100
+  endif
+  assign option_4_final_price = option_4_total | minus: option_4_discount_calculated
+  if option_4_discount_type != 'fixed'
+    assign option_4_discount_remainder = option_4_discount_raw | modulo: 100
+    if option_4_discount_remainder >= 1
+      assign option_4_final_price = option_4_final_price | plus: 1
+    endif
+  endif
+  # Calculate effective discount percentage for display
+  if option_4_discount_type == 'fixed' and option_4_total > 0
+    assign option_4_effective_discount = option_4_discount_calculated | times: 100 | divided_by: option_4_total
+  else
+    assign option_4_effective_discount = option_4_discount
+  endif
+  if compare_price_type == 'original'
+    assign option_4_compare_price = base_compare_at_price | times: option_4_quantity
+  else
+    assign option_4_compare_price = option_4_total
+  endif
+  
+  assign option_5_total = base_price | times: option_5_quantity
+  if option_5_discount_type == 'fixed'
+    assign option_5_discount_calculated = option_5_discount_amount
+  else
+    assign option_5_discount_raw = option_5_total | times: option_5_discount
+    assign option_5_discount_calculated = option_5_discount_raw | divided_by: 100
+  endif
+  assign option_5_final_price = option_5_total | minus: option_5_discount_calculated
+  if option_5_discount_type != 'fixed'
+    assign option_5_discount_remainder = option_5_discount_raw | modulo: 100
+    if option_5_discount_remainder >= 1
+      assign option_5_final_price = option_5_final_price | plus: 1
+    endif
+  endif
+  # Calculate effective discount percentage for display
+  if option_5_discount_type == 'fixed' and option_5_total > 0
+    assign option_5_effective_discount = option_5_discount_calculated | times: 100 | divided_by: option_5_total
+  else
+    assign option_5_effective_discount = option_5_discount
+  endif
+  if compare_price_type == 'original'
+    assign option_5_compare_price = base_compare_at_price | times: option_5_quantity
+  else
+    assign option_5_compare_price = option_5_total
+  endif
+  
+  assign option_6_total = base_price | times: option_6_quantity
+  if option_6_discount_type == 'fixed'
+    assign option_6_discount_calculated = option_6_discount_amount
+  else
+    assign option_6_discount_raw = option_6_total | times: option_6_discount
+    assign option_6_discount_calculated = option_6_discount_raw | divided_by: 100
+  endif
+  assign option_6_final_price = option_6_total | minus: option_6_discount_calculated
+  if option_6_discount_type != 'fixed'
+    assign option_6_discount_remainder = option_6_discount_raw | modulo: 100
+    if option_6_discount_remainder >= 1
+      assign option_6_final_price = option_6_final_price | plus: 1
+    endif
+  endif
+  # Calculate effective discount percentage for display
+  if option_6_discount_type == 'fixed' and option_6_total > 0
+    assign option_6_effective_discount = option_6_discount_calculated | times: 100 | divided_by: option_6_total
+  else
+    assign option_6_effective_discount = option_6_discount
+  endif
+  if compare_price_type == 'original'
+    assign option_6_compare_price = base_compare_at_price | times: option_6_quantity
+  else
+    assign option_6_compare_price = option_6_total
+  endif
+  
+  # Format prices (quantity breaks never show currency code on product page)
+%}
+{% capture option_1_final_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_1_final_price %}{% endcapture %}
+{% capture option_1_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_1_compare_price %}{% endcapture %}
+{% capture option_2_final_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_2_final_price %}{% endcapture %}
+{% capture option_2_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_2_compare_price %}{% endcapture %}
+{% capture option_3_final_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_3_final_price %}{% endcapture %}
+{% capture option_3_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_3_compare_price %}{% endcapture %}
+{% capture option_4_final_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_4_final_price %}{% endcapture %}
+{% capture option_4_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_4_compare_price %}{% endcapture %}
+{% capture option_5_final_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_5_final_price %}{% endcapture %}
+{% capture option_5_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_5_compare_price %}{% endcapture %}
+{% capture option_6_final_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_6_final_price %}{% endcapture %}
+{% capture option_6_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_6_compare_price %}{% endcapture %}
+{%- liquid
+  
+  # Calculate per-unit prices if enabled
+  if block_settings.show_price_per_unit == true
+    if option_1_enabled == true and option_1_quantity > 0
+      assign option_1_per_unit_price = option_1_final_price | divided_by: option_1_quantity
+      assign option_1_per_unit_compare_price = option_1_compare_price | divided_by: option_1_quantity
+    else
+      assign option_1_per_unit_price = 0
+      assign option_1_per_unit_compare_price = 0
+    endif
+    if option_2_enabled == true and option_2_quantity > 0
+      assign option_2_per_unit_price = option_2_final_price | divided_by: option_2_quantity
+      assign option_2_per_unit_compare_price = option_2_compare_price | divided_by: option_2_quantity
+    else
+      assign option_2_per_unit_price = 0
+      assign option_2_per_unit_compare_price = 0
+    endif
+    if option_3_enabled == true and option_3_quantity > 0
+      assign option_3_per_unit_price = option_3_final_price | divided_by: option_3_quantity
+      assign option_3_per_unit_compare_price = option_3_compare_price | divided_by: option_3_quantity
+    else
+      assign option_3_per_unit_price = 0
+      assign option_3_per_unit_compare_price = 0
+    endif
+    if option_4_enabled == true and option_4_quantity > 0
+      assign option_4_per_unit_price = option_4_final_price | divided_by: option_4_quantity
+      assign option_4_per_unit_compare_price = option_4_compare_price | divided_by: option_4_quantity
+    else
+      assign option_4_per_unit_price = 0
+      assign option_4_per_unit_compare_price = 0
+    endif
+    if option_5_enabled == true and option_5_quantity > 0
+      assign option_5_per_unit_price = option_5_final_price | divided_by: option_5_quantity
+      assign option_5_per_unit_compare_price = option_5_compare_price | divided_by: option_5_quantity
+    else
+      assign option_5_per_unit_price = 0
+      assign option_5_per_unit_compare_price = 0
+    endif
+    if option_6_enabled == true and option_6_quantity > 0
+      assign option_6_per_unit_price = option_6_final_price | divided_by: option_6_quantity
+      assign option_6_per_unit_compare_price = option_6_compare_price | divided_by: option_6_quantity
+    else
+      assign option_6_per_unit_price = 0
+      assign option_6_per_unit_compare_price = 0
+    endif
+  endif
+
+%}
+{% if block_settings.show_price_per_unit == true %}
+  {% capture option_1_per_unit_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_1_per_unit_price %}{% endcapture %}
+  {% capture option_1_per_unit_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_1_per_unit_compare_price %}{% endcapture %}
+  {% capture option_2_per_unit_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_2_per_unit_price %}{% endcapture %}
+  {% capture option_2_per_unit_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_2_per_unit_compare_price %}{% endcapture %}
+  {% capture option_3_per_unit_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_3_per_unit_price %}{% endcapture %}
+  {% capture option_3_per_unit_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_3_per_unit_compare_price %}{% endcapture %}
+  {% capture option_4_per_unit_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_4_per_unit_price %}{% endcapture %}
+  {% capture option_4_per_unit_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_4_per_unit_compare_price %}{% endcapture %}
+  {% capture option_5_per_unit_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_5_per_unit_price %}{% endcapture %}
+  {% capture option_5_per_unit_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_5_per_unit_compare_price %}{% endcapture %}
+  {% capture option_6_per_unit_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_6_per_unit_price %}{% endcapture %}
+  {% capture option_6_per_unit_compare_price_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_6_per_unit_compare_price %}{% endcapture %}
+{% endif %}
+{%- liquid
+
+  # Free gifts config
+  assign free_gifts_enabled = block_settings.free_gifts_enabled
+  assign free_gifts_heading = block_settings.free_gifts_heading | default: '<p>Free Gift Set</p>'
+  assign free_gifts_style = block_settings.free_gifts_style | default: 'card'
+  assign free_gifts_image_fit = block_settings.free_gifts_image_fit | default: 'square'
+  assign free_gifts_per_row_desktop = block_settings.free_gifts_per_row_desktop | default: '3'
+  assign free_gifts_per_row_mobile = block_settings.free_gifts_per_row_mobile | default: '2'
+  assign free_gifts_badge_display = block_settings.free_gifts_badge_display | default: 'free'
+  assign free_gifts_background_enabled = block_settings.free_gifts_background_enabled
+  assign gift_1_product = block_settings.gift_1_product
+  assign gift_2_product = block_settings.gift_2_product
+  assign gift_3_product = block_settings.gift_3_product
+  assign gift_1_unlock = block_settings.gift_1_unlock_at | default: 'option_2'
+  assign gift_2_unlock = block_settings.gift_2_unlock_at | default: 'option_2'
+  assign gift_3_unlock = block_settings.gift_3_unlock_at | default: 'option_3'
+
+  assign gift_custom_enabled = block_settings.gift_custom_enabled
+  assign gift_custom_name = block_settings.gift_custom_name
+  assign gift_custom_image = block_settings.gift_custom_image
+  assign gift_custom_price = block_settings.gift_custom_price | default: 0
+  assign gift_custom_compare_at_price = block_settings.gift_custom_compare_at_price | default: 0
+  assign gift_custom_unlock = block_settings.gift_custom_unlock_at | default: 'option_2'
+  assign gift_custom_position_num = block_settings.gift_custom_position | default: '4' | plus: 0
+
+  assign gift_custom_2_enabled = block_settings.gift_custom_2_enabled
+  assign gift_custom_2_name = block_settings.gift_custom_2_name
+  assign gift_custom_2_image = block_settings.gift_custom_2_image
+  assign gift_custom_2_price = block_settings.gift_custom_2_price | default: 0
+  assign gift_custom_2_compare_at_price = block_settings.gift_custom_2_compare_at_price | default: 0
+  assign gift_custom_2_unlock = block_settings.gift_custom_2_unlock_at | default: 'option_2'
+  assign gift_custom_2_position_num = block_settings.gift_custom_2_position | default: '5' | plus: 0
+
+  assign gift_custom_3_enabled = block_settings.gift_custom_3_enabled
+  assign gift_custom_3_name = block_settings.gift_custom_3_name
+  assign gift_custom_3_image = block_settings.gift_custom_3_image
+  assign gift_custom_3_price = block_settings.gift_custom_3_price | default: 0
+  assign gift_custom_3_compare_at_price = block_settings.gift_custom_3_compare_at_price | default: 0
+  assign gift_custom_3_unlock = block_settings.gift_custom_3_unlock_at | default: 'option_3'
+  assign gift_custom_3_position_num = block_settings.gift_custom_3_position | default: '6' | plus: 0
+  assign gift_custom_show_price = block_settings.gift_custom_show_price
+  assign gift_custom_2_show_price = block_settings.gift_custom_2_show_price
+  assign gift_custom_3_show_price = block_settings.gift_custom_3_show_price
+
+  if gift_custom_enabled or gift_custom_2_enabled or gift_custom_3_enabled
+    assign c1_at_1 = 0
+    if gift_custom_enabled and gift_custom_position_num <= 1
+      assign c1_at_1 = 1
+    endif
+    assign c2_at_1 = 0
+    if gift_custom_2_enabled and gift_custom_2_position_num <= 1
+      assign c2_at_1 = 1
+    endif
+    assign c3_at_1 = 0
+    if gift_custom_3_enabled and gift_custom_3_position_num <= 1
+      assign c3_at_1 = 1
+    endif
+    assign customs_at_1 = c1_at_1 | plus: c2_at_1 | plus: c3_at_1
+
+    assign c1_at_2 = 0
+    if gift_custom_enabled and gift_custom_position_num <= 2
+      assign c1_at_2 = 1
+    endif
+    assign c2_at_2 = 0
+    if gift_custom_2_enabled and gift_custom_2_position_num <= 2
+      assign c2_at_2 = 1
+    endif
+    assign c3_at_2 = 0
+    if gift_custom_3_enabled and gift_custom_3_position_num <= 2
+      assign c3_at_2 = 1
+    endif
+    assign customs_at_2 = c1_at_2 | plus: c2_at_2 | plus: c3_at_2
+
+    assign c1_at_3 = 0
+    if gift_custom_enabled and gift_custom_position_num <= 3
+      assign c1_at_3 = 1
+    endif
+    assign c2_at_3 = 0
+    if gift_custom_2_enabled and gift_custom_2_position_num <= 3
+      assign c2_at_3 = 1
+    endif
+    assign c3_at_3 = 0
+    if gift_custom_3_enabled and gift_custom_3_position_num <= 3
+      assign c3_at_3 = 1
+    endif
+    assign customs_at_3 = c1_at_3 | plus: c2_at_3 | plus: c3_at_3
+
+    assign gift_1_order = 1 | plus: customs_at_1
+    assign gift_2_order = 2 | plus: customs_at_2
+    assign gift_3_order = 3 | plus: customs_at_3
+
+    if gift_custom_enabled
+      assign gift_custom_1_order = 1
+      if gift_custom_position_num >= 2
+        assign gift_custom_1_order = gift_custom_1_order | plus: 1
+      endif
+      if gift_custom_position_num >= 3
+        assign gift_custom_1_order = gift_custom_1_order | plus: 1
+      endif
+      if gift_custom_position_num >= 4
+        assign gift_custom_1_order = gift_custom_1_order | plus: 1
+      endif
+      if gift_custom_position_num >= 5
+        assign gift_custom_1_order = gift_custom_1_order | plus: 1
+      endif
+      if gift_custom_position_num >= 6
+        assign gift_custom_1_order = gift_custom_1_order | plus: 1
+      endif
+      if gift_custom_2_enabled and gift_custom_2_position_num < gift_custom_position_num
+        assign gift_custom_1_order = gift_custom_1_order | plus: 1
+      endif
+      if gift_custom_3_enabled and gift_custom_3_position_num < gift_custom_position_num
+        assign gift_custom_1_order = gift_custom_1_order | plus: 1
+      endif
+    endif
+
+    if gift_custom_2_enabled
+      assign gift_custom_2_order = 1
+      if gift_custom_2_position_num >= 2
+        assign gift_custom_2_order = gift_custom_2_order | plus: 1
+      endif
+      if gift_custom_2_position_num >= 3
+        assign gift_custom_2_order = gift_custom_2_order | plus: 1
+      endif
+      if gift_custom_2_position_num >= 4
+        assign gift_custom_2_order = gift_custom_2_order | plus: 1
+      endif
+      if gift_custom_2_position_num >= 5
+        assign gift_custom_2_order = gift_custom_2_order | plus: 1
+      endif
+      if gift_custom_2_position_num >= 6
+        assign gift_custom_2_order = gift_custom_2_order | plus: 1
+      endif
+      if gift_custom_enabled and gift_custom_position_num <= gift_custom_2_position_num
+        assign gift_custom_2_order = gift_custom_2_order | plus: 1
+      endif
+      if gift_custom_3_enabled and gift_custom_3_position_num < gift_custom_2_position_num
+        assign gift_custom_2_order = gift_custom_2_order | plus: 1
+      endif
+    endif
+
+    if gift_custom_3_enabled
+      assign gift_custom_3_order = 1
+      if gift_custom_3_position_num >= 2
+        assign gift_custom_3_order = gift_custom_3_order | plus: 1
+      endif
+      if gift_custom_3_position_num >= 3
+        assign gift_custom_3_order = gift_custom_3_order | plus: 1
+      endif
+      if gift_custom_3_position_num >= 4
+        assign gift_custom_3_order = gift_custom_3_order | plus: 1
+      endif
+      if gift_custom_3_position_num >= 5
+        assign gift_custom_3_order = gift_custom_3_order | plus: 1
+      endif
+      if gift_custom_3_position_num >= 6
+        assign gift_custom_3_order = gift_custom_3_order | plus: 1
+      endif
+      if gift_custom_enabled and gift_custom_position_num <= gift_custom_3_position_num
+        assign gift_custom_3_order = gift_custom_3_order | plus: 1
+      endif
+      if gift_custom_2_enabled and gift_custom_2_position_num <= gift_custom_3_position_num
+        assign gift_custom_3_order = gift_custom_3_order | plus: 1
+      endif
+    endif
+  endif
+
+  assign gift_discount_enabled = block_settings.gift_discount_enabled
+  assign gift_discount_type = block_settings.gift_discount_type | default: 'percentage'
+  assign gift_discount_value = block_settings.gift_discount_value | default: 50
+  assign gift_discount_amount = block_settings.gift_discount_amount | default: 0
+  assign gift_discount_code = block_settings.gift_discount_code | default: ''
+
+  assign option_1_gifts_count = 0
+  assign option_2_gifts_count = 0
+  assign option_3_gifts_count = 0
+  assign option_4_gifts_count = 0
+  assign option_5_gifts_count = 0
+  assign option_6_gifts_count = 0
+  if free_gifts_enabled
+    if gift_1_product != blank and gift_1_unlock == 'option_1'
+      assign option_1_gifts_count = option_1_gifts_count | plus: 1
+    endif
+    if gift_2_product != blank and gift_2_unlock == 'option_1'
+      assign option_1_gifts_count = option_1_gifts_count | plus: 1
+    endif
+    if gift_3_product != blank and gift_3_unlock == 'option_1'
+      assign option_1_gifts_count = option_1_gifts_count | plus: 1
+    endif
+    if gift_custom_enabled and gift_custom_unlock == 'option_1'
+      assign option_1_gifts_count = option_1_gifts_count | plus: 1
+    endif
+    if gift_custom_2_enabled and gift_custom_2_unlock == 'option_1'
+      assign option_1_gifts_count = option_1_gifts_count | plus: 1
+    endif
+    if gift_custom_3_enabled and gift_custom_3_unlock == 'option_1'
+      assign option_1_gifts_count = option_1_gifts_count | plus: 1
+    endif
+
+    assign option_2_gifts_count = option_1_gifts_count
+    if gift_1_product != blank and gift_1_unlock == 'option_2'
+      assign option_2_gifts_count = option_2_gifts_count | plus: 1
+    endif
+    if gift_2_product != blank and gift_2_unlock == 'option_2'
+      assign option_2_gifts_count = option_2_gifts_count | plus: 1
+    endif
+    if gift_3_product != blank and gift_3_unlock == 'option_2'
+      assign option_2_gifts_count = option_2_gifts_count | plus: 1
+    endif
+    if gift_custom_enabled and gift_custom_unlock == 'option_2'
+      assign option_2_gifts_count = option_2_gifts_count | plus: 1
+    endif
+    if gift_custom_2_enabled and gift_custom_2_unlock == 'option_2'
+      assign option_2_gifts_count = option_2_gifts_count | plus: 1
+    endif
+    if gift_custom_3_enabled and gift_custom_3_unlock == 'option_2'
+      assign option_2_gifts_count = option_2_gifts_count | plus: 1
+    endif
+
+    assign option_3_gifts_count = option_2_gifts_count
+    if gift_1_product != blank and gift_1_unlock == 'option_3'
+      assign option_3_gifts_count = option_3_gifts_count | plus: 1
+    endif
+    if gift_2_product != blank and gift_2_unlock == 'option_3'
+      assign option_3_gifts_count = option_3_gifts_count | plus: 1
+    endif
+    if gift_3_product != blank and gift_3_unlock == 'option_3'
+      assign option_3_gifts_count = option_3_gifts_count | plus: 1
+    endif
+    if gift_custom_enabled and gift_custom_unlock == 'option_3'
+      assign option_3_gifts_count = option_3_gifts_count | plus: 1
+    endif
+    if gift_custom_2_enabled and gift_custom_2_unlock == 'option_3'
+      assign option_3_gifts_count = option_3_gifts_count | plus: 1
+    endif
+    if gift_custom_3_enabled and gift_custom_3_unlock == 'option_3'
+      assign option_3_gifts_count = option_3_gifts_count | plus: 1
+    endif
+
+    assign option_4_gifts_count = option_3_gifts_count
+    if gift_1_product != blank and gift_1_unlock == 'option_4'
+      assign option_4_gifts_count = option_4_gifts_count | plus: 1
+    endif
+    if gift_2_product != blank and gift_2_unlock == 'option_4'
+      assign option_4_gifts_count = option_4_gifts_count | plus: 1
+    endif
+    if gift_3_product != blank and gift_3_unlock == 'option_4'
+      assign option_4_gifts_count = option_4_gifts_count | plus: 1
+    endif
+    if gift_custom_enabled and gift_custom_unlock == 'option_4'
+      assign option_4_gifts_count = option_4_gifts_count | plus: 1
+    endif
+    if gift_custom_2_enabled and gift_custom_2_unlock == 'option_4'
+      assign option_4_gifts_count = option_4_gifts_count | plus: 1
+    endif
+    if gift_custom_3_enabled and gift_custom_3_unlock == 'option_4'
+      assign option_4_gifts_count = option_4_gifts_count | plus: 1
+    endif
+
+    assign option_5_gifts_count = option_4_gifts_count
+    if gift_1_product != blank and gift_1_unlock == 'option_5'
+      assign option_5_gifts_count = option_5_gifts_count | plus: 1
+    endif
+    if gift_2_product != blank and gift_2_unlock == 'option_5'
+      assign option_5_gifts_count = option_5_gifts_count | plus: 1
+    endif
+    if gift_3_product != blank and gift_3_unlock == 'option_5'
+      assign option_5_gifts_count = option_5_gifts_count | plus: 1
+    endif
+    if gift_custom_enabled and gift_custom_unlock == 'option_5'
+      assign option_5_gifts_count = option_5_gifts_count | plus: 1
+    endif
+    if gift_custom_2_enabled and gift_custom_2_unlock == 'option_5'
+      assign option_5_gifts_count = option_5_gifts_count | plus: 1
+    endif
+    if gift_custom_3_enabled and gift_custom_3_unlock == 'option_5'
+      assign option_5_gifts_count = option_5_gifts_count | plus: 1
+    endif
+
+    assign option_6_gifts_count = option_5_gifts_count
+    if gift_1_product != blank and gift_1_unlock == 'option_6'
+      assign option_6_gifts_count = option_6_gifts_count | plus: 1
+    endif
+    if gift_2_product != blank and gift_2_unlock == 'option_6'
+      assign option_6_gifts_count = option_6_gifts_count | plus: 1
+    endif
+    if gift_3_product != blank and gift_3_unlock == 'option_6'
+      assign option_6_gifts_count = option_6_gifts_count | plus: 1
+    endif
+    if gift_custom_enabled and gift_custom_unlock == 'option_6'
+      assign option_6_gifts_count = option_6_gifts_count | plus: 1
+    endif
+    if gift_custom_2_enabled and gift_custom_2_unlock == 'option_6'
+      assign option_6_gifts_count = option_6_gifts_count | plus: 1
+    endif
+    if gift_custom_3_enabled and gift_custom_3_unlock == 'option_6'
+      assign option_6_gifts_count = option_6_gifts_count | plus: 1
+    endif
+  endif
+
+  assign display_scope = block_settings.display_scope | default: 'all'
+  assign show_quantity_breaks = false
+  if product != blank
+    if display_scope == 'all'
+      assign show_quantity_breaks = true
+    elsif display_scope == 'selected_products'
+      assign show_quantity_breaks = false
+      if block_settings.display_products != blank
+        for display_product in block_settings.display_products
+          if display_product.id == product.id
+            assign show_quantity_breaks = true
+          endif
+        endfor
+      endif
+    elsif display_scope == 'collection'
+      assign show_quantity_breaks = false
+      if block_settings.display_collections != blank
+        for target_collection in block_settings.display_collections
+          for product_collection in product.collections
+            if product_collection.id == target_collection.id
+              assign show_quantity_breaks = true
+            endif
+          endfor
+        endfor
+      endif
+    endif
+  endif
+-%}
+
+{% if show_quantity_breaks %}
+<div
+  class="quantity-breaks spacing-style{% if block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }}{% endif %}"
+  data-block-id="{{ block.id }}"
+  data-quantity-breaks-component
+  data-radio-indicator="{% if show_quantity_breaks_radio_indicator %}true{% else %}false{% endif %}"
+  {% if show_variant_picker %}data-variant-picker-full-width="{% if block_settings.variant_picker_full_width %}true{% else %}false{% endif %}"{% endif %}
+  data-money-format="{{ shop.money_format | escape }}"
+  data-currency="{{ cart.currency.iso_code | escape }}"
+  data-per-unit-text="{% if block_settings.per_unit_text != blank and block_settings.show_price_per_unit == true %}{{ block_settings.per_unit_text }}{% else %}{% endif %}"
+  data-currency-code-enabled="false"
+  data-compare-price-type="{{ compare_price_type }}"
+  data-override-product-price="{% if block_settings.override_product_price == true %}true{% else %}false{% endif %}"
+  data-recommended-badge-style="{{ block_settings.recommended_badge_style | default: 'rounded' }}"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+    --columns-desktop: {{ block_settings.columns_per_row_desktop | default: 3 }};
+    --columns-mobile: {{ block_settings.columns_per_row_mobile | default: 1 }};
+    --container-gap-desktop: {{ block_settings.container_gap_desktop | default: 16 }}px;
+    --container-gap-mobile: {{ block_settings.container_gap_mobile | default: 16 }}px;
+    --container-padding-top-desktop: {{ block_settings.container_padding_top_desktop | default: 14 }}px;
+    --container-padding-top-mobile: {{ block_settings.container_padding_top_mobile | default: 14 }}px;
+    --is-single-column-desktop: {% if block_settings.columns_per_row_desktop == 1 %}1{% else %}0{% endif %};
+    --is-single-column-mobile: {% if block_settings.columns_per_row_mobile == 1 %}1{% else %}0{% endif %};
+    --two-column-layout-desktop: {% if block_settings.two_column_layout_desktop == 'vertical' %}vertical{% else %}horizontal{% endif %};
+    --two-column-layout-mobile: {% if block_settings.two_column_layout_mobile == 'vertical' %}vertical{% else %}horizontal{% endif %};
+    --card-radius: {{ block_settings.card_radius | default: 12 }}px;
+    --heading-font-family: {{ block_settings.heading_font_family | default: 'var(--font-heading--family)' }};
+    --heading-text-size: {{ block_settings.heading_text_size | default: 24 }}px;
+    --heading-text-size-mobile: {{ block_settings.heading_text_size_mobile | default: 20 }}px;
+    --title-font-family: {{ block_settings.title_font_family | default: 'var(--font-heading--family)' }};
+    --price-font-family: {{ block_settings.price_font_family | default: 'var(--font-body--family)' }};
+    --title-text-size: {{ block_settings.title_text_size | default: 18 }}px;
+    --title-text-size-mobile: {{ block_settings.title_text_size_mobile | default: 16 }}px;
+    --description-text-size: {{ block_settings.description_text_size | default: 14 }}px;
+    --description-text-size-mobile: {{ block_settings.description_text_size_mobile | default: 12 }}px;
+    --price-text-size: {{ block_settings.price_text_size | default: 20 }}px;
+    --price-text-size-mobile: {{ block_settings.price_text_size_mobile | default: 18 }}px;
+    --compare-price-text-size: {{ block_settings.compare_price_text_size | default: 14 }}px;
+    --per-unit-text-size: {{ block_settings.per_unit_text_size | default: 14 }}px;
+    --per-unit-text-size-mobile: {{ block_settings.per_unit_text_size_mobile | default: 12 }}px;
+    --badge-text-size: {{ block_settings.badge_text_size | default: 12 }}px;
+    --badge-text-size-mobile: {{ block_settings.badge_text_size_mobile | default: 12 }}px;
+    --discount-badge-text-size: {{ block_settings.discount_badge_text_size | default: 12 }}px;
+    --badge-radius: {{ block_settings.badge_radius | default: 4 }}px;
+    --discount-badge-radius: {{ block_settings.discount_badge_radius | default: 4 }}px;
+    --card-border-width-selected: {{ block_settings.card_border_width_selected | default: 2 }}px;
+    --card-border-width-unselected: {{ block_settings.card_border_width_unselected | default: 1 }}px;
+    --image-size: {{ block_settings.image_size | default: 60 }}px;
+    --scalloped-badge-size: {{ block_settings.scalloped_badge_size | default: 60 }}px;
+    --recommended-badge-bg: {{ block_settings.recommended_badge_bg | default: '#4caf50' }};
+    --recommended-badge-text: {{ block_settings.recommended_badge_text | default: '#ffffff' }};
+    --discount-badge-bg: {{ block_settings.discount_badge_bg | default: '#4caf50' }};
+    --discount-badge-text: {{ block_settings.discount_badge_text | default: '#ffffff' }};
+    --price-color: {{ block_settings.price_color | default: '#000000' }};
+    --compare-price-color: {{ block_settings.compare_price_color | default: '#999999' }};
+    --active-price-color: {{ block_settings.active_price_color | default: '#000000' }};
+    --active-compare-price-color: {{ block_settings.active_compare_price_color | default: '#999999' }};
+    --radio-color: {{ block_settings.radio_color | default: '#8B4513' }};
+    --price-font-weight: {% if block_settings.bold_prices %}700{% else %}400{% endif %};
+    --compare-price-font-weight: {% if block_settings.bold_prices %}700{% else %}400{% endif %};
+    --free-gifts-background: {% if block_settings.free_gifts_background_enabled %}{{ block_settings.free_gifts_background_color | default: '#f5f5f5' }}{% else %}transparent{% endif %};
+    --free-gifts-border-width: {{ block_settings.free_gifts_border_width | default: 2 }}px;
+    --free-gifts-border-style: {{ block_settings.free_gifts_border_style | default: 'solid' }};
+    --free-gifts-border-color: {{ block_settings.free_gifts_border_color | default: '#e0e0e0' }};
+    --free-gifts-per-row-desktop: {{ block_settings.free_gifts_per_row_desktop | default: '3' }};
+    --free-gifts-per-row-mobile: {{ block_settings.free_gifts_per_row_mobile | default: '2' }};
+    --free-gifts-gap: {{ block_settings.free_gifts_gap | default: 28 }}px;
+    --free-gifts-locked-background: {{ block_settings.free_gifts_locked_background_color | default: '#e8e8e8' }};
+    --free-gifts-locked-text: {{ block_settings.free_gifts_locked_text_color | default: '#666666' }};
+    --free-gifts-badge-background: {{ block_settings.free_gifts_badge_background_color | default: '#f5c6d6' }};
+    --free-gifts-badge-text: {{ block_settings.free_gifts_badge_text_color | default: '#ffffff' }};
+    --free-gifts-badge-border: {{ block_settings.free_gifts_badge_border_color | default: '#e8a4b8' }};
+    --sold-out-badge-bg: {{ block_settings.sold_out_badge_background | default: '#999999' }};
+    --sold-out-badge-text: {{ block_settings.sold_out_badge_text | default: '#ffffff' }};
+    {% liquid
+      assign sold_out_card_bg_setting = block_settings.sold_out_card_background | default: 'transparent'
+      assign sold_out_card_normalized = sold_out_card_bg_setting | strip | downcase | replace: ' ', ''
+      assign sold_out_use_card_bg = true
+      if sold_out_card_bg_setting == blank or sold_out_card_normalized == 'transparent'
+        assign sold_out_use_card_bg = false
+      elsif sold_out_card_normalized == '#00000000' or sold_out_card_normalized == 'rgba(0,0,0,0)'
+        assign sold_out_use_card_bg = false
+      endif
+      if sold_out_use_card_bg
+        echo '--sold-out-card-background: ' | append: sold_out_card_bg_setting | append: ';'
+      endif
+    %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {% if block_settings.title != blank %}
+    <div class="quantity-breaks__title">
+      <span class="quantity-breaks__heading">{{ block_settings.title }}</span>
+    </div>
+  {% endif %}
+  
+  
+  <div 
+    class="quantity-breaks__container"
+  {% if block_settings.ancher_id != blank %}id="{{ block_settings.ancher_id }}"{% endif %}
+    data-columns-desktop="{{ block_settings.columns_per_row_desktop | default: 3 }}"
+    data-columns-mobile="{{ block_settings.columns_per_row_mobile | default: 1 }}"
+    data-two-column-layout-desktop="{{ block_settings.two_column_layout_desktop | default: 'horizontal' }}"
+    data-two-column-layout-mobile="{{ block_settings.two_column_layout_mobile | default: 'horizontal' }}"
+  >
+    <!-- Option 1 -->
+    {% if option_1_enabled == true and option_1_quantity > 0 %}
+    {% assign show_picker_1 = false %}
+    {% if show_variant_picker and product_has_variants and option_1_quantity > 0 %}
+      {% unless hide_variant_picker_when_quantity_1 and option_1_quantity == 1 %}
+        {% assign show_picker_1 = true %}
+      {% endunless %}
+    {% endif %}
+    <button
+      type="button"
+      class="quantity-breaks__card{% if option_1_recommended %} quantity-breaks__card--recommended{% endif %}{% if option_1_sold_out %} quantity-breaks__card--sold-out{% endif %}"
+      data-option-index="1"
+      {% if option_1_sold_out %}disabled aria-label="Sold out"{% endif %}
+      data-quantity="{{ option_1_quantity }}"
+      data-variant-id="{{ variant.id }}"
+      {% if show_picker_1 %}data-variant-ids="{% for i in (1..option_1_quantity) %}{{ variant.id }}{% unless forloop.last %},{% endunless %}{% endfor %}" data-has-variant-pickers="true" data-variant-picker-count="{{ option_1_quantity }}"{% endif %}
+      data-discount="{{ option_1_discount }}"
+      data-discount-type="{{ option_1_discount_type }}"
+      data-discount-amount="{{ option_1_discount_amount }}"
+      data-final-price-cents="{{ option_1_final_price }}"
+      data-compare-price-cents="{{ option_1_compare_price }}"
+      data-show-per-unit="{% if block_settings.show_price_per_unit == true %}true{% else %}false{% endif %}"
+      {% if block_settings.option_1_discount_code != blank %}data-discount-code="{{ block_settings.option_1_discount_code | escape }}"{% endif %}
+      aria-label="Select quantity {{ option_1_quantity }}"
+    >
+      {% if option_1_sold_out %}
+        <span class="quantity-breaks__sold-out-badge">{{ 'products.product.sold_out' | t | default: 'Sold out' }}</span>
+      {% elsif block_settings.option_1_badge_text != blank %}
+        {% assign badge_text = block_settings.option_1_badge_text %}
+        {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_1_discount_calculated %}{% endcapture %}
+        {% if option_1_effective_discount > 0 %}
+          {% assign discount_value = option_1_effective_discount | round | append: '%' %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+        {% else %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+        {% endif %}
+      {% elsif option_1_gifts_count > 0 %}
+        <span class="quantity-breaks__free-gifts-badge visually-hidden">{{ option_1_gifts_count }} FREE GIFTS</span>
+      {% endif %}
+      
+      <div class="quantity-breaks__content">
+        {% if show_quantity_breaks_radio_indicator %}
+        <span class="quantity-breaks__lumin-radio-indicator"></span>
+        {% endif %}
+        {% if show_images and option_1_image != blank %}
+        <div class="quantity-breaks__image-container">
+          <div class="quantity-breaks__product-image">
+            <img
+              src="{{ option_1_image | image_url: width: image_url_width }}"
+              alt="{{ option_1_image.alt | default: product.title | escape }}"
+              width="{{ image_size }}"
+              height="{{ image_size }}"
+              loading="lazy"
+              data-option-image="1"
+              data-custom-image="{% if block_settings.option_1_custom_image != blank %}true{% else %}false{% endif %}"
+            >
+          </div>
+        </div>
+        {% endif %}
+        <div class="quantity-breaks__content-left">
+          <div class="quantity-breaks__title-wrapper">
+            <span class="quantity-breaks__quantity-title">{{ block_settings.option_1_label | default: 'Buy 1' }}</span>
+            {% if block_settings.option_1_off_text != blank %}
+              {% assign off_text = block_settings.option_1_off_text %}
+              {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_1_discount_calculated %}{% endcapture %}
+              {% if option_1_effective_discount > 0 %}
+                {% assign discount_value = option_1_effective_discount | round | append: '%' %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+              {% else %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% if block_settings.option_1_description != blank %}
+          <p class="quantity-breaks__description">
+            {% assign description_text = block_settings.option_1_description %}
+            {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_1_discount_calculated %}{% endcapture %}
+            {% if option_1_effective_discount > 0 %}
+              {% assign discount_value = option_1_effective_discount | round | append: '%' %}
+              {{ description_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}
+            {% else %}
+              {{ description_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}
+            {% endif %}
+          </p>
+          {% endif %}
+        </div>
+        
+        <div class="quantity-breaks__content-right">
+          <div class="quantity-breaks__price-container">
+            {% if block_settings.show_price_per_unit == true %}
+              <span class="quantity-breaks__price">{{ option_1_per_unit_price_formatted }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% comment %} Show compare price per unit when discount applied, or when variant has compare price {% endcomment %}
+              {% if show_compare_when_original or option_1_effective_discount > 0 or option_1_discount_type == 'fixed' and option_1_discount_calculated > 0 or base_compare_at_price > base_price %}
+                {% assign compare_per_unit_1 = option_1_per_unit_compare_price_formatted %}
+                {% if base_compare_at_price > base_price and show_compare_when_original == false and option_1_effective_discount == 0 %}
+                  {% if option_1_discount_type != 'fixed' or option_1_discount_calculated == 0 %}
+                    {% capture compare_per_unit_1 %}{% render 'price-split', context: 'quantity_breaks', cents: base_compare_at_price %}{% endcapture %}
+                  {% endif %}
+                {% endif %}
+                <span class="quantity-breaks__original-price">{{ compare_per_unit_1 }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% endif %}
+            {% else %}
+              <span class="quantity-breaks__price">{{ option_1_final_price_formatted }}</span>
+              {% if show_compare_when_original or option_1_effective_discount > 0 or option_1_discount_type == 'fixed' and option_1_discount_calculated > 0 %}
+                <span class="quantity-breaks__original-price">{{ option_1_compare_price_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% if show_picker_1 %}
+        {% render 'quantity-breaks-variant-pickers', product: product, variant: variant, option_index: 1, option_quantity: option_1_quantity, image_url_width: image_url_width, show_color_swatches: block_settings.show_color_swatches, show_variant_pickers_heading: show_variant_pickers_heading, show_variant_picker_row_numbers: show_variant_picker_row_numbers %}
+        {% endif %}
+      </div>
+    </button>
+    {% endif %}
+    
+    <!-- Option 2 -->
+    {% if option_2_enabled == true and option_2_quantity > 0 %}
+    {% assign show_picker_2 = false %}
+    {% if show_variant_picker and product_has_variants and option_2_quantity > 0 %}
+      {% unless hide_variant_picker_when_quantity_1 and option_2_quantity == 1 %}
+        {% assign show_picker_2 = true %}
+      {% endunless %}
+    {% endif %}
+    <button
+      type="button"
+      class="quantity-breaks__card{% if option_2_recommended %} quantity-breaks__card--recommended{% endif %}{% if option_2_sold_out %} quantity-breaks__card--sold-out{% endif %}"
+      data-option-index="2"
+      {% if option_2_sold_out %}disabled aria-label="Sold out"{% endif %}
+      data-quantity="{{ option_2_quantity }}"
+      data-variant-id="{{ variant.id }}"
+      {% if show_picker_2 %}data-variant-ids="{% for i in (1..option_2_quantity) %}{{ variant.id }}{% unless forloop.last %},{% endunless %}{% endfor %}" data-has-variant-pickers="true" data-variant-picker-count="{{ option_2_quantity }}"{% endif %}
+      data-discount="{{ option_2_discount }}"
+      data-discount-type="{{ option_2_discount_type }}"
+      data-discount-amount="{{ option_2_discount_amount }}"
+      data-final-price-cents="{{ option_2_final_price }}"
+      data-compare-price-cents="{{ option_2_compare_price }}"
+      data-show-per-unit="{% if block_settings.show_price_per_unit == true %}true{% else %}false{% endif %}"
+      {% if block_settings.option_2_discount_code != blank %}data-discount-code="{{ block_settings.option_2_discount_code | escape }}"{% endif %}
+      aria-label="Select quantity {{ option_2_quantity }}"
+    >
+      {% if option_2_sold_out %}
+        <span class="quantity-breaks__sold-out-badge">{{ 'products.product.sold_out' | t | default: 'Sold out' }}</span>
+      {% elsif block_settings.option_2_badge_text != blank %}
+        {% assign badge_text = block_settings.option_2_badge_text %}
+        {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_2_discount_calculated %}{% endcapture %}
+        {% if option_2_effective_discount > 0 %}
+          {% assign discount_value = option_2_effective_discount | round | append: '%' %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+        {% else %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+        {% endif %}
+      {% elsif option_2_gifts_count > 0 %}
+        <span class="quantity-breaks__free-gifts-badge visually-hidden">{{ option_2_gifts_count }} FREE GIFTS</span>
+      {% endif %}
+      
+      <div class="quantity-breaks__content">
+        {% if show_quantity_breaks_radio_indicator %}
+        <span class="quantity-breaks__lumin-radio-indicator"></span>
+        {% endif %}
+        {% if show_images and option_2_image != blank %}
+        <div class="quantity-breaks__image-container">
+          <div class="quantity-breaks__product-image">
+            <img
+              src="{{ option_2_image | image_url: width: image_url_width }}"
+              alt="{{ option_2_image.alt | default: product.title | escape }}"
+              width="{{ image_size }}"
+              height="{{ image_size }}"
+              loading="lazy"
+              data-option-image="2"
+              data-custom-image="{% if block_settings.option_2_custom_image != blank %}true{% else %}false{% endif %}"
+            >
+          </div>
+        </div>
+        {% endif %}
+        <div class="quantity-breaks__content-left">
+          <div class="quantity-breaks__title-wrapper">
+            <span class="quantity-breaks__quantity-title">{{ block_settings.option_2_label | default: 'Buy 2' }}</span>
+            {% if block_settings.option_2_off_text != blank %}
+              {% assign off_text = block_settings.option_2_off_text %}
+              {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_2_discount_calculated %}{% endcapture %}
+              {% if option_2_effective_discount > 0 %}
+                {% assign discount_value = option_2_effective_discount | round | append: '%' %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+              {% else %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% if block_settings.option_2_description != blank %}
+          <p class="quantity-breaks__description">
+            {% assign description_text = block_settings.option_2_description %}
+            {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_2_discount_calculated %}{% endcapture %}
+            {% if option_2_effective_discount > 0 %}
+              {% assign discount_value = option_2_effective_discount | round | append: '%' %}
+              {{ description_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}
+            {% else %}
+              {{ description_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}
+            {% endif %}
+          </p>
+          {% endif %}
+        </div>
+        
+        <div class="quantity-breaks__content-right">
+          <div class="quantity-breaks__price-container">
+            {% if block_settings.show_price_per_unit == true %}
+              <span class="quantity-breaks__price">{{ option_2_per_unit_price_formatted }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% if show_compare_when_original or option_2_effective_discount > 0 or option_2_discount_type == 'fixed' and option_2_discount_calculated > 0 or base_compare_at_price > base_price %}
+                {% assign compare_per_unit_2 = option_2_per_unit_compare_price_formatted %}
+                {% if base_compare_at_price > base_price and show_compare_when_original == false and option_2_effective_discount == 0 %}
+                  {% if option_2_discount_type != 'fixed' or option_2_discount_calculated == 0 %}
+                    {% capture compare_per_unit_2 %}{% render 'price-split', context: 'quantity_breaks', cents: base_compare_at_price %}{% endcapture %}
+                  {% endif %}
+                {% endif %}
+                <span class="quantity-breaks__original-price">{{ compare_per_unit_2 }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% endif %}
+            {% else %}
+              <span class="quantity-breaks__price">{{ option_2_final_price_formatted }}</span>
+              {% if show_compare_when_original or option_2_effective_discount > 0 or option_2_discount_type == 'fixed' and option_2_discount_calculated > 0 %}
+                <span class="quantity-breaks__original-price">{{ option_2_compare_price_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% if show_picker_2 %}
+        {% render 'quantity-breaks-variant-pickers', product: product, variant: variant, option_index: 2, option_quantity: option_2_quantity, image_url_width: image_url_width, show_color_swatches: block_settings.show_color_swatches, show_variant_pickers_heading: show_variant_pickers_heading, show_variant_picker_row_numbers: show_variant_picker_row_numbers %}
+        {% endif %}
+      </div>
+    </button>
+    {% endif %}
+    
+    <!-- Option 3 -->
+    {% if option_3_enabled == true and option_3_quantity > 0 %}
+    {% assign show_picker_3 = false %}
+    {% if show_variant_picker and product_has_variants and option_3_quantity > 0 %}
+      {% unless hide_variant_picker_when_quantity_1 and option_3_quantity == 1 %}
+        {% assign show_picker_3 = true %}
+      {% endunless %}
+    {% endif %}
+    <button
+      type="button"
+      class="quantity-breaks__card{% if option_3_recommended %} quantity-breaks__card--recommended{% endif %}{% if option_3_sold_out %} quantity-breaks__card--sold-out{% endif %}"
+      data-option-index="3"
+      {% if option_3_sold_out %}disabled aria-label="Sold out"{% endif %}
+      data-quantity="{{ option_3_quantity }}"
+      data-variant-id="{{ variant.id }}"
+      {% if show_picker_3 %}data-variant-ids="{% for i in (1..option_3_quantity) %}{{ variant.id }}{% unless forloop.last %},{% endunless %}{% endfor %}" data-has-variant-pickers="true" data-variant-picker-count="{{ option_3_quantity }}"{% endif %}
+      data-discount="{{ option_3_discount }}"
+      data-discount-type="{{ option_3_discount_type }}"
+      data-discount-amount="{{ option_3_discount_amount }}"
+      data-final-price-cents="{{ option_3_final_price }}"
+      data-compare-price-cents="{{ option_3_compare_price }}"
+      data-show-per-unit="{% if block_settings.show_price_per_unit == true %}true{% else %}false{% endif %}"
+      {% if block_settings.option_3_discount_code != blank %}data-discount-code="{{ block_settings.option_3_discount_code | escape }}"{% endif %}
+      aria-label="Select quantity {{ option_3_quantity }}"
+    >
+      {% if option_3_sold_out %}
+        <span class="quantity-breaks__sold-out-badge">{{ 'products.product.sold_out' | t | default: 'Sold out' }}</span>
+      {% elsif block_settings.option_3_badge_text != blank %}
+        {% assign badge_text = block_settings.option_3_badge_text %}
+        {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_3_discount_calculated %}{% endcapture %}
+        {% if option_3_effective_discount > 0 %}
+          {% assign discount_value = option_3_effective_discount | round | append: '%' %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+        {% else %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+        {% endif %}
+      {% elsif option_3_gifts_count > 0 %}
+        <span class="quantity-breaks__free-gifts-badge visually-hidden">{{ option_3_gifts_count }} FREE GIFTS</span>
+      {% endif %}
+      
+      <div class="quantity-breaks__content">
+        {% if show_quantity_breaks_radio_indicator %}
+        <span class="quantity-breaks__lumin-radio-indicator"></span>
+        {% endif %}
+        {% if show_images and option_3_image != blank %}
+        <div class="quantity-breaks__image-container">
+          <div class="quantity-breaks__product-image">
+            <img
+              src="{{ option_3_image | image_url: width: image_url_width }}"
+              alt="{{ option_3_image.alt | default: product.title | escape }}"
+              width="{{ image_size }}"
+              height="{{ image_size }}"
+              loading="lazy"
+              data-option-image="3"
+              data-custom-image="{% if block_settings.option_3_custom_image != blank %}true{% else %}false{% endif %}"
+            >
+          </div>
+        </div>
+        {% endif %}
+        <div class="quantity-breaks__content-left">
+          <div class="quantity-breaks__title-wrapper">
+            <span class="quantity-breaks__quantity-title">{{ block_settings.option_3_label | default: 'Buy 3' }}</span>
+            {% if block_settings.option_3_off_text != blank %}
+              {% assign off_text = block_settings.option_3_off_text %}
+              {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_3_discount_calculated %}{% endcapture %}
+              {% if option_3_effective_discount > 0 %}
+                {% assign discount_value = option_3_effective_discount | round | append: '%' %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+              {% else %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% if block_settings.option_3_description != blank %}
+          <p class="quantity-breaks__description">
+            {% assign description_text = block_settings.option_3_description %}
+            {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_3_discount_calculated %}{% endcapture %}
+            {% if option_3_effective_discount > 0 %}
+              {% assign discount_value = option_3_effective_discount | round | append: '%' %}
+              {{ description_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}
+            {% else %}
+              {{ description_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}
+            {% endif %}
+          </p>
+          {% endif %}
+        </div>
+        
+        <div class="quantity-breaks__content-right">
+          <div class="quantity-breaks__price-container">
+            {% if block_settings.show_price_per_unit == true %}
+              <span class="quantity-breaks__price">{{ option_3_per_unit_price_formatted }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% if show_compare_when_original or option_3_effective_discount > 0 or option_3_discount_type == 'fixed' and option_3_discount_calculated > 0 or base_compare_at_price > base_price %}
+                {% assign compare_per_unit_3 = option_3_per_unit_compare_price_formatted %}
+                {% if base_compare_at_price > base_price and show_compare_when_original == false and option_3_effective_discount == 0 %}
+                  {% if option_3_discount_type != 'fixed' or option_3_discount_calculated == 0 %}
+                    {% capture compare_per_unit_3 %}{% render 'price-split', context: 'quantity_breaks', cents: base_compare_at_price %}{% endcapture %}
+                  {% endif %}
+                {% endif %}
+                <span class="quantity-breaks__original-price">{{ compare_per_unit_3 }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% endif %}
+            {% else %}
+              <span class="quantity-breaks__price">{{ option_3_final_price_formatted }}</span>
+              {% if show_compare_when_original or option_3_effective_discount > 0 or option_3_discount_type == 'fixed' and option_3_discount_calculated > 0 %}
+                <span class="quantity-breaks__original-price">{{ option_3_compare_price_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% if show_picker_3 %}
+        {% render 'quantity-breaks-variant-pickers', product: product, variant: variant, option_index: 3, option_quantity: option_3_quantity, image_url_width: image_url_width, show_color_swatches: block_settings.show_color_swatches, show_variant_pickers_heading: show_variant_pickers_heading, show_variant_picker_row_numbers: show_variant_picker_row_numbers %}
+        {% endif %}
+      </div>
+    </button>
+    {% endif %}
+    
+    <!-- Option 4 -->
+    {% if option_4_enabled == true and option_4_quantity > 0 %}
+    {% assign show_picker_4 = false %}
+    {% if show_variant_picker and product_has_variants and option_4_quantity > 0 %}
+      {% unless hide_variant_picker_when_quantity_1 and option_4_quantity == 1 %}
+        {% assign show_picker_4 = true %}
+      {% endunless %}
+    {% endif %}
+    <button
+      type="button"
+      class="quantity-breaks__card{% if option_4_recommended %} quantity-breaks__card--recommended{% endif %}{% if option_4_sold_out %} quantity-breaks__card--sold-out{% endif %}"
+      data-option-index="4"
+      {% if option_4_sold_out %}disabled aria-label="Sold out"{% endif %}
+      data-quantity="{{ option_4_quantity }}"
+      data-variant-id="{{ variant.id }}"
+      {% if show_picker_4 %}data-variant-ids="{% for i in (1..option_4_quantity) %}{{ variant.id }}{% unless forloop.last %},{% endunless %}{% endfor %}" data-has-variant-pickers="true" data-variant-picker-count="{{ option_4_quantity }}"{% endif %}
+      data-discount="{{ option_4_discount }}"
+      data-discount-type="{{ option_4_discount_type }}"
+      data-discount-amount="{{ option_4_discount_amount }}"
+      data-final-price-cents="{{ option_4_final_price }}"
+      data-compare-price-cents="{{ option_4_compare_price }}"
+      data-show-per-unit="{% if block_settings.show_price_per_unit == true %}true{% else %}false{% endif %}"
+      {% if block_settings.option_4_discount_code != blank %}data-discount-code="{{ block_settings.option_4_discount_code | escape }}"{% endif %}
+      aria-label="Select quantity {{ option_4_quantity }}"
+    >
+      {% if option_4_sold_out %}
+        <span class="quantity-breaks__sold-out-badge">{{ 'products.product.sold_out' | t | default: 'Sold out' }}</span>
+      {% elsif block_settings.option_4_badge_text != blank %}
+        {% assign badge_text = block_settings.option_4_badge_text %}
+        {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_4_discount_calculated %}{% endcapture %}
+        {% if option_4_effective_discount > 0 %}
+          {% assign discount_value = option_4_effective_discount | round | append: '%' %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+        {% else %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+        {% endif %}
+      {% elsif option_4_gifts_count > 0 %}
+        <span class="quantity-breaks__free-gifts-badge visually-hidden">{{ option_4_gifts_count }} FREE GIFTS</span>
+      {% endif %}
+      
+      <div class="quantity-breaks__content">
+        {% if show_quantity_breaks_radio_indicator %}
+        <span class="quantity-breaks__lumin-radio-indicator"></span>
+        {% endif %}
+        {% if show_images and option_4_image != blank %}
+        <div class="quantity-breaks__image-container">
+          <div class="quantity-breaks__product-image">
+            <img
+              src="{{ option_4_image | image_url: width: image_url_width }}"
+              alt="{{ option_4_image.alt | default: product.title | escape }}"
+              width="{{ image_size }}"
+              height="{{ image_size }}"
+              loading="lazy"
+              data-option-image="4"
+              data-custom-image="{% if block_settings.option_4_custom_image != blank %}true{% else %}false{% endif %}"
+            >
+          </div>
+        </div>
+        {% endif %}
+        <div class="quantity-breaks__content-left">
+          <div class="quantity-breaks__title-wrapper">
+            <span class="quantity-breaks__quantity-title">{{ block_settings.option_4_label | default: 'Buy 4' }}</span>
+            {% if block_settings.option_4_off_text != blank %}
+              {% assign off_text = block_settings.option_4_off_text %}
+              {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_4_discount_calculated %}{% endcapture %}
+              {% if option_4_effective_discount > 0 %}
+                {% assign discount_value = option_4_effective_discount | round | append: '%' %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+              {% else %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% if block_settings.option_4_description != blank %}
+          <p class="quantity-breaks__description">
+            {% assign description_text = block_settings.option_4_description %}
+            {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_4_discount_calculated %}{% endcapture %}
+            {% if option_4_effective_discount > 0 %}
+              {% assign discount_value = option_4_effective_discount | round | append: '%' %}
+              {{ description_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}
+            {% else %}
+              {{ description_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}
+            {% endif %}
+          </p>
+          {% endif %}
+        </div>
+        
+        <div class="quantity-breaks__content-right">
+          <div class="quantity-breaks__price-container">
+            {% if block_settings.show_price_per_unit == true %}
+              <span class="quantity-breaks__price">{{ option_4_per_unit_price_formatted }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% if show_compare_when_original or option_4_effective_discount > 0 or option_4_discount_type == 'fixed' and option_4_discount_calculated > 0 or base_compare_at_price > base_price %}
+                {% assign compare_per_unit_4 = option_4_per_unit_compare_price_formatted %}
+                {% if base_compare_at_price > base_price and show_compare_when_original == false and option_4_effective_discount == 0 %}
+                  {% if option_4_discount_type != 'fixed' or option_4_discount_calculated == 0 %}
+                    {% capture compare_per_unit_4 %}{% render 'price-split', context: 'quantity_breaks', cents: base_compare_at_price %}{% endcapture %}
+                  {% endif %}
+                {% endif %}
+                <span class="quantity-breaks__original-price">{{ compare_per_unit_4 }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% endif %}
+            {% else %}
+              <span class="quantity-breaks__price">{{ option_4_final_price_formatted }}</span>
+              {% if show_compare_when_original or option_4_effective_discount > 0 or option_4_discount_type == 'fixed' and option_4_discount_calculated > 0 %}
+                <span class="quantity-breaks__original-price">{{ option_4_compare_price_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% if show_picker_4 %}
+        {% render 'quantity-breaks-variant-pickers', product: product, variant: variant, option_index: 4, option_quantity: option_4_quantity, image_url_width: image_url_width, show_color_swatches: block_settings.show_color_swatches, show_variant_pickers_heading: show_variant_pickers_heading, show_variant_picker_row_numbers: show_variant_picker_row_numbers %}
+        {% endif %}
+      </div>
+    </button>
+    {% endif %}
+    
+    <!-- Option 5 -->
+    {% if option_5_enabled == true and option_5_quantity > 0 %}
+    {% assign show_picker_5 = false %}
+    {% if show_variant_picker and product_has_variants and option_5_quantity > 0 %}
+      {% unless hide_variant_picker_when_quantity_1 and option_5_quantity == 1 %}
+        {% assign show_picker_5 = true %}
+      {% endunless %}
+    {% endif %}
+    <button
+      type="button"
+      class="quantity-breaks__card{% if option_5_recommended %} quantity-breaks__card--recommended{% endif %}{% if option_5_sold_out %} quantity-breaks__card--sold-out{% endif %}"
+      data-option-index="5"
+      {% if option_5_sold_out %}disabled aria-label="Sold out"{% endif %}
+      data-quantity="{{ option_5_quantity }}"
+      data-variant-id="{{ variant.id }}"
+      {% if show_picker_5 %}data-variant-ids="{% for i in (1..option_5_quantity) %}{{ variant.id }}{% unless forloop.last %},{% endunless %}{% endfor %}" data-has-variant-pickers="true" data-variant-picker-count="{{ option_5_quantity }}"{% endif %}
+      data-discount="{{ option_5_discount }}"
+      data-discount-type="{{ option_5_discount_type }}"
+      data-discount-amount="{{ option_5_discount_amount }}"
+      data-final-price-cents="{{ option_5_final_price }}"
+      data-compare-price-cents="{{ option_5_compare_price }}"
+      data-show-per-unit="{% if block_settings.show_price_per_unit == true %}true{% else %}false{% endif %}"
+      {% if block_settings.option_5_discount_code != blank %}data-discount-code="{{ block_settings.option_5_discount_code | escape }}"{% endif %}
+      aria-label="Select quantity {{ option_5_quantity }}"
+    >
+      {% if option_5_sold_out %}
+        <span class="quantity-breaks__sold-out-badge">{{ 'products.product.sold_out' | t | default: 'Sold out' }}</span>
+      {% elsif block_settings.option_5_badge_text != blank %}
+        {% assign badge_text = block_settings.option_5_badge_text %}
+        {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_5_discount_calculated %}{% endcapture %}
+        {% if option_5_effective_discount > 0 %}
+          {% assign discount_value = option_5_effective_discount | round | append: '%' %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+        {% else %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+        {% endif %}
+      {% elsif option_5_gifts_count > 0 %}
+        <span class="quantity-breaks__free-gifts-badge visually-hidden">{{ option_5_gifts_count }} FREE GIFTS</span>
+      {% endif %}
+      
+      <div class="quantity-breaks__content">
+        {% if show_quantity_breaks_radio_indicator %}
+        <span class="quantity-breaks__lumin-radio-indicator"></span>
+        {% endif %}
+        {% if show_images and option_5_image != blank %}
+        <div class="quantity-breaks__image-container">
+          <div class="quantity-breaks__product-image">
+            <img
+              src="{{ option_5_image | image_url: width: image_url_width }}"
+              alt="{{ option_5_image.alt | default: product.title | escape }}"
+              width="{{ image_size }}"
+              height="{{ image_size }}"
+              loading="lazy"
+              data-option-image="5"
+              data-custom-image="{% if block_settings.option_5_custom_image != blank %}true{% else %}false{% endif %}"
+            >
+          </div>
+        </div>
+        {% endif %}
+        <div class="quantity-breaks__content-left">
+          <div class="quantity-breaks__title-wrapper">
+            <span class="quantity-breaks__quantity-title">{{ block_settings.option_5_label | default: 'Buy 5' }}</span>
+            {% if block_settings.option_5_off_text != blank %}
+              {% assign off_text = block_settings.option_5_off_text %}
+              {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_5_discount_calculated %}{% endcapture %}
+              {% if option_5_effective_discount > 0 %}
+                {% assign discount_value = option_5_effective_discount | round | append: '%' %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+              {% else %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% if block_settings.option_5_description != blank %}
+          <p class="quantity-breaks__description">
+            {% assign description_text = block_settings.option_5_description %}
+            {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_5_discount_calculated %}{% endcapture %}
+            {% if option_5_effective_discount > 0 %}
+              {% assign discount_value = option_5_effective_discount | round | append: '%' %}
+              {{ description_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}
+            {% else %}
+              {{ description_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}
+            {% endif %}
+          </p>
+          {% endif %}
+        </div>
+        
+        <div class="quantity-breaks__content-right">
+          <div class="quantity-breaks__price-container">
+            {% if block_settings.show_price_per_unit == true %}
+              <span class="quantity-breaks__price">{{ option_5_per_unit_price_formatted }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% if show_compare_when_original or option_5_effective_discount > 0 or option_5_discount_type == 'fixed' and option_5_discount_calculated > 0 or base_compare_at_price > base_price %}
+                {% assign compare_per_unit_5 = option_5_per_unit_compare_price_formatted %}
+                {% if base_compare_at_price > base_price and show_compare_when_original == false and option_5_effective_discount == 0 %}
+                  {% if option_5_discount_type != 'fixed' or option_5_discount_calculated == 0 %}
+                    {% capture compare_per_unit_5 %}{% render 'price-split', context: 'quantity_breaks', cents: base_compare_at_price %}{% endcapture %}
+                  {% endif %}
+                {% endif %}
+                <span class="quantity-breaks__original-price">{{ compare_per_unit_5 }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% endif %}
+            {% else %}
+              <span class="quantity-breaks__price">{{ option_5_final_price_formatted }}</span>
+              {% if show_compare_when_original or option_5_effective_discount > 0 or option_5_discount_type == 'fixed' and option_5_discount_calculated > 0 %}
+                <span class="quantity-breaks__original-price">{{ option_5_compare_price_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% if show_picker_5 %}
+        {% render 'quantity-breaks-variant-pickers', product: product, variant: variant, option_index: 5, option_quantity: option_5_quantity, image_url_width: image_url_width, show_color_swatches: block_settings.show_color_swatches, show_variant_pickers_heading: show_variant_pickers_heading, show_variant_picker_row_numbers: show_variant_picker_row_numbers %}
+        {% endif %}
+      </div>
+    </button>
+    {% endif %}
+    
+    <!-- Option 6 -->
+    {% if option_6_enabled == true and option_6_quantity > 0 %}
+    {% assign show_picker_6 = false %}
+    {% if show_variant_picker and product_has_variants and option_6_quantity > 0 %}
+      {% unless hide_variant_picker_when_quantity_1 and option_6_quantity == 1 %}
+        {% assign show_picker_6 = true %}
+      {% endunless %}
+    {% endif %}
+    <button
+      type="button"
+      class="quantity-breaks__card{% if option_6_recommended %} quantity-breaks__card--recommended{% endif %}{% if option_6_sold_out %} quantity-breaks__card--sold-out{% endif %}"
+      data-option-index="6"
+      {% if option_6_sold_out %}disabled aria-label="Sold out"{% endif %}
+      data-quantity="{{ option_6_quantity }}"
+      data-variant-id="{{ variant.id }}"
+      {% if show_picker_6 %}data-variant-ids="{% for i in (1..option_6_quantity) %}{{ variant.id }}{% unless forloop.last %},{% endunless %}{% endfor %}" data-has-variant-pickers="true" data-variant-picker-count="{{ option_6_quantity }}"{% endif %}
+      data-discount="{{ option_6_discount }}"
+      data-discount-type="{{ option_6_discount_type }}"
+      data-discount-amount="{{ option_6_discount_amount }}"
+      data-final-price-cents="{{ option_6_final_price }}"
+      data-compare-price-cents="{{ option_6_compare_price }}"
+      data-show-per-unit="{% if block_settings.show_price_per_unit == true %}true{% else %}false{% endif %}"
+      {% if block_settings.option_6_discount_code != blank %}data-discount-code="{{ block_settings.option_6_discount_code | escape }}"{% endif %}
+      aria-label="Select quantity {{ option_6_quantity }}"
+    >
+      {% if option_6_sold_out %}
+        <span class="quantity-breaks__sold-out-badge">{{ 'products.product.sold_out' | t | default: 'Sold out' }}</span>
+      {% elsif block_settings.option_6_badge_text != blank %}
+        {% assign badge_text = block_settings.option_6_badge_text %}
+        {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_6_discount_calculated %}{% endcapture %}
+        {% if option_6_effective_discount > 0 %}
+          {% assign discount_value = option_6_effective_discount | round | append: '%' %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+        {% else %}
+          <span class="quantity-breaks__recommended-badge">{{ badge_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+        {% endif %}
+      {% elsif option_6_gifts_count > 0 %}
+        <span class="quantity-breaks__free-gifts-badge visually-hidden">{{ option_6_gifts_count }} FREE GIFTS</span>
+      {% endif %}
+      
+      <div class="quantity-breaks__content">
+        {% if show_quantity_breaks_radio_indicator %}
+        <span class="quantity-breaks__lumin-radio-indicator"></span>
+        {% endif %}
+        {% if show_images and option_6_image != blank %}
+        <div class="quantity-breaks__image-container">
+          <div class="quantity-breaks__product-image">
+            <img
+              src="{{ option_6_image | image_url: width: image_url_width }}"
+              alt="{{ option_6_image.alt | default: product.title | escape }}"
+              width="{{ image_size }}"
+              height="{{ image_size }}"
+              loading="lazy"
+              data-option-image="6"
+              data-custom-image="{% if block_settings.option_6_custom_image != blank %}true{% else %}false{% endif %}"
+            >
+          </div>
+        </div>
+        {% endif %}
+        <div class="quantity-breaks__content-left">
+          <div class="quantity-breaks__title-wrapper">
+            <span class="quantity-breaks__quantity-title">{{ block_settings.option_6_label | default: 'Buy 6' }}</span>
+            {% if block_settings.option_6_off_text != blank %}
+              {% assign off_text = block_settings.option_6_off_text %}
+              {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_6_discount_calculated %}{% endcapture %}
+              {% if option_6_effective_discount > 0 %}
+                {% assign discount_value = option_6_effective_discount | round | append: '%' %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}</span>
+              {% else %}
+                <span class="quantity-breaks__discount-badge">{{ off_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+          {% if block_settings.option_6_description != blank %}
+          <p class="quantity-breaks__description">
+            {% assign description_text = block_settings.option_6_description %}
+            {% capture saved_amount_formatted %}{% render 'price-split', context: 'quantity_breaks', cents: option_6_discount_calculated %}{% endcapture %}
+            {% if option_6_effective_discount > 0 %}
+              {% assign discount_value = option_6_effective_discount | round | append: '%' %}
+              {{ description_text | replace: '[%]', discount_value | replace: '[amount]', saved_amount_formatted }}
+            {% else %}
+              {{ description_text | replace: '[%]', '0%' | replace: '[amount]', saved_amount_formatted }}
+            {% endif %}
+          </p>
+          {% endif %}
+        </div>
+        
+        <div class="quantity-breaks__content-right">
+          <div class="quantity-breaks__price-container">
+            {% if block_settings.show_price_per_unit == true %}
+              <span class="quantity-breaks__price">{{ option_6_per_unit_price_formatted }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% if show_compare_when_original or option_6_effective_discount > 0 or option_6_discount_type == 'fixed' and option_6_discount_calculated > 0 or base_compare_at_price > base_price %}
+                {% assign compare_per_unit_6 = option_6_per_unit_compare_price_formatted %}
+                {% if base_compare_at_price > base_price and show_compare_when_original == false and option_6_effective_discount == 0 %}
+                  {% if option_6_discount_type != 'fixed' or option_6_discount_calculated == 0 %}
+                    {% capture compare_per_unit_6 %}{% render 'price-split', context: 'quantity_breaks', cents: base_compare_at_price %}{% endcapture %}
+                  {% endif %}
+                {% endif %}
+                <span class="quantity-breaks__original-price">{{ compare_per_unit_6 }}{% if block_settings.per_unit_text != blank %} <span class="quantity-breaks__per-unit-text">{{ block_settings.per_unit_text }}</span>{% endif %}</span>
+              {% endif %}
+            {% else %}
+              <span class="quantity-breaks__price">{{ option_6_final_price_formatted }}</span>
+              {% if show_compare_when_original or option_6_effective_discount > 0 or option_6_discount_type == 'fixed' and option_6_discount_calculated > 0 %}
+                <span class="quantity-breaks__original-price">{{ option_6_compare_price_formatted }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% if show_picker_6 %}
+        {% render 'quantity-breaks-variant-pickers', product: product, variant: variant, option_index: 6, option_quantity: option_6_quantity, image_url_width: image_url_width, show_color_swatches: block_settings.show_color_swatches, show_variant_pickers_heading: show_variant_pickers_heading, show_variant_picker_row_numbers: show_variant_picker_row_numbers %}
+        {% endif %}
+      </div>
+    </button>
+    {% endif %}
+  </div>
+
+  {% if free_gifts_enabled %}
+    {% if gift_1_product != blank or gift_2_product != blank or gift_3_product != blank or gift_custom_enabled or gift_custom_2_enabled or gift_custom_3_enabled %}
+  <div class="quantity-breaks__free-gifts quantity-breaks__free-gifts--{{ free_gifts_style }}{% if free_gifts_image_fit == 'auto' %} quantity-breaks__free-gifts--image-auto{% endif %}{% if free_gifts_background_enabled %} quantity-breaks__free-gifts--has-background{% endif %}" data-free-gifts data-gift-discount-enabled="{% if gift_discount_enabled %}true{% else %}false{% endif %}" data-gift-discount-code="{{ gift_discount_code | escape }}">
+    <div class="quantity-breaks__free-gifts-heading rte">{{ free_gifts_heading }}</div>
+    <div class="quantity-breaks__free-gifts-grid">
+      {% if gift_1_product != blank %}
+        {% render 'quantity-breaks-gift-card', product: gift_1_product, unlock_at: gift_1_unlock, gift_index: 1, discount_enabled: gift_discount_enabled, discount_type: gift_discount_type, discount_value: gift_discount_value, discount_amount: gift_discount_amount, order: gift_1_order, badge_display: free_gifts_badge_display %}
+      {% endif %}
+      {% if gift_2_product != blank %}
+        {% render 'quantity-breaks-gift-card', product: gift_2_product, unlock_at: gift_2_unlock, gift_index: 2, discount_enabled: gift_discount_enabled, discount_type: gift_discount_type, discount_value: gift_discount_value, discount_amount: gift_discount_amount, order: gift_2_order, badge_display: free_gifts_badge_display %}
+      {% endif %}
+      {% if gift_3_product != blank %}
+        {% render 'quantity-breaks-gift-card', product: gift_3_product, unlock_at: gift_3_unlock, gift_index: 3, discount_enabled: gift_discount_enabled, discount_type: gift_discount_type, discount_value: gift_discount_value, discount_amount: gift_discount_amount, order: gift_3_order, badge_display: free_gifts_badge_display %}
+      {% endif %}
+      {% if gift_custom_enabled %}
+        {% render 'quantity-breaks-gift-card-custom', name: gift_custom_name, image: gift_custom_image, price: gift_custom_price, compare_at_price: gift_custom_compare_at_price, unlock_at: gift_custom_unlock, gift_index: 4, order: gift_custom_1_order, show_price: gift_custom_show_price, badge_display: free_gifts_badge_display %}
+      {% endif %}
+      {% if gift_custom_2_enabled %}
+        {% render 'quantity-breaks-gift-card-custom', name: gift_custom_2_name, image: gift_custom_2_image, price: gift_custom_2_price, compare_at_price: gift_custom_2_compare_at_price, unlock_at: gift_custom_2_unlock, gift_index: 5, order: gift_custom_2_order, show_price: gift_custom_2_show_price, badge_display: free_gifts_badge_display %}
+      {% endif %}
+      {% if gift_custom_3_enabled %}
+        {% render 'quantity-breaks-gift-card-custom', name: gift_custom_3_name, image: gift_custom_3_image, price: gift_custom_3_price, compare_at_price: gift_custom_3_compare_at_price, unlock_at: gift_custom_3_unlock, gift_index: 6, order: gift_custom_3_order, show_price: gift_custom_3_show_price, badge_display: free_gifts_badge_display %}
+      {% endif %}
+    </div>
+  </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<script src="{{ 'quantity-breaks.js' | asset_url }}" defer></script>
+{% endif %}
+
+{% stylesheet %}
+  .quantity-breaks {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    border-radius: var(--card-radius, 12px);
+  }
+  
+  .quantity-breaks__title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+    padding: 0 20px;
+    gap: 20px;
+  }
+  
+  .quantity-breaks__title::before,
+  .quantity-breaks__title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-border, #e0e0e0);
+    min-width: 0;
+  }
+  
+  .quantity-breaks__title::before {
+    order: 1;
+  }
+  
+  .quantity-breaks__heading {
+    order: 2;
+  }
+  
+  .quantity-breaks__title::after {
+    order: 3;
+  }
+  
+  .quantity-breaks__heading {
+    margin: 0;
+    font-family: var(--heading-font-family, inherit);
+    font-size: var(--heading-text-size, 1.5rem);
+    color: var(--color-foreground-heading, #000);
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__heading {
+      font-size: var(--heading-text-size-mobile, 1.25rem);
+    }
+  }
+  
+  .quantity-breaks__container {
+    display: grid;
+    grid-template-columns: repeat(var(--columns-mobile, 1), 1fr);
+    gap: var(--container-gap-mobile, 16px);
+    padding-top: var(--container-padding-top-mobile, 14px);
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container {
+      grid-template-columns: repeat(var(--columns-desktop, 3), 1fr);
+      gap: var(--container-gap-desktop, 16px);
+      padding-top: var(--container-padding-top-desktop, 14px);
+    }
+  }
+  
+  .quantity-breaks__card {
+    position: relative;
+    background-color: var(--color-variant-background, #fff);
+    border: var(--card-border-width-unselected, 1px) solid var(--color-variant-border, var(--color-border, #e0e0e0));
+    border-radius: var(--card-radius, 12px);
+    padding: 20px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: visible;
+    color: var(--color-variant-text, var(--color-foreground, #000));
+  }
+  
+  /*.quantity-breaks__card:has(.quantity-breaks__image-container) {
+    min-height: 280px;
+  }*/
+  
+  /* Single column layout - horizontal */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container:has([style*="--columns-desktop: 1"]) .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-desktop="1"] .quantity-breaks__card {
+      flex-direction: row;
+      text-align: left;
+      align-items: center;
+      min-height: auto;
+      padding: 16px;
+      gap: 12px;
+    }
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container:has([style*="--columns-mobile: 1"]) .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-mobile="1"] .quantity-breaks__card {
+      flex-direction: row;
+      text-align: left;
+      align-items: center;
+      min-height: auto;
+      padding: 16px;
+      gap: 12px;
+    }
+  }
+  
+  /* Two columns layout - horizontal/vertical */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container[data-columns-desktop="2"] .quantity-breaks__card {
+      min-height: auto;
+      padding: 16px 8px;
+      gap: 12px;
+    }
+    
+    .quantity-breaks__container[data-columns-desktop="2"][data-two-column-layout-desktop="horizontal"] .quantity-breaks__card {
+      flex-direction: row;
+      text-align: left;
+      /*align-items: baseline;*/
+    }
+    
+    .quantity-breaks__container[data-columns-desktop="2"][data-two-column-layout-desktop="vertical"] .quantity-breaks__card {
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+    }
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container[data-columns-mobile="2"] .quantity-breaks__card {
+      min-height: auto;
+      padding: 12px;
+      gap: 12px;
+    }
+    .quantity-breaks__container[data-columns-mobile="2"][data-two-column-layout-mobile="horizontal"] .quantity-breaks__card {
+      flex-direction: row;
+      text-align: left;
+      align-items: center;
+    }
+    
+    .quantity-breaks__container[data-columns-mobile="2"][data-two-column-layout-mobile="vertical"] .quantity-breaks__card {
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+    }
+  }
+
+  .quantity-breaks__container .quantity-breaks__card:has(.quantity-breaks__recommended-badge),
+  .quantity-breaks__container .quantity-breaks__card:has(.quantity-breaks__sold-out-badge) {
+    padding-top: calc(var(--badge-text-size, 12px) + 5px) !important;
+  }
+
+  /* Columns > 1: apply top padding to all cards for alignment */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container[data-columns-desktop="2"] .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-desktop="3"] .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-desktop="4"] .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-desktop="5"] .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-desktop="6"] .quantity-breaks__card {
+      padding-top: calc(var(--badge-text-size, 12px) + 5px) !important;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container[data-columns-mobile="2"] .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-mobile="3"] .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-mobile="4"] .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-mobile="5"] .quantity-breaks__card,
+    .quantity-breaks__container[data-columns-mobile="6"] .quantity-breaks__card {
+      padding-top: calc(var(--badge-text-size-mobile, var(--badge-text-size, 12px)) + 5px) !important;
+    }
+  }
+  
+  .quantity-breaks__card--active {
+    border-color: var(--color-selected-variant-border, var(--radio-color, #000));
+    border-width: var(--card-border-width-selected, 2px);
+   /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);*/
+    background-color: var(--color-selected-variant-background, #fff);
+  }
+  
+  .quantity-breaks__card--recommended {
+    border-color: var(--color-selected-variant-border, var(--radio-color, #4caf50));
+    border-width: var(--card-border-width-selected, 2px);
+    background-color: var(--color-selected-variant-background, #fff);
+  }
+  
+  .quantity-breaks__card--recommended.quantity-breaks__card--unselected {
+    border-color: var(--color-variant-border, var(--color-border, #e0e0e0));
+    border-width: var(--card-border-width-unselected, 1px);
+    background-color: var(--color-variant-background, #fff);
+  }
+  
+  .quantity-breaks__card--sold-out {
+    opacity: 0.65;
+    cursor: not-allowed;
+    pointer-events: none;
+    background-color: var(--sold-out-card-background, var(--color-variant-background, #fff));
+  }
+  
+  .quantity-breaks__sold-out-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--sold-out-badge-bg, #999);
+    color: var(--sold-out-badge-text, #fff);
+    padding: 4px 12px;
+    border-radius: var(--badge-radius, 12px);
+    font-size: var(--badge-text-size, 0.75rem);
+    font-weight: 600;
+    white-space: nowrap;
+    z-index: 1;
+  }
+  
+  .quantity-breaks__recommended-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--recommended-badge-bg, #4caf50);
+    color: var(--recommended-badge-text, #ffffff);
+    padding: 4px 12px;
+    border-radius: var(--badge-radius, 12px);
+    font-size: var(--badge-text-size, 0.75rem);
+    white-space: nowrap;
+    z-index: 1;
+  }
+
+  [data-recommended-badge-style="scalloped"] .quantity-breaks__recommended-badge {
+    padding: 8px;
+    overflow: hidden;
+    border-radius: 0;
+    white-space: pre-line;
+    line-height: 1.15;
+    display: flex;
+    font-size: calc(var(--scalloped-badge-size, 12px) / 5);
+    font-optical-sizing: auto;
+    width: var(--scalloped-badge-size, 60px);
+    height: var(--scalloped-badge-size, 60px);
+    max-height: var(--scalloped-badge-size, 60px);
+    right: 0 !important;
+    left: auto !important;
+    top: calc(var(--scalloped-badge-size, 60px) * -0.5);
+    transform: rotate(-15deg) !important;
+    background-color: transparent;
+    text-align: center;
+    align-items: center;
+    
+    background-color: transparent;
+  }
+
+  [data-recommended-badge-style="scalloped"] .quantity-breaks__recommended-badge::after {
+    content: "";
+    inset: 0;
+    position: absolute;
+    z-index: -1;
+    clip-path: polygon(100% 50%, 93.15% 58.58%, 96.19% 69.13%, 86.58% 74.45%, 85.36% 85.36%, 74.45% 86.58%, 69.13% 96.19%, 58.58% 93.15%, 50% 100%, 41.42% 93.15%, 30.87% 96.19%, 25.55% 86.58%, 14.64% 85.36%, 13.42% 74.45%, 3.81% 69.13%, 6.85% 58.58%, 0 50%, 6.85% 41.42%, 3.81% 30.87%, 13.42% 25.55%, 14.64% 14.64%, 25.55% 13.42%, 30.87% 3.81%, 41.42% 6.85%, 50% 0, 58.58% 6.85%, 69.13% 3.81%, 74.45% 13.42%, 85.36% 14.64%, 86.58% 25.55%, 96.19% 30.87%, 93.15% 41.42%);
+    background-color: var(--recommended-badge-bg, #4caf50);
+  }
+
+  [data-recommended-badge-style="ribbon"] .quantity-breaks__recommended-badge {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  [data-recommended-badge-style="ribbon"] .quantity-breaks__recommended-badge {
+    top: calc(-5px + var(--card-border-width-unselected) * -1);
+  }
+  [data-recommended-badge-style="ribbon"] .quantity-breaks__card--active > .quantity-breaks__recommended-badge {
+    top: calc(-5px - var(--card-border-width-selected, 2px));
+  }
+
+  /* Single column - badge on right */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container:has([style*="--columns-desktop: 1"]) .quantity-breaks__recommended-badge,
+    .quantity-breaks__container[data-columns-desktop="1"] .quantity-breaks__recommended-badge {
+      left: auto;
+      right: 20px;
+      transform: none;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container:has([style*="--columns-mobile: 1"]) .quantity-breaks__recommended-badge,
+    .quantity-breaks__container[data-columns-mobile="1"] .quantity-breaks__recommended-badge {
+      left: auto;
+      right: 20px;
+      transform: none;
+    }
+
+    .quantity-breaks__recommended-badge {
+      font-size: var(--badge-text-size-mobile, var(--badge-text-size, 0.75rem));
+    }
+
+    .quantity-breaks__free-gifts-badge {
+      font-size: var(--badge-text-size-mobile, var(--badge-text-size, 0.7rem));
+    }
+
+    .quantity-breaks__container[data-columns-mobile="1"] .quantity-breaks__card:has(.quantity-breaks__recommended-badge) {
+      padding-top: calc(var(--badge-text-size-mobile, var(--badge-text-size, 12px)) + 5px) !important;
+    }
+  }
+
+  [data-recommended-badge-style="ribbon"] .quantity-breaks__recommended-badge::before {
+    content: "";
+    background: color-mix(in lab, var(--recommended-badge-bg), #000000 20%);
+    position: absolute;
+    height: 5px;
+    width: 5px;
+    top: 0;
+    display: block;
+    left: -5px;
+    clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+  }
+
+  [data-recommended-badge-style="ribbon"] .quantity-breaks__recommended-badge::after {
+    content: "";
+    background: color-mix(in lab, var(--recommended-badge-bg), #000000 20%);
+    position: absolute;
+    height: 5px;
+    width: 5px;
+    top: 0;
+    display: block;
+    right: -5px;
+    clip-path: polygon(0 0, 0% 100%, 100% 100%);
+  }
+
+  .quantity-breaks__free-gifts-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: #000;
+    color: #fff;
+    padding: 4px 10px;
+    font-size: var(--badge-text-size, 0.7rem);
+    white-space: nowrap;
+    z-index: 1;
+    transform: rotate(0deg);
+    border-radius: 2px;
+  }
+
+  .quantity-breaks__free-gifts {
+    margin-top: 24px;
+    text-align: center;
+    background-color: var(--free-gifts-background, transparent);
+  }
+
+  .quantity-breaks__free-gifts--has-background {
+    padding: 8px;
+    border-width: var(--free-gifts-border-width, 2px);
+    border-style: var(--free-gifts-border-style, solid);
+    border-color: var(--free-gifts-border-color, #e0e0e0);
+    border-radius: var(--card-radius, 12px);
+    overflow: hidden;
+  }
+
+  .quantity-breaks__free-gifts-heading {
+    margin: 0 0 16px;
+    color: var(--color-foreground-heading, #000);
+  }
+  .quantity-breaks__free-gifts-heading p:first-child {
+    margin-top: 0;
+  }
+  .quantity-breaks__free-gifts-heading p:last-child {
+    margin-bottom: 0;
+  }
+
+  .quantity-breaks__free-gifts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--free-gifts-gap, 28px);
+  }
+
+  .quantity-breaks__free-gifts-grid > * {
+    box-sizing: border-box;
+    flex: 0 1 calc((100% - (var(--free-gifts-per-row-mobile, 2) - 1) * var(--free-gifts-gap, 28px)) / var(--free-gifts-per-row-mobile, 2));
+    max-width: calc((100% - (var(--free-gifts-per-row-mobile, 2) - 1) * var(--free-gifts-gap, 28px)) / var(--free-gifts-per-row-mobile, 2));
+    min-width: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__free-gifts-grid > * {
+      flex-basis: calc((100% - (var(--free-gifts-per-row-desktop, 3) - 1) * var(--free-gifts-gap, 28px)) / var(--free-gifts-per-row-desktop, 3));
+      max-width: calc((100% - (var(--free-gifts-per-row-desktop, 3) - 1) * var(--free-gifts-gap, 28px)) / var(--free-gifts-per-row-desktop, 3));
+    }
+  }
+
+
+  .quantity-breaks-gift-card {
+    position: relative;
+    border: 1px solid var(--color-border, #e0e0e0);
+    border-radius: var(--card-radius, 12px);
+    overflow: hidden;
+    background: var(--color-variant-background, #fff);
+    color: var(--color-variant-text, #000);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+  }
+  .quantity-breaks-gift-card {
+    position: relative;
+    border: 1px solid var(--color-selected-variant-border, #e0e0e0);
+    border-radius: var(--card-radius, 12px);
+    overflow: visible;
+    background: var(--color-selected-variant-background, #fff);
+    color: var(--color-selected-variant-text, #000);
+  }
+
+  @keyframes quantity-breaks-gift-card-enable {
+    0% {
+      transform: scale(0.96);
+      opacity: 0.85;
+    }
+    60% {
+      transform: scale(1.02);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .quantity-breaks-gift-card--enabled {
+    animation: quantity-breaks-gift-card-enable 0.45s ease-out;
+  }
+
+  .quantity-breaks__free-gifts--normal .quantity-breaks-gift-card--enabled {
+    color: var(--color-foreground, #000);
+  }
+
+  .quantity-breaks-gift-card__image-wrapper {
+    position: relative;
+    aspect-ratio: 1;
+   /* background: var(--color-background-secondary, #f5f5f5); */
+    overflow: hidden;
+    border-radius: var(--card-radius, 12px) var(--card-radius, 12px) 0 0;
+  }
+
+  .quantity-breaks-gift-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin: auto;
+  }
+
+  .quantity-breaks__free-gifts--image-auto .quantity-breaks-gift-card__image {
+    object-fit: contain;
+    width: auto;
+  }
+
+  .quantity-breaks__free-gifts--normal .quantity-breaks-gift-card__image {
+    border-radius: var(--card-radius, 12px);
+    overflow: hidden;
+  }
+
+  .quantity-breaks-gift-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-foreground-secondary, #999);
+  }
+
+  .quantity-breaks-gift-card__price-badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--free-gifts-badge-background, #f5c6d6);
+    color: var(--free-gifts-badge-text, #fff);
+    padding: 1px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 2px;
+    border: 1px solid var(--free-gifts-badge-border, #e8a4b8);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 2;
+    white-space: nowrap;
+  }
+
+  .quantity-breaks-gift-card__price-badge .quantity-breaks-gift-card__free-label {
+    text-transform: uppercase;
+  }
+
+  .quantity-breaks-gift-card__price-badge .quantity-breaks-gift-card__original-price {
+    text-decoration: none;
+    opacity: 0.95;
+    font-weight: 600;
+  }
+
+  .quantity-breaks-gift-card__price-badge .quantity-breaks-gift-card__discounted-price {
+    text-decoration: none;
+  }
+
+  .quantity-breaks-gift-card--locked .quantity-breaks-gift-card__price-badge {
+    background: var(--free-gifts-locked-text, #666);
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .quantity-breaks-gift-card__locked-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--free-gifts-locked-background, #e8e8e8);
+    color: var(--free-gifts-locked-text, #666);
+    transition: opacity 0.35s ease;
+  }
+  .quantity-breaks__free-gifts--normal .quantity-breaks-gift-card__locked-overlay {  
+    border-radius: var(--card-radius, 12px);
+    overflow: hidden;
+  }
+
+  .quantity-breaks-gift-card--enabled .quantity-breaks-gift-card__locked-overlay {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .quantity-breaks-gift-card__lock-icon {
+    margin-bottom: 8px;
+    opacity: 0.7;
+  }
+
+  .quantity-breaks-gift-card__locked-text {
+    font-size: 0.875rem;
+  }
+
+  .quantity-breaks-gift-card__content {
+    padding: 0;
+  }
+
+  .quantity-breaks-gift-card__title {
+    margin: 0 0 8px;
+    font-size: 12px;
+  }
+
+  .quantity-breaks-gift-card__variant-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border, #e0e0e0);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: #fff;
+  }
+
+  .quantity-breaks-gift-card--locked .quantity-breaks-gift-card__variant-select {
+    display: none;
+  }
+
+  /* Normal style: no borders, minimal styling */
+  .quantity-breaks__free-gifts--normal .quantity-breaks-gift-card {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .quantity-breaks__free-gifts--normal .quantity-breaks-gift-card--enabled {
+    border: none;
+  }
+
+  .quantity-breaks__free-gifts--normal .quantity-breaks-gift-card__image-wrapper {
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .quantity-breaks__free-gifts--normal .quantity-breaks-gift-card__content {
+    padding: 12px 0;
+  }
+  
+    .quantity-breaks__lumin-radio-indicator {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--color-variant-text, var(--color-border, #666));
+      border-radius: 50%;
+      margin-bottom: 2px;
+      position: relative;
+      background-color: transparent;
+      transition: border-color var(--animation-speed, 0.3s) var(--animation-easing, ease),
+        background-color var(--animation-speed, 0.3s) var(--animation-easing, ease);
+      flex-shrink: 0;
+    }
+  .quantity-breaks__card--active .quantity-breaks__lumin-radio-indicator {
+    border-color: var(--color-selected-variant-text, var(--radio-color, var(--color-selected-variant-border, #000)));
+    background-color: var(--color-selected-variant-background, var(--radio-color, var(--color-selected-variant-border, #000)));
+  }
+  
+  .quantity-breaks__card--active .quantity-breaks__lumin-radio-indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-selected-variant-text, var(--radio-color, #ffffff));
+  }
+  
+  /* {
+    border-color: var(--color-selected-variant-border, var(--radio-color, #8B4513));
+  }*/
+  
+  .quantity-breaks__card--recommended.quantity-breaks__card--active .quantity-breaks__lumin-radio-indicator {
+    border-color: var(--color-selected-variant-text, var(--radio-color, var(--color-selected-variant-border, #000)));
+    background-color: var(--color-selected-variant-background, var(--radio-color, var(--color-selected-variant-border, #000)));
+  }
+  
+  .quantity-breaks__card--recommended.quantity-breaks__card--active .quantity-breaks__lumin-radio-indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-selected-variant-text, var(--radio-color, #ffffff));
+  }
+  
+  /* Adjust radio indicator margin in horizontal layouts */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container:has([style*="--columns-desktop: 1"]) .quantity-breaks__lumin-radio-indicator,
+    .quantity-breaks__container[data-columns-desktop="1"] .quantity-breaks__lumin-radio-indicator,
+    .quantity-breaks__container[data-columns-desktop="2"][data-two-column-layout-desktop="horizontal"] .quantity-breaks__lumin-radio-indicator {
+      margin-bottom: 0;
+      margin-right: 8px;
+    }
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container:has([style*="--columns-mobile: 1"]) .quantity-breaks__lumin-radio-indicator,
+    .quantity-breaks__container[data-columns-mobile="1"] .quantity-breaks__lumin-radio-indicator,
+    .quantity-breaks__container[data-columns-mobile="2"][data-two-column-layout-mobile="horizontal"] .quantity-breaks__lumin-radio-indicator {
+      margin-bottom: 0;
+      margin-right: 8px;
+    }
+  }
+  
+  .quantity-breaks__image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 4px;
+    min-height: 30px;
+    max-width: 100%;
+  }
+  
+  /* Single column and two columns horizontal: adjust image container for horizontal layout */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container:has([style*="--columns-desktop: 1"]) .quantity-breaks__image-container,
+    .quantity-breaks__container[data-columns-desktop="1"] .quantity-breaks__image-container,
+    .quantity-breaks__container[data-columns-desktop="2"][data-two-column-layout-desktop="horizontal"] .quantity-breaks__image-container {
+      margin-bottom: 0;
+      margin-right: 12px;
+      min-height: auto;
+    }
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container:has([style*="--columns-mobile: 1"]) .quantity-breaks__image-container,
+    .quantity-breaks__container[data-columns-mobile="1"] .quantity-breaks__image-container,
+    .quantity-breaks__container[data-columns-mobile="2"][data-two-column-layout-mobile="horizontal"] .quantity-breaks__image-container {
+      margin-bottom: 0;
+      margin-right: 12px;
+      min-height: auto;
+    }
+  }
+  
+  .quantity-breaks__product-image {
+    width: var(--image-size, 60px);
+    height: auto;
+    max-width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  
+  .quantity-breaks__product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .quantity-breaks__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  /* Single column and two columns horizontal: horizontal content layout */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container:has([style*="--columns-desktop: 1"]) .quantity-breaks__content,
+    .quantity-breaks__container[data-columns-desktop="1"] .quantity-breaks__content,
+    .quantity-breaks__container[data-columns-desktop="2"][data-two-column-layout-desktop="horizontal"] .quantity-breaks__content {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      column-gap: 5px;
+      row-gap: 10px;
+    }
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container:has([style*="--columns-mobile: 1"]) .quantity-breaks__content,
+    .quantity-breaks__container[data-columns-mobile="1"] .quantity-breaks__content,
+    .quantity-breaks__container[data-columns-mobile="2"][data-two-column-layout-mobile="horizontal"] .quantity-breaks__content {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      row-gap: 20px;
+      column-gap: 4px;
+    }
+  }
+  
+  .quantity-breaks__content-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    /*overflow: hidden;*/
+  }
+  .quantity-breaks__content-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .quantity-breaks__content-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  
+  .quantity-breaks__title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 0;
+  }
+  
+  /* Center title wrapper when columns per row is more than 2 (vertical card layout) */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container[data-columns-desktop="3"] .quantity-breaks__title-wrapper,
+    .quantity-breaks__container[data-columns-desktop="4"] .quantity-breaks__title-wrapper,
+    .quantity-breaks__container[data-columns-desktop="5"] .quantity-breaks__title-wrapper,
+    .quantity-breaks__container[data-columns-desktop="6"] .quantity-breaks__title-wrapper {
+      justify-content: center;
+    }
+    
+    .quantity-breaks__container[data-columns-desktop="2"][data-two-column-layout-desktop="vertical"] .quantity-breaks__title-wrapper {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container[data-columns-mobile="3"] .quantity-breaks__title-wrapper,
+    .quantity-breaks__container[data-columns-mobile="4"] .quantity-breaks__title-wrapper {
+      justify-content: center;
+    }
+    
+    .quantity-breaks__container[data-columns-mobile="2"][data-two-column-layout-mobile="vertical"] .quantity-breaks__title-wrapper {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  
+  .quantity-breaks__quantity-title {
+    margin: 0;
+    font-family: var(--title-font-family, inherit);
+    font-size: var(--title-text-size, 1.125rem);
+    color: var(--color-variant-text, var(--color-foreground-heading, #000));
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .quantity-breaks__card--active .quantity-breaks__quantity-title {
+    color: var(--color-selected-variant-text, var(--color-variant-text, var(--color-foreground-heading, #000)));
+  }
+  
+  .quantity-breaks__description {
+    margin: 0;
+    font-size: var(--description-text-size, 0.875rem);
+    color: var(--color-variant-text, var(--color-foreground, #666));
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
+  }
+  
+  .quantity-breaks__card--active .quantity-breaks__description {
+    color: var(--color-selected-variant-text, var(--color-variant-text, var(--color-foreground, #666)));
+  }
+  
+  .quantity-breaks__content .quantity-breaks__variant-pickers {
+    margin-top: 2px;
+    width: 100%;
+    min-width: 100%;
+    flex-basis: 100%;
+    max-width: 100%;
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Preselected card: reserve space when inactive (only before user selects another option) */
+  [data-quantity-breaks-component]:not([data-user-has-selected-other="true"]) .quantity-breaks__card--recommended:not(.quantity-breaks__card--active) .quantity-breaks__variant-pickers {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Non-preselected cards: hide without reserving space */
+  .quantity-breaks__card:not(.quantity-breaks__card--recommended):not(.quantity-breaks__card--active) .quantity-breaks__variant-pickers {
+    display: none;
+  }
+
+  /* After user selects another option: all inactive cards use display: none */
+  [data-quantity-breaks-component][data-user-has-selected-other="true"] .quantity-breaks__card:not(.quantity-breaks__card--active) .quantity-breaks__variant-pickers {
+    display: none;
+  }
+
+  .quantity-breaks__variant-pickers-heading {
+    font-size: var(--description-text-size, 0.875rem);
+    color: var(--color-selected-variant-text, var(--color-foreground, #333));
+    margin-bottom: 2px;
+    text-align: left;
+    margin-left: 31px;
+  }
+
+  .quantity-breaks__variant-pickers--no-row-numbers .quantity-breaks__variant-pickers-heading {
+    margin-left: 0;
+    text-align: center;
+  }
+
+  .quantity-breaks__variant-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+   /* width: 100%;*/
+    text-align: left;
+  }
+
+  .quantity-breaks__variant-picker-select-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .quantity-breaks__variant-swatch {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--swatch-background, #eee);
+    background-size: cover;
+    background-position: center;
+    display: block;
+  }
+
+  .quantity-breaks__variant-select--has-swatch {
+    min-width: 60px;
+  }
+
+  [data-variant-picker-full-width="true"] .quantity-breaks__variant-select--has-swatch {
+    flex: 1;
+  }
+
+  .quantity-breaks__variant-picker-number {
+    font-size: var(--description-text-size, 0.875rem);
+    color: var(--color-selected-variant-text, var(--color-foreground, #666));
+    min-width: 0.5em;
+    flex-shrink: 0;
+  }
+
+  .quantity-breaks__variant-picker-row .quantity-breaks__variant-select {
+    min-width: 30px;
+  }
+  
+  .quantity-breaks__variant-select {
+    padding: 6px 8px;
+    font-size: var(--description-text-size, 0.875rem);
+    border: 1px solid var(--color-variant-border, var(--color-border, #e0e0e0));
+    border-radius: 6px;
+    background-color: var(--color-variant-background, #fff);
+    color: var(--color-input-text, var(--color-foreground, #000));
+    cursor: pointer;
+    appearance: auto;
+    -webkit-appearance: menulist;
+  }
+  
+  .quantity-breaks__card--active .quantity-breaks__variant-select {
+    border-color: var(--color-selected-variant-text, var(--radio-color, #8B4513));
+  }
+  [data-variant-picker-full-width="true"] .quantity-breaks__card--active .quantity-breaks__variant-select {
+    flex: 1;
+  }
+  
+  .quantity-breaks__discount-badge {
+    background-color: var(--discount-badge-bg, #4caf50);
+    color: var(--discount-badge-text, #ffffff);
+    padding: 4px 6px;
+    border-radius: var(--discount-badge-radius, 4px);
+    font-size: var(--discount-badge-text-size, 0.75rem);
+    margin: 0;
+  }
+  
+  .quantity-breaks__price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  
+  /* Single column and two columns horizontal: align price to right */
+  @media screen and (min-width: 750px) {
+    .quantity-breaks__container:has([style*="--columns-desktop: 1"]) .quantity-breaks__price-container,
+    .quantity-breaks__container[data-columns-desktop="1"] .quantity-breaks__price-container,
+    .quantity-breaks__container[data-columns-desktop="2"][data-two-column-layout-desktop="horizontal"] .quantity-breaks__price-container {
+      align-items: flex-end;
+      margin-top: 0;
+      padding-top: 0;
+    }
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__container:has([style*="--columns-mobile: 1"]) .quantity-breaks__price-container,
+    .quantity-breaks__container[data-columns-mobile="1"] .quantity-breaks__price-container,
+    .quantity-breaks__container[data-columns-mobile="2"][data-two-column-layout-mobile="horizontal"] .quantity-breaks__price-container {
+      align-items: flex-end;
+      margin-top: 0;
+      padding-top: 0;
+    }
+  }
+  
+  .quantity-breaks__price {
+    font-family: var(--price-font-family, inherit);
+    font-size: var(--price-text-size, 1.25rem);
+    font-weight: var(--price-font-weight, 600);
+    color: var(--price-color, var(--color-variant-text, var(--color-foreground-heading, #000)));
+    line-height: 1;
+    letter-spacing: -0.03rem;
+  }
+  
+  .quantity-breaks__card--active .quantity-breaks__price {
+    color: var(--active-price-color, var(--price-color, var(--color-selected-variant-text, var(--color-variant-text, var(--color-foreground-heading, #000)))));
+  }
+  
+  .quantity-breaks__original-price {
+    font-family: var(--price-font-family, inherit);
+    font-size: var(--compare-price-text-size, 0.875rem);
+    font-weight: var(--compare-price-font-weight, 400);
+    color: var(--compare-price-color, var(--color-variant-text, var(--color-foreground-secondary, #999)));
+    text-decoration: none;
+    line-height: 1;
+    letter-spacing: -0.03rem;
+  }
+  
+  .quantity-breaks__card--active .quantity-breaks__original-price {
+    color: var(--active-compare-price-color, var(--compare-price-color, var(--color-selected-variant-text, var(--color-variant-text, var(--color-foreground-secondary, #999)))));
+  }
+  
+  .quantity-breaks__per-unit-text {
+    font-size: var(--per-unit-text-size, 0.875rem);
+  }
+  
+  @media screen and (max-width: 749px) {
+    .quantity-breaks__card {
+      min-height: auto;
+    }
+    
+    .quantity-breaks__quantity-title {
+      font-size: var(--title-text-size-mobile, 1rem);
+    }
+    
+    .quantity-breaks__description {
+      font-size: var(--description-text-size-mobile, 0.75rem);
+    }
+    
+    .quantity-breaks__price {
+      font-size: var(--price-text-size-mobile, 1.125rem);
+    }
+    
+    .quantity-breaks__per-unit-text {
+      font-size: var(--per-unit-text-size-mobile, 0.75rem);
+    }
+    
+  }
+
+  .quantity-breaks__ancher-target {
+    display: block;
+    height: 0;
+    overflow: hidden;
+    scroll-margin-top: calc(var(--header-group-height, 0px) + var(--scroll-margin, 12px));
+    pointer-events: none;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.quantity_breaks.name",
+  "settings": [
+    {"type": "paragraph",
+     "content": "t:sections.quantity_breaks.paragraph"
+    },
+    {
+      "type": "select",
+      "id": "display_scope",
+      "label": "t:sections.quantity_breaks.display_scope",
+      "options": [
+        {
+          "value": "all",
+          "label": "t:sections.quantity_breaks.display_scope_all"
+        },
+        {
+          "value": "selected_products",
+          "label": "t:sections.quantity_breaks.display_scope_selected_products"
+        },
+        {
+          "value": "collection",
+          "label": "t:sections.quantity_breaks.display_scope_collection"
+        }
+      ],
+      "default": "all"
+    },
+    {
+      "type": "product_list",
+      "id": "display_products",
+      "label": "t:sections.quantity_breaks.display_products",
+      "info": "t:sections.quantity_breaks.display_products_info",
+      "limit": 50
+    },
+    {
+      "type": "collection_list",
+      "id": "display_collections",
+      "label": "t:sections.quantity_breaks.display_collections",
+      "info": "t:sections.quantity_breaks.display_collections_info"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "t:names.title",
+      "default": "Buy More, Save More"
+    },
+    {
+      "type": "range",
+      "id": "heading_text_size",
+      "label": "t:sections.quantity_breaks.heading_text_size",
+      "min": 12,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "heading_text_size_mobile",
+      "label": "t:sections.quantity_breaks.heading_text_size_mobile",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "preselected_option",
+      "label": "t:sections.quantity_breaks.preselected_option",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "option_1", 
+          "label": "t:sections.quantity_breaks.option_1"
+        },
+        {
+          "value": "option_2", 
+          "label": "t:sections.quantity_breaks.option_2"
+        },
+                {
+                  "value": "option_3",
+                  "label": "t:sections.quantity_breaks.option_3"
+                },
+                {
+                  "value": "option_4",
+                  "label": "t:sections.quantity_breaks.option_4"
+                },
+                {
+                  "value": "option_5",
+                  "label": "t:sections.quantity_breaks.option_5"
+                },
+                {
+                  "value": "option_6",
+                  "label": "t:sections.quantity_breaks.option_6"
+                }
+              ],
+              "default": "option_2"
+            },
+
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_per_row_desktop",
+      "label": "t:sections.quantity_breaks.columns_per_row_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_per_row_mobile",
+      "label": "t:sections.quantity_breaks.columns_per_row_mobile",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "two_column_layout_desktop",
+      "label": "t:sections.quantity_breaks.two_column_layout_desktop",
+      "visible_if": "{{ block.settings.columns_per_row_desktop == 2 }}",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "Vertical"
+        }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "select",
+      "id": "two_column_layout_mobile",
+      "label": "t:sections.quantity_breaks.two_column_layout_mobile",
+      "visible_if": "{{ block.settings.columns_per_row_mobile == 2 }}",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:options.horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "t:options.vertical"
+        }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "range",
+      "id": "container_gap_desktop",
+      "label": "Gap (desktop)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "container_gap_mobile",
+      "label": "Gap (mobile)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "container_padding_top_desktop",
+      "label": "Padding top (desktop)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "container_padding_top_mobile",
+      "label": "Padding top (mobile)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.pricing"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_product_price",
+      "label": "t:sections.quantity_breaks.override_product_price",
+      "default": true,
+      "info": "t:sections.quantity_breaks.override_product_price_info"
+    },
+    {
+      "type": "checkbox",
+      "id": "bold_prices",
+      "label": "Bold prices",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price_per_unit",
+      "label": "t:sections.quantity_breaks.show_price_per_unit",
+      "default": false,
+      "info": "t:sections.quantity_breaks.show_price_per_unit_info"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "per_unit_text",
+      "label": "t:sections.quantity_breaks.per_unit_text",
+      "default": "/Pcs",
+      "info": "t:sections.quantity_breaks.per_unit_text_info",
+      "visible_if": "{{ block.settings.show_price_per_unit }}"
+    },
+    {
+      "type": "range",
+      "id": "per_unit_text_size",
+      "label": "t:sections.quantity_breaks.per_unit_text_size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "info": "t:sections.quantity_breaks.per_unit_text_size_info",
+      "visible_if": "{{ block.settings.show_price_per_unit }}"
+    },
+    {
+      "type": "range",
+      "id": "per_unit_text_size_mobile",
+      "label": "t:sections.quantity_breaks.per_unit_text_size_mobile",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ block.settings.show_price_per_unit }}"
+    },
+    {
+      "type": "select",
+      "id": "compare_price_type",
+      "label": "t:sections.quantity_breaks.compare_price_type",
+      "info": "t:sections.quantity_breaks.compare_price_type_info",
+      "options": [
+        {
+          "value": "calculated",
+          "label": "t:sections.quantity_breaks.compare_price_type_calculated"
+        },
+        {
+          "value": "original",
+          "label": "t:sections.quantity_breaks.compare_price_type_original"
+        }
+      ],
+      "default": "calculated"
+    },
+    {
+      "type": "header",
+      "content": "Variant picker"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant_picker",
+      "label": "Show variant picker ",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_variant_picker_when_quantity_1",
+      "label": "Hide variant picker for single quantity",
+      "default": false,
+      "visible_if": "{{ block.settings.show_variant_picker == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_color_swatches",
+      "label": "Show color swatches",
+      "default": true,
+      "visible_if": "{{ block.settings.show_variant_picker == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "variant_picker_full_width",
+      "label": "Variant picker full width",
+      "default": false,
+      "visible_if": "{{ block.settings.show_variant_picker == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant_pickers_heading",
+      "label": "t:sections.quantity_breaks.show_variant_pickers_heading",
+      "default": true,
+      "visible_if": "{{ block.settings.show_variant_picker == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant_picker_row_numbers",
+      "label": "t:sections.quantity_breaks.show_variant_picker_row_numbers",
+      "default": true,
+      "visible_if": "{{ block.settings.show_variant_picker == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity_breaks_radio_indicator",
+      "label": "t:sections.quantity_breaks.show_quantity_breaks_radio_indicator",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:content.images"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_images",
+      "label": "t:sections.quantity_breaks.show_images",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "t:sections.quantity_breaks.image_size",
+      "min": 30,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 60,
+      "visible_if": "{{ block.settings.show_images }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.option_1"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_1_enabled",
+      "label": "t:sections.quantity_breaks.option_1_enabled",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_1_label",
+      "label": "t:sections.quantity_breaks.option_label",
+      "default": "Buy 1",
+      "visible_if": "{{ block.settings.option_1_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_1_quantity",
+      "label": "t:sections.quantity_breaks.option_quantity",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "visible_if": "{{ block.settings.option_1_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "option_1_discount_type",
+      "label": "t:sections.quantity_breaks.option_discount_type",
+      "options": [
+        {
+          "value": "percentage",
+          "label": "t:sections.quantity_breaks.percentage"
+        },
+        {
+          "value": "fixed",
+          "label": "t:sections.quantity_breaks.fixed"
+        }
+      ],
+      "default": "percentage",
+      "visible_if": "{{ block.settings.option_1_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_1_discount",
+      "label": "t:sections.quantity_breaks.option_discount",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 0,
+      "unit": "%",
+      "visible_if": "{{ block.settings.option_1_enabled == true and block.settings.option_1_discount_type == 'percentage' }}"
+    },
+    {
+      "type": "number",
+      "id": "option_1_discount_amount",
+      "label": "t:sections.quantity_breaks.option_discount_amount",
+      "default": 0,
+      "info": "t:sections.quantity_breaks.option_discount_amount_info",
+      "visible_if": "{{ block.settings.option_1_enabled == true and block.settings.option_1_discount_type == 'fixed' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "option_1_custom_image",
+      "label": "t:sections.quantity_breaks.option_custom_image",
+      "info": "t:sections.quantity_breaks.option_custom_image_info",
+      "visible_if": "{{ block.settings.option_1_enabled == true and block.settings.show_images == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_1_badge_text",
+      "label": "t:sections.quantity_breaks.option_badge_text",
+      "info": "t:sections.quantity_breaks.option_badge_text_info",
+      "visible_if": "{{ block.settings.option_1_enabled == true }}"
+    },
+    {
+      "type": "html",
+      "id": "option_1_description",
+      "label": "t:sections.quantity_breaks.option_description",
+      "default": "Standrad Price",
+      "info": "t:sections.quantity_breaks.option_description_info",
+      "visible_if": "{{ block.settings.option_1_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_1_off_text",
+      "label": "t:sections.quantity_breaks.option_off_text",
+      "info": "t:sections.quantity_breaks.option_off_text_info",
+      "visible_if": "{{ block.settings.option_1_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_1_discount_code",
+      "label": "t:sections.quantity_breaks.option_discount_code",
+      "info": "t:sections.quantity_breaks.option_discount_code_info",
+      "visible_if": "{{ block.settings.option_1_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_1_sold_out",
+      "label": "t:sections.quantity_breaks.option_sold_out",
+      "default": false,
+      "visible_if": "{{ block.settings.option_1_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.option_2"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_2_enabled",
+      "label": "t:sections.quantity_breaks.option_2_enabled",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_2_label",
+      "label": "t:sections.quantity_breaks.option_label",
+      "default": "Buy 2",
+      "visible_if": "{{ block.settings.option_2_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_2_quantity",
+      "label": "t:sections.quantity_breaks.option_quantity",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 2,
+      "visible_if": "{{ block.settings.option_2_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "option_2_discount_type",
+      "label": "t:sections.quantity_breaks.option_discount_type",
+      "options": [
+        {
+          "value": "percentage",
+          "label": "t:sections.quantity_breaks.percentage"
+        },
+        {
+          "value": "fixed",
+          "label": "t:sections.quantity_breaks.fixed"
+        }
+      ],
+      "default": "percentage",
+      "visible_if": "{{ block.settings.option_2_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_2_discount",
+      "label": "t:sections.quantity_breaks.option_discount",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 10,
+      "unit": "%",
+      "visible_if": "{{ block.settings.option_2_enabled == true and block.settings.option_2_discount_type == 'percentage' }}"
+    },
+    {
+      "type": "number",
+      "id": "option_2_discount_amount",
+      "label": "t:sections.quantity_breaks.option_discount_amount",
+      "default": 0,
+      "info": "t:sections.quantity_breaks.option_discount_amount_info",
+      "visible_if": "{{ block.settings.option_2_enabled == true and block.settings.option_2_discount_type == 'fixed' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "option_2_custom_image",
+      "label": "t:sections.quantity_breaks.option_custom_image",
+      "info": "t:sections.quantity_breaks.option_custom_image_info",
+      "visible_if": "{{ block.settings.option_2_enabled == true and block.settings.show_images == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_2_badge_text",
+      "label": "t:sections.quantity_breaks.option_badge_text",
+      "default": "Popular",
+      "info": "t:sections.quantity_breaks.option_badge_text_info",
+      "visible_if": "{{ block.settings.option_2_enabled == true }}"
+    },
+    {
+      "type": "html",
+      "id": "option_2_description",
+      "label": "t:sections.quantity_breaks.option_description",
+      "default": "Save [%]",
+      "info": "t:sections.quantity_breaks.option_description_info",
+      "visible_if": "{{ block.settings.option_2_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_2_off_text",
+      "label": "t:sections.quantity_breaks.option_off_text",
+      "default": "Free Shipping",
+      "info": "t:sections.quantity_breaks.option_off_text_info",
+      "visible_if": "{{ block.settings.option_2_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_2_discount_code",
+      "label": "t:sections.quantity_breaks.option_discount_code",
+      "info": "t:sections.quantity_breaks.option_discount_code_info",
+      "visible_if": "{{ block.settings.option_2_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_2_sold_out",
+      "label": "t:sections.quantity_breaks.option_sold_out",
+      "default": false,
+      "visible_if": "{{ block.settings.option_2_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.option_3"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_3_enabled",
+      "label": "t:sections.quantity_breaks.option_3_enabled",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_3_label",
+      "label": "t:sections.quantity_breaks.option_label",
+      "default": "Buy 3",
+      "visible_if": "{{ block.settings.option_3_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_3_quantity",
+      "label": "t:sections.quantity_breaks.option_quantity",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 3,
+      "visible_if": "{{ block.settings.option_3_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "option_3_discount_type",
+      "label": "t:sections.quantity_breaks.option_discount_type",
+      "options": [
+        {
+          "value": "percentage",
+          "label": "t:sections.quantity_breaks.percentage"
+        },
+        {
+          "value": "fixed",
+          "label": "t:sections.quantity_breaks.fixed"
+        }
+      ],
+      "default": "percentage",
+      "visible_if": "{{ block.settings.option_3_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_3_discount",
+      "label": "t:sections.quantity_breaks.option_discount",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 15,
+      "unit": "%",
+      "visible_if": "{{ block.settings.option_3_enabled == true and block.settings.option_3_discount_type == 'percentage' }}"
+    },
+    {
+      "type": "number",
+      "id": "option_3_discount_amount",
+      "label": "t:sections.quantity_breaks.option_discount_amount",
+      "default": 0,
+      "info": "t:sections.quantity_breaks.option_discount_amount_info",
+      "visible_if": "{{ block.settings.option_3_enabled == true and block.settings.option_3_discount_type == 'fixed' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "option_3_custom_image",
+      "label": "t:sections.quantity_breaks.option_custom_image",
+      "info": "t:sections.quantity_breaks.option_custom_image_info",
+      "visible_if": "{{ block.settings.option_3_enabled == true and block.settings.show_images == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_3_badge_text",
+      "label": "t:sections.quantity_breaks.option_badge_text",
+      "default": "Best Value",
+      "info": "t:sections.quantity_breaks.option_badge_text_info",
+      "visible_if": "{{ block.settings.option_3_enabled == true }}"
+    },
+    {
+      "type": "html",
+      "id": "option_3_description",
+      "label": "t:sections.quantity_breaks.option_description",
+      "default": "Save [%] ([amount])",
+      "info": "t:sections.quantity_breaks.option_description_info",
+      "visible_if": "{{ block.settings.option_3_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_3_off_text",
+      "label": "t:sections.quantity_breaks.option_off_text",
+      "info": "t:sections.quantity_breaks.option_off_text_info",
+      "visible_if": "{{ block.settings.option_3_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_3_discount_code",
+      "label": "t:sections.quantity_breaks.option_discount_code",
+      "info": "t:sections.quantity_breaks.option_discount_code_info",
+      "visible_if": "{{ block.settings.option_3_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_3_sold_out",
+      "label": "t:sections.quantity_breaks.option_sold_out",
+      "default": false,
+      "visible_if": "{{ block.settings.option_3_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.option_4"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_4_enabled",
+      "label": "t:sections.quantity_breaks.option_4_enabled",
+      "default": false
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_4_label",
+      "label": "t:sections.quantity_breaks.option_label",
+      "default": "Buy 4",
+      "visible_if": "{{ block.settings.option_4_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_4_quantity",
+      "label": "t:sections.quantity_breaks.option_quantity",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 0,
+      "visible_if": "{{ block.settings.option_4_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "option_4_discount_type",
+      "label": "t:sections.quantity_breaks.option_discount_type",
+      "options": [
+        {
+          "value": "percentage",
+          "label": "t:sections.quantity_breaks.percentage"
+        },
+        {
+          "value": "fixed",
+          "label": "t:sections.quantity_breaks.fixed"
+        }
+      ],
+      "default": "percentage",
+      "visible_if": "{{ block.settings.option_4_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_4_discount",
+      "label": "t:sections.quantity_breaks.option_discount",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 0,
+      "unit": "%",
+      "visible_if": "{{ block.settings.option_4_enabled == true and block.settings.option_4_discount_type == 'percentage' }}"
+    },
+    {
+      "type": "number",
+      "id": "option_4_discount_amount",
+      "label": "t:sections.quantity_breaks.option_discount_amount",
+      "default": 0,
+      "info": "t:sections.quantity_breaks.option_discount_amount_info",
+      "visible_if": "{{ block.settings.option_4_enabled == true and block.settings.option_4_discount_type == 'fixed' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "option_4_custom_image",
+      "label": "t:sections.quantity_breaks.option_custom_image",
+      "info": "t:sections.quantity_breaks.option_custom_image_info",
+      "visible_if": "{{ block.settings.option_4_enabled == true and block.settings.show_images == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_4_badge_text",
+      "label": "t:sections.quantity_breaks.option_badge_text",
+      "info": "t:sections.quantity_breaks.option_badge_text_info",
+      "visible_if": "{{ block.settings.option_4_enabled == true }}"
+    },
+    {
+      "type": "html",
+      "id": "option_4_description",
+      "label": "t:sections.quantity_breaks.option_description",
+      "info": "t:sections.quantity_breaks.option_description_info",
+      "visible_if": "{{ block.settings.option_4_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_4_off_text",
+      "label": "t:sections.quantity_breaks.option_off_text",
+      "info": "t:sections.quantity_breaks.option_off_text_info",
+      "visible_if": "{{ block.settings.option_4_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_4_discount_code",
+      "label": "t:sections.quantity_breaks.option_discount_code",
+      "info": "t:sections.quantity_breaks.option_discount_code_info",
+      "visible_if": "{{ block.settings.option_4_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_4_sold_out",
+      "label": "t:sections.quantity_breaks.option_sold_out",
+      "default": false,
+      "visible_if": "{{ block.settings.option_4_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.option_5"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_5_enabled",
+      "label": "t:sections.quantity_breaks.option_5_enabled",
+      "default": false
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_5_label",
+      "label": "t:sections.quantity_breaks.option_label",
+      "default": "Buy 5",
+      "visible_if": "{{ block.settings.option_5_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_5_quantity",
+      "label": "t:sections.quantity_breaks.option_quantity",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 0,
+      "visible_if": "{{ block.settings.option_5_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "option_5_discount_type",
+      "label": "t:sections.quantity_breaks.option_discount_type",
+      "options": [
+        {
+          "value": "percentage",
+          "label": "t:sections.quantity_breaks.percentage"
+        },
+        {
+          "value": "fixed",
+          "label": "t:sections.quantity_breaks.fixed"
+        }
+      ],
+      "default": "percentage",
+      "visible_if": "{{ block.settings.option_5_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_5_discount",
+      "label": "t:sections.quantity_breaks.option_discount",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 0,
+      "unit": "%",
+      "visible_if": "{{ block.settings.option_5_enabled == true and block.settings.option_5_discount_type == 'percentage' }}"
+    },
+    {
+      "type": "number",
+      "id": "option_5_discount_amount",
+      "label": "t:sections.quantity_breaks.option_discount_amount",
+      "default": 0,
+      "info": "t:sections.quantity_breaks.option_discount_amount_info",
+      "visible_if": "{{ block.settings.option_5_enabled == true and block.settings.option_5_discount_type == 'fixed' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "option_5_custom_image",
+      "label": "t:sections.quantity_breaks.option_custom_image",
+      "info": "t:sections.quantity_breaks.option_custom_image_info",
+      "visible_if": "{{ block.settings.option_5_enabled == true and block.settings.show_images == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_5_badge_text",
+      "label": "t:sections.quantity_breaks.option_badge_text",
+      "info": "t:sections.quantity_breaks.option_badge_text_info",
+      "visible_if": "{{ block.settings.option_5_enabled == true }}"
+    },
+    {
+      "type": "html",
+      "id": "option_5_description",
+      "label": "t:sections.quantity_breaks.option_description",
+      "info": "t:sections.quantity_breaks.option_description_info",
+      "visible_if": "{{ block.settings.option_5_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_5_off_text",
+      "label": "t:sections.quantity_breaks.option_off_text",
+      "info": "t:sections.quantity_breaks.option_off_text_info",
+      "visible_if": "{{ block.settings.option_5_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_5_discount_code",
+      "label": "Discount code",
+      "info": "Apply this code when this option is added to cart.",
+      "visible_if": "{{ block.settings.option_5_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_5_sold_out",
+      "label": "t:sections.quantity_breaks.option_sold_out",
+      "default": false,
+      "visible_if": "{{ block.settings.option_5_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.option_6"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_6_enabled",
+      "label": "t:sections.quantity_breaks.option_6_enabled",
+      "default": false
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_6_label",
+      "label": "t:sections.quantity_breaks.option_label",
+      "default": "Buy 6",
+      "visible_if": "{{ block.settings.option_6_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_6_quantity",
+      "label": "t:sections.quantity_breaks.option_quantity",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 0,
+      "visible_if": "{{ block.settings.option_6_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "option_6_discount_type",
+      "label": "t:sections.quantity_breaks.option_discount_type",
+      "options": [
+        {
+          "value": "percentage",
+          "label": "t:sections.quantity_breaks.percentage"
+        },
+        {
+          "value": "fixed",
+          "label": "t:sections.quantity_breaks.fixed"
+        }
+      ],
+      "default": "percentage",
+      "visible_if": "{{ block.settings.option_6_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "option_6_discount",
+      "label": "t:sections.quantity_breaks.option_discount",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 0,
+      "unit": "%",
+      "visible_if": "{{ block.settings.option_6_enabled == true and block.settings.option_6_discount_type == 'percentage' }}"
+    },
+    {
+      "type": "number",
+      "id": "option_6_discount_amount",
+      "label": "t:sections.quantity_breaks.option_discount_amount",
+      "default": 0,
+      "info": "t:sections.quantity_breaks.option_discount_amount_info",
+      "visible_if": "{{ block.settings.option_6_enabled == true and block.settings.option_6_discount_type == 'fixed' }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "option_6_custom_image",
+      "label": "t:sections.quantity_breaks.option_custom_image",
+      "info": "t:sections.quantity_breaks.option_custom_image_info",
+      "visible_if": "{{ block.settings.option_6_enabled == true and block.settings.show_images == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_6_badge_text",
+      "label": "t:sections.quantity_breaks.option_badge_text",
+      "info": "t:sections.quantity_breaks.option_badge_text_info",
+      "visible_if": "{{ block.settings.option_6_enabled == true }}"
+    },  
+    {
+      "type": "html",
+      "id": "option_6_description",
+      "label": "t:sections.quantity_breaks.option_description",
+      "info": "t:sections.quantity_breaks.option_description_info",
+      "visible_if": "{{ block.settings.option_6_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_6_off_text",
+      "label": "t:sections.quantity_breaks.option_off_text",
+      "info": "t:sections.quantity_breaks.option_off_text_info",
+      "visible_if": "{{ block.settings.option_6_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "option_6_discount_code",
+      "label": "t:sections.free_gifts.discount_code",
+      "info": "t:sections.free_gifts.discount_code_info",
+      "visible_if": "{{ block.settings.option_6_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_6_sold_out",
+      "label": "t:sections.quantity_breaks.option_sold_out",
+      "default": false,
+      "visible_if": "{{ block.settings.option_6_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.free_gifts.free_gifts"
+    },
+    {
+      "type": "checkbox",
+      "id": "free_gifts_enabled",
+      "label": "t:sections.free_gifts.show_free_gifts",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "gift_discount_enabled",
+      "label": "t:sections.free_gifts.gift_discount_enabled",
+      "default": false,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "gift_discount_type",
+      "label": "t:sections.free_gifts.gift_discount_type",
+      "options": [
+        { "value": "percentage", "label": "t:sections.free_gifts.gift_discount_type_percentage" },
+        { "value": "fixed", "label": "t:sections.free_gifts.gift_discount_type_fixed" }
+      ],
+      "default": "percentage",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_discount_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "gift_discount_value",
+      "label": "t:sections.free_gifts.gift_discount_value",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_discount_enabled == true and block.settings.gift_discount_type == 'percentage' }}"
+    },
+    {
+      "type": "number",
+      "id": "gift_discount_amount",
+      "label": "t:sections.free_gifts.gift_discount_amount",
+      "default": 0,
+      "info": "t:sections.free_gifts.gift_discount_amount_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_discount_enabled == true and block.settings.gift_discount_type == 'fixed' }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "gift_discount_code",
+      "label": "t:sections.free_gifts.gift_discount_code",
+      "info": "t:sections.free_gifts.gift_discount_code_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_discount_enabled == true }}"
+    },
+    {
+      "type": "richtext",
+      "id": "free_gifts_heading",
+      "label": "t:sections.free_gifts.free_gifts_heading",
+      "default": "<p>Free Gift Set</p>",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "free_gifts_style",
+      "label": "t:sections.free_gifts.free_gifts_style",
+      "options": [
+        { "value": "card", "label": "t:sections.free_gifts.free_gifts_style_card" },
+        { "value": "normal", "label": "t:sections.free_gifts.free_gifts_style_normal" }
+      ],
+      "default": "card",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "free_gifts_image_fit",
+      "label": "t:sections.free_gifts.free_gifts_image_fit",
+      "options": [
+        { "value": "square", "label": "t:sections.free_gifts.free_gifts_image_fit_square" },
+        { "value": "auto", "label": "t:sections.free_gifts.free_gifts_image_fit_auto" }
+      ],
+      "default": "square",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "free_gifts_per_row_desktop",
+      "label": "t:sections.free_gifts.free_gifts_per_row_desktop",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" },
+        { "value": "5", "label": "5" },
+        { "value": "6", "label": "6" }
+      ],
+      "default": "3",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "free_gifts_per_row_mobile",
+      "label": "t:sections.free_gifts.free_gifts_per_row_mobile",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "2",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "free_gifts_gap",
+      "label": "t:sections.free_gifts.free_gifts_gap",
+      "min": 8,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 28,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "color",
+      "id": "free_gifts_locked_background_color",
+      "label": "t:sections.free_gifts.free_gifts_locked_background_color",
+      "default": "#e8e8e8",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "color",
+      "id": "free_gifts_locked_text_color",
+      "label": "t:sections.free_gifts.free_gifts_locked_text_color",
+      "default": "#666666",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.free_gifts.badge_style",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "free_gifts_badge_display",
+      "label": "t:sections.free_gifts.free_gifts_badge_display",
+      "options": [
+        { "value": "free", "label": "t:sections.free_gifts.free_gifts_badge_display_free" },
+        { "value": "price", "label": "t:sections.free_gifts.free_gifts_badge_display_price" }
+      ],
+      "default": "free",
+      "info": "t:sections.free_gifts.free_gifts_badge_display_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "color",
+      "id": "free_gifts_badge_background_color",
+      "label": "t:sections.free_gifts.free_gifts_badge_background_color",
+      "default": "#f5c6d6",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "color",
+      "id": "free_gifts_badge_text_color",
+      "label": "t:sections.free_gifts.free_gifts_badge_text_color",
+      "default": "#ffffff",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "color",
+      "id": "free_gifts_badge_border_color",
+      "label": "t:sections.free_gifts.free_gifts_badge_border_color",
+      "default": "#e8a4b8",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "free_gifts_background_enabled",
+      "label": "t:sections.free_gifts.free_gifts_background_enabled",
+      "default": false,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "color",
+      "id": "free_gifts_background_color",
+      "label": "t:sections.free_gifts.free_gifts_background_color",
+      "default": "#f5f5f5",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.free_gifts_background_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "free_gifts_border_width",
+      "label": "t:sections.free_gifts.free_gifts_border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 2,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.free_gifts_background_enabled == true }}"
+    },
+    {
+      "type": "color",
+      "id": "free_gifts_border_color",
+      "label": "t:sections.free_gifts.free_gifts_border_color",
+      "default": "#e0e0e0",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.free_gifts_background_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "free_gifts_border_style",
+      "label": "t:sections.free_gifts.free_gifts_border_style",
+      "options": [
+        { "value": "solid", "label": "t:sections.free_gifts.free_gifts_border_style_solid" },
+        { "value": "dashed", "label": "t:sections.free_gifts.free_gifts_border_style_dashed" },
+        { "value": "dotted", "label": "t:sections.free_gifts.free_gifts_border_style_dotted" },
+        { "value": "double", "label": "t:sections.free_gifts.free_gifts_border_style_double" },
+        { "value": "none", "label": "t:sections.free_gifts.free_gifts_border_style_none" }
+      ],
+      "default": "solid",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.free_gifts_background_enabled == true }}"
+    },
+    {
+      "type": "product",
+      "id": "gift_1_product",
+      "label": "t:sections.free_gifts.gift_1"
+    },
+    {
+      "type": "select",
+      "id": "gift_1_unlock_at",
+      "label": "t:sections.free_gifts.gift_1_unlock_at",
+      "options": [
+        { "value": "option_1", "label": "t:sections.quantity_breaks.option_1" },
+        { "value": "option_2", "label": "t:sections.quantity_breaks.option_2" },
+        { "value": "option_3", "label": "t:sections.quantity_breaks.option_3" },
+        { "value": "option_4", "label": "t:sections.quantity_breaks.option_4" },
+        { "value": "option_5", "label": "t:sections.quantity_breaks.option_5" },
+        { "value": "option_6", "label": "t:sections.quantity_breaks.option_6" }
+      ],
+      "default": "option_2",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "product",
+      "id": "gift_2_product",
+      "label": "t:sections.free_gifts.gift_2"
+    },
+    {
+      "type": "select",
+      "id": "gift_2_unlock_at",
+      "label": "t:sections.free_gifts.gift_2_unlock_at",
+      "options": [
+        { "value": "option_1", "label": "t:sections.quantity_breaks.option_1" },
+        { "value": "option_2", "label": "t:sections.quantity_breaks.option_2" },
+        { "value": "option_3", "label": "t:sections.quantity_breaks.option_3" },
+        { "value": "option_4", "label": "t:sections.quantity_breaks.option_4" },
+        { "value": "option_5", "label": "t:sections.quantity_breaks.option_5" },
+        { "value": "option_6", "label": "t:sections.quantity_breaks.option_6" }
+      ],
+      "default": "option_2",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "product",
+      "id": "gift_3_product",
+      "label": "t:sections.free_gifts.gift_3"
+    },
+    {
+      "type": "select",
+      "id": "gift_3_unlock_at",
+      "label": "t:sections.free_gifts.gift_3_unlock_at",
+      "options": [
+        { "value": "option_1", "label": "t:sections.quantity_breaks.option_1" },
+        { "value": "option_2", "label": "t:sections.quantity_breaks.option_2" },
+        { "value": "option_3", "label": "t:sections.quantity_breaks.option_3" },
+        { "value": "option_4", "label": "t:sections.quantity_breaks.option_4" },
+        { "value": "option_5", "label": "t:sections.quantity_breaks.option_5" },
+        { "value": "option_6", "label": "t:sections.quantity_breaks.option_6" }
+      ],
+      "default": "option_3",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.free_gifts.custom_gift",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "gift_custom_enabled",
+      "label": "t:sections.free_gifts.gift_custom_enabled",
+      "default": false,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "gift_custom_name",
+      "label": "t:sections.free_gifts.product_name",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "gift_custom_image",
+      "label": "t:sections.free_gifts.product_image",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "gift_custom_show_price",
+      "label": "t:sections.free_gifts.show_price",
+      "default": true,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_enabled == true }}"
+    },
+    {
+      "type": "number",
+      "id": "gift_custom_price",
+      "label": "t:sections.free_gifts.price_cents",
+      "default": 0,
+      "info": "t:sections.free_gifts.price_cents_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_enabled == true and block.settings.gift_custom_show_price == true }}"
+    },
+    {
+      "type": "number",
+      "id": "gift_custom_compare_at_price",
+      "label": "t:sections.free_gifts.cross_out_price_cents",
+      "default": 0,
+      "info": "t:sections.free_gifts.cross_out_price_cents_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_enabled == true and block.settings.gift_custom_show_price == true }}"
+    },
+    {
+      "type": "select",
+      "id": "gift_custom_unlock_at",
+      "label": "t:sections.free_gifts.custom_gift_unlock_at",
+      "options": [
+        { "value": "option_1", "label": "t:sections.quantity_breaks.option_1" },
+        { "value": "option_2", "label": "t:sections.quantity_breaks.option_2" },
+        { "value": "option_3", "label": "t:sections.quantity_breaks.option_3" },
+        { "value": "option_4", "label": "t:sections.quantity_breaks.option_4" },
+        { "value": "option_5", "label": "t:sections.quantity_breaks.option_5" },
+        { "value": "option_6", "label": "t:sections.quantity_breaks.option_6" }
+      ],
+      "default": "option_2",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "gift_custom_position",
+      "label": "t:sections.free_gifts.show_at_position",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" },
+        { "value": "5", "label": "5" },
+        { "value": "6", "label": "6" }
+      ],
+      "default": "4",
+      "info": "t:sections.free_gifts.show_at_position_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.free_gifts.custom_gift_2",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "gift_custom_2_enabled",
+      "label": "t:sections.free_gifts.gift_custom_2_enabled",
+      "default": false,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "gift_custom_2_name",
+      "label": "t:sections.free_gifts.product_name",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_2_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "gift_custom_2_image",
+      "label": "t:sections.free_gifts.product_image",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_2_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "gift_custom_2_show_price",
+      "label": "t:sections.free_gifts.show_price",
+      "default": true,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_2_enabled == true }}"
+    },
+    {
+      "type": "number",
+      "id": "gift_custom_2_price",
+      "label": "t:sections.free_gifts.price_cents",
+      "default": 0,
+      "info": "t:sections.free_gifts.price_cents_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_2_enabled == true and block.settings.gift_custom_2_show_price == true }}"
+    },
+    {
+      "type": "number",
+      "id": "gift_custom_2_compare_at_price",
+      "label": "t:sections.free_gifts.cross_out_price_cents",
+      "default": 0,
+      "info": "t:sections.free_gifts.cross_out_price_cents_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_2_enabled == true and block.settings.gift_custom_2_show_price == true }}"
+    },
+    {
+      "type": "select",
+      "id": "gift_custom_2_unlock_at",
+      "label": "t:sections.free_gifts.custom_gift_2_unlock_at",
+      "options": [
+        { "value": "option_1", "label": "t:sections.quantity_breaks.option_1" },
+        { "value": "option_2", "label": "t:sections.quantity_breaks.option_2" },
+        { "value": "option_3", "label": "t:sections.quantity_breaks.option_3" },
+        { "value": "option_4", "label": "t:sections.quantity_breaks.option_4" },
+        { "value": "option_5", "label": "t:sections.quantity_breaks.option_5" },
+        { "value": "option_6", "label": "t:sections.quantity_breaks.option_6" }
+      ],
+      "default": "option_2",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_2_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "gift_custom_2_position",
+      "label": "t:sections.free_gifts.show_at_position",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" },
+        { "value": "5", "label": "5" },
+        { "value": "6", "label": "6" }
+      ],
+      "default": "5",
+      "info": "t:sections.free_gifts.show_at_position_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_2_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.free_gifts.custom_gift_3",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "gift_custom_3_enabled",
+      "label": "t:sections.free_gifts.gift_custom_3_enabled",
+      "default": false,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "gift_custom_3_name",
+      "label": "t:sections.free_gifts.product_name",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_3_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "gift_custom_3_image",
+      "label": "t:sections.free_gifts.product_image",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_3_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "gift_custom_3_show_price",
+      "label": "t:sections.free_gifts.show_price",
+      "default": true,
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_3_enabled == true }}"
+    },
+    {
+      "type": "number",
+      "id": "gift_custom_3_price",
+      "label": "t:sections.free_gifts.price_cents",
+      "default": 0,
+      "info": "t:sections.free_gifts.price_cents_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_3_enabled == true and block.settings.gift_custom_3_show_price == true }}"
+    },
+    {
+      "type": "number",
+      "id": "gift_custom_3_compare_at_price",
+      "label": "t:sections.free_gifts.cross_out_price_cents",
+      "default": 0,
+      "info": "t:sections.free_gifts.cross_out_price_cents_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_3_enabled == true and block.settings.gift_custom_3_show_price == true }}"
+    },
+    {
+      "type": "select",
+      "id": "gift_custom_3_unlock_at",
+      "label": "t:sections.free_gifts.custom_gift_3_unlock_at",
+      "options": [
+        { "value": "option_1", "label": "t:sections.quantity_breaks.option_1" },
+        { "value": "option_2", "label": "t:sections.quantity_breaks.option_2" },
+        { "value": "option_3", "label": "t:sections.quantity_breaks.option_3" },
+        { "value": "option_4", "label": "t:sections.quantity_breaks.option_4" },
+        { "value": "option_5", "label": "t:sections.quantity_breaks.option_5" },
+        { "value": "option_6", "label": "t:sections.quantity_breaks.option_6" }
+      ],
+      "default": "option_3",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_3_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "gift_custom_3_position",
+      "label": "t:sections.free_gifts.show_at_position",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" },
+        { "value": "5", "label": "5" },
+        { "value": "6", "label": "6" }
+      ],
+      "default": "6",
+      "info": "t:sections.free_gifts.show_at_position_info",
+      "visible_if": "{{ block.settings.free_gifts_enabled == true and block.settings.gift_custom_3_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.card_settings"
+    },
+    {
+      "type": "select",
+      "id": "heading_font_family",
+      "label": "t:sections.quantity_breaks.heading_font_family",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "t:options.body"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "t:options.heading"
+        }
+      ],
+      "default": "var(--font-heading--family)"
+    },
+    {
+      "type": "select",
+      "id": "title_font_family",
+      "label": "t:sections.quantity_breaks.title_font_family",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "t:options.body"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "t:options.heading"
+        }
+      ],
+      "default": "var(--font-body--family)"
+    },
+    {
+      "type": "select",
+      "id": "price_font_family",
+      "label": "t:sections.quantity_breaks.price_font_family",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "t:options.body"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "t:options.heading"
+        }
+      ],
+      "default": "var(--font-body--family)"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "t:sections.quantity_breaks.card_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "title_text_size",
+      "label": "t:sections.quantity_breaks.title_text_size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "title_text_size_mobile",
+      "label": "t:sections.quantity_breaks.title_text_size_mobile",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "price_text_size",
+      "label": "t:sections.quantity_breaks.price_text_size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "price_text_size_mobile",
+      "label": "t:sections.quantity_breaks.price_text_size_mobile",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "compare_price_text_size",
+      "label": "t:sections.quantity_breaks.compare_price_text_size",
+      "min": 8,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "badge_text_size",
+      "label": "t:sections.quantity_breaks.badge_text_size",
+      "min": 8,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "badge_text_size_mobile",
+      "label": "t:sections.quantity_breaks.badge_text_size_mobile",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "badge_radius",
+      "label": "t:sections.quantity_breaks.badge_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "card_border_width_selected",
+      "label": "t:sections.quantity_breaks.card_border_width_selected",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "card_border_width_unselected",
+      "label": "t:sections.quantity_breaks.card_border_width_unselected",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "description_text_size",
+      "label": "t:sections.quantity_breaks.description_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "description_text_size_mobile",
+      "label": "t:sections.quantity_breaks.description_text_size_mobile",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "discount_badge_text_size",
+      "label": "t:sections.quantity_breaks.discount_badge_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "discount_badge_radius",
+      "label": "t:sections.quantity_breaks.discount_badge_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.appearance"
+    },
+    {
+      "type": "checkbox",
+      "id": "inherit_color_scheme",
+      "label": "t:settings.inherit_color_scheme",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1",
+      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.colors"
+    },
+    {
+      "type": "select",
+      "id": "recommended_badge_style",
+      "label": "t:sections.quantity_breaks.recommended_badge_style",
+      "options": [
+        {
+          "value": "rounded",
+          "label": "t:sections.quantity_breaks.recommended_badge_style_rounded"
+        },
+        {
+          "value": "scalloped",
+          "label": "t:sections.quantity_breaks.recommended_badge_style_scalloped"
+        },
+        {
+          "value": "ribbon",
+          "label": "t:sections.quantity_breaks.recommended_badge_style_ribbon"
+        }
+      ],
+      "default": "ribbon"
+    },
+    {
+      "type": "range",
+      "id": "scalloped_badge_size",
+      "label": "t:sections.quantity_breaks.scalloped_badge_size",
+      "min": 40,
+      "max": 70,
+      "step": 1,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "recommended_badge_bg",
+      "label": "t:sections.quantity_breaks.recommended_badge_bg",
+      "default": "#8B4513"
+    },
+    {
+      "type": "color",
+      "id": "recommended_badge_text",
+      "label": "t:sections.quantity_breaks.recommended_badge_text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "discount_badge_bg",
+      "label": "t:sections.quantity_breaks.discount_badge_bg",
+      "default": "#F0F4E9"
+    },
+    {
+      "type": "color",
+      "id": "discount_badge_text",
+      "label": "t:sections.quantity_breaks.discount_badge_text",
+      "default": "#556B2F"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.quantity_breaks.sold_out_colors"
+    },
+    {
+      "type": "color",
+      "id": "sold_out_badge_background",
+      "label": "t:sections.quantity_breaks.sold_out_badge_background",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "sold_out_badge_text",
+      "label": "t:sections.quantity_breaks.sold_out_badge_text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "sold_out_card_background",
+      "label": "t:sections.quantity_breaks.sold_out_card_background",
+      "info": "t:sections.quantity_breaks.sold_out_card_background_info",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "t:sections.quantity_breaks.price_color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "compare_price_color",
+      "label": "t:sections.quantity_breaks.compare_price_color",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "active_price_color",
+      "label": "t:sections.quantity_breaks.active_price_color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "active_compare_price_color",
+      "label": "t:sections.quantity_breaks.active_compare_price_color",
+      "default": "#999999"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:sections.group.ancher_link"
+    },
+    {
+      "type": "text",
+      "id": "ancher_id",
+      "label": "t:sections.group.ancher_id",
+      "info": "t:sections.group.ancher_id_info"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quantity Breaks",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
+

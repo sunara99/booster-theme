@@ -1,0 +1,101 @@
+{% comment %}
+  Renders a custom gift card for quantity breaks free gifts (display-only, no add to cart).
+  @param {string} name - Custom product name
+  @param {image} image - Custom product image
+  @param {number} price - Price in cents (e.g. 500 = $5.00)
+  @param {number} compare_at_price - Compare/cross-out price in cents
+  @param {string} unlock_at - Which option unlocks this gift (option_1, option_2, etc.)
+  @param {number} gift_index - Index for data attributes
+  @param {number} order - CSS order for grid positioning (1, 2, 3, or 4)
+  @param {boolean} show_price - Whether to show the price badge (default: true)
+  @param {string} badge_display - 'free' (show FREE only when price is 0) or 'price' (always show price)
+{% endcomment %}
+
+{%- liquid
+  assign unlock_index = 1
+  case unlock_at
+    when 'option_1'
+      assign unlock_index = 1
+    when 'option_2'
+      assign unlock_index = 2
+    when 'option_3'
+      assign unlock_index = 3
+    when 'option_4'
+      assign unlock_index = 4
+    when 'option_5'
+      assign unlock_index = 5
+    when 'option_6'
+      assign unlock_index = 6
+    else
+      assign unlock_index = 2
+  endcase
+
+  assign price_cents = price | default: 0
+  assign compare_at_cents = compare_at_price | default: 0
+  assign show_compare = false
+  if compare_at_cents > 0 and compare_at_cents > price_cents
+    assign show_compare = true
+  endif
+  assign is_100_percent_free = false
+  if price_cents == 0
+    assign is_100_percent_free = true
+  endif
+  assign badge_display = badge_display | default: 'free'
+  assign show_free_label = false
+  if badge_display == 'free' and is_100_percent_free
+    assign show_free_label = true
+  endif
+-%}
+
+<div
+  class="quantity-breaks-gift-card quantity-breaks-gift-card--locked quantity-breaks-gift-card--custom"
+  {% if order != blank %}style="order: {{ order }}"{% endif %}
+  data-gift-card
+  data-gift-index="{{ gift_index }}"
+  data-unlock-at-option="{{ unlock_at }}"
+  data-unlock-index="{{ unlock_index }}"
+  data-custom-gift
+>
+  {% if show_price != false %}
+  <span class="quantity-breaks-gift-card__price-badge">
+    {% if show_free_label %}
+      <span class="quantity-breaks-gift-card__free-label">FREE</span>
+      <span class="quantity-breaks-gift-card__original-price">{% render 'price-split', context: 'quantity_breaks', cents: compare_at_cents | default: price_cents %}</span>
+    {% else %}
+      {% if show_compare %}
+        <span class="quantity-breaks-gift-card__original-price">{% render 'price-split', context: 'quantity_breaks', cents: compare_at_cents %}</span>
+        <span class="quantity-breaks-gift-card__discounted-price">{% render 'price-split', context: 'quantity_breaks', cents: price_cents %}</span>
+      {% else %}
+        {% render 'price-split', context: 'quantity_breaks', cents: price_cents %}
+      {% endif %}
+    {% endif %}
+  </span>
+  {% endif %}
+  <div class="quantity-breaks-gift-card__image-wrapper">
+    {% if image != blank %}
+      <img
+        src="{{ image | image_url: width: 200 }}"
+        alt="{{ image.alt | default: name | escape }}"
+        loading="lazy"
+        width="200"
+        height="200"
+        class="quantity-breaks-gift-card__image"
+      >
+    {% else %}
+      <div class="quantity-breaks-gift-card__placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+        </svg>
+      </div>
+    {% endif %}
+    <div class="quantity-breaks-gift-card__locked-overlay" data-locked-overlay>
+      <svg class="quantity-breaks-gift-card__lock-icon" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+      </svg>
+      <span class="quantity-breaks-gift-card__locked-text">Locked</span>
+    </div>
+  </div>
+  <div class="quantity-breaks-gift-card__content">
+    <h5 class="quantity-breaks-gift-card__title">{{ name | default: 'Custom Gift' }}</h5>
+  </div>
+</div>

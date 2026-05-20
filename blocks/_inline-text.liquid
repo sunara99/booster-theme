@@ -1,0 +1,287 @@
+
+
+{%- doc -%}
+  Renders an inline text block.
+
+  @param {string} suffix
+{%- enddoc -%}
+
+{% assign block_settings = block.settings %}
+{% assign plain_text = block_settings.text | strip_newlines | strip_html | strip %}
+
+{% # We need to make sure the wrapper is rendered even if the text element is empty in the theme editor to allow live text editing %}
+{%- if plain_text != '' or request.design_mode -%}
+  <span
+    class="
+      text-block
+      custom-typography
+      {% if block_settings.weight != blank %}custom-font-weight{% endif %}
+      {% if block_settings.font_size != blank %}custom-font-size{% endif %}
+      {% if block_settings.color != '' or block_settings.color_mode == 'custom' %}custom-color{% endif %}
+      {% if block_settings.color_mode == 'custom' and block_settings.custom_color_style == 'gradient' %}custom-color-gradient{% endif %}
+    "
+    style="{% render 'typography-style', preset: 'custom', settings: block_settings, type: 'heading' %}"
+    {{ block.shopify_attributes }}
+  >
+    <span>{{ block.settings.text }}</span>{{ suffix }}
+  </span>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.text",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "t:settings.text"
+    },
+    {
+      "type": "header",
+      "content": "t:content.typography"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "t:options.body"
+        },
+        {
+          "value": "var(--font-subheading--family)",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "var(--font-accent--family)",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "var(--font-body--family)"
+    },
+    {
+      "type": "select",
+      "id": "weight",
+      "label": "t:settings.weight",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "100",
+          "label": "t:options.thin"
+        },
+        {
+          "value": "300",
+          "label": "t:options.light"
+        },
+        {
+          "value": "400",
+          "label": "t:options.regular"
+        },
+        {
+          "value": "500",
+          "label": "t:options.medium"
+        },
+        {
+          "value": "600",
+          "label": "t:options.semibold"
+        },
+        {
+          "value": "700",
+          "label": "t:options.bold"
+        },
+        {
+          "value": "900",
+          "label": "t:options.black"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "t:settings.line_height",
+      "options": [
+        {
+          "value": "tight",
+          "label": "t:options.tight"
+        },
+        {
+          "value": "normal",
+          "label": "t:options.normal"
+        },
+        {
+          "value": "loose",
+          "label": "t:options.loose"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "select",
+      "id": "letter_spacing",
+      "label": "t:settings.letter_spacing",
+      "options": [
+        {
+          "value": "tight",
+          "label": "t:options.tight"
+        },
+        {
+          "value": "normal",
+          "label": "t:options.normal"
+        },
+        {
+          "value": "loose",
+          "label": "t:options.loose"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "t:settings.case",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select",
+      "id": "color_mode",
+      "label": "Color style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "select",
+      "id": "color",
+      "label": "t:settings.color",
+      "options": [
+        {
+          "value": "var(--color-foreground)",
+          "label": "t:options.text"
+        },
+        {
+          "value": "var(--color-foreground-heading)",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "var(--color-primary)",
+          "label": "t:options.link"
+        }
+      ],
+      "default": "var(--color-foreground)",
+      "visible_if": "{{ block.settings.color_mode == 'default' }}"
+    },
+    {
+      "type": "select",
+      "id": "custom_color_style",
+      "label": "Custom color type",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Text color"
+        },
+        {
+          "value": "gradient",
+          "label": "Text gradient"
+        }
+      ],
+      "default": "solid",
+      "visible_if": "{{ block.settings.color_mode == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_text_color",
+      "label": "t:sections.lumin_general.text_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.color_mode == 'custom' and block.settings.custom_color_style == 'solid' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_gradient_color_start",
+      "label": "t:sections.lumin_general.gradient_start_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.color_mode == 'custom' and block.settings.custom_color_style == 'gradient' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_gradient_color_end",
+      "label": "t:sections.lumin_general.gradient_end_color",
+      "default": "#666666",
+      "visible_if": "{{ block.settings.color_mode == 'custom' and block.settings.custom_color_style == 'gradient' }}"
+    },
+    {
+      "type": "select",
+      "id": "custom_gradient_direction",
+      "label": "t:settings.gradient_direction",
+      "options": [
+        {
+          "value": "to right",
+          "label": "t:options.right"
+        },
+        {
+          "value": "to left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "to bottom",
+          "label": "t:options.down"
+        },
+        {
+          "value": "to top",
+          "label": "t:options.up"
+        }
+      ],
+      "default": "to right",
+      "visible_if": "{{ block.settings.color_mode == 'custom' and block.settings.custom_color_style == 'gradient' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_color_bold",
+      "label": "t:sections.lumin_general.bold_text_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.color_mode == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_color_italic",
+      "label": "t:sections.lumin_general.italic_text_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.color_mode == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_color_underline",
+      "label": "t:sections.lumin_general.underline_text_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.color_mode == 'custom' }}"
+    }
+  ]
+}
+{% endschema %}

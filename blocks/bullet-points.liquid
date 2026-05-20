@@ -1,0 +1,659 @@
+{% liquid
+  assign block_settings = block.settings
+%}
+
+<div 
+  class="bullet-points bullet-points--{{ block.id }} spacing-style"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+    {% if block_settings.block_background != 'transparent' %}
+      background-color: {{ block_settings.block_background }};
+      border-radius: {{ block_settings.block_border_radius }}px;
+    {% endif %}
+    {% if block_settings.border != 'none' %}
+      border-width: {{ block_settings.border_width }}px;
+      border-style: {{ block_settings.border }};
+      {% if block_settings.border_color_mode == 'default' %}
+        border-color: rgb(var(--color-border-rgb) / {{ block_settings.border_opacity | divided_by: 100.0 }});
+      {% else %}
+        border-color: {{ block_settings.border_color }};
+      {% endif %}
+      {% if block_settings.block_background == 'transparent' %}
+        border-radius: {{ block_settings.block_border_radius }}px;
+      {% endif %}
+    {% endif %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {% if block_settings.title != blank %}
+    <p 
+      class="bullet-points__title"
+      style="
+        font-size: {{ block_settings.title_size }}px;
+        color: {{ block_settings.title_color }};
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+      "
+    >
+      {{ block_settings.title }}
+    </p>
+  {% endif %}
+  
+  <ul 
+    class="bullet-points__list"
+    style="
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    "
+  >
+    {% for i in (1..5) %}
+      {% assign point_key = 'point_' | append: i %}
+      {% assign point_text = block_settings[point_key] %}
+      {% assign icon_key = 'icon_' | append: i %}
+      {% assign point_icon = block_settings[icon_key] %}
+      {% assign icon_color_key = 'icon_' | append: i | append: '_color' %}
+      {% assign point_icon_color = block_settings[icon_color_key] %}
+      {% assign icon_background_key = 'icon_' | append: i | append: '_background' %}
+      {% assign point_icon_background = block_settings[icon_background_key] %}
+      {% assign icon_image_key = 'icon_' | append: i | append: '_image' %}
+      {% assign point_icon_image = block_settings[icon_image_key] %}
+      {% assign image_size = block_settings.icon_size | times: 2 %}
+      
+      {% if point_text != blank %}
+        <li 
+          class="bullet-points__item"
+          style="
+            display: flex;
+            {% if block_settings.icon_alignment == 'top' %}
+              align-items: flex-start;
+            {% else %}
+              align-items: center;
+            {% endif %}
+            gap: var(--gap-xs);
+            margin-bottom: {{ block_settings.spacing }}px;
+            font-size: {{ block_settings.text_size }}px;
+            color: {{ block_settings.text_color }};
+            line-height: 1.5;
+          "
+        >
+          <span 
+            class="bullet-points__icon"
+            style="
+              flex-shrink: 0;
+              width: {{ block_settings.icon_size }}px;
+              height: {{ block_settings.icon_size }}px;
+              {% if point_icon_image == blank %}
+                background-color: {{ point_icon_background | default: block_settings.icon_background }};
+                color: {{ point_icon_color | default: block_settings.icon_color }};
+                {% if block_settings.icon_style == 'circle' %}
+                  border-radius: 50%;
+                {% elsif block_settings.icon_style == 'square' %}
+                  border-radius: 4px;
+                {% else %}
+                  border-radius: 0;
+                  background-color: transparent;
+                {% endif %}
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: {{ block_settings.icon_size | divided_by: 2 }}px;
+                font-weight: bold;
+              {% else %}
+                background-color: transparent;
+                border-radius: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              {% endif %}
+              margin-top: 0.125rem;
+            "
+          >
+            {% if point_icon_image != blank %}
+              <img 
+                src="{{ point_icon_image | image_url: width: image_size }}"
+                alt="Icon {{ i }}"
+                width="{{ block_settings.icon_size }}"
+                height="{{ block_settings.icon_size }}"
+                style="
+                  width: {{ block_settings.icon_size }}px;
+                  height: {{ block_settings.icon_size }}px;
+                  object-fit: contain;
+                  {% if block_settings.icon_style == 'circle' %}
+                    border-radius: 50%;
+                  {% elsif block_settings.icon_style == 'square' %}
+                    border-radius: 4px;
+                  {% endif %}
+                "
+              >
+            {% else %}
+              {% if point_icon == 'check' %}
+                ✓
+              {% elsif point_icon == 'star' %}
+                ★
+              {% elsif point_icon == 'arrow' %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="{{ block_settings.icon_size }}" height="{{ block_settings.icon_size }}" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                  <path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {% elsif point_icon == 'bullet' %}
+                •
+              {% elsif point_icon == 'cross' %}
+                ✕
+              {% else %}
+                {{ i }}
+              {% endif %}
+            {% endif %}
+          </span>
+          
+          <span class="bullet-points__text">
+            {{ point_text }}
+          </span>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>
+
+{% stylesheet %}
+  .bullet-points {
+    position: relative;
+  }
+
+  .bullet-points__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .bullet-points__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .bullet-points__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .bullet-points__icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .bullet-points__icon svg {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .bullet-points__text {
+    flex: 1;
+  }
+  
+  /* Mobile responsive */
+  @media screen and (max-width: 749px) {
+    .bullet-points__item {
+      gap: 0.5rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Bullet Points",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Title",
+      "default": "Key Benefits"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title Size",
+      "min": 14,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#333333"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "point_1",
+      "label": "Point 1",
+      "default": "100% Natural Ingredients"
+    },
+    {
+      "type": "select",
+      "id": "icon_1",
+      "label": "Icon 1",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "star", "label": "Star" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "bullet", "label": "Bullet" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "number", "label": "Number" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "icon_1_color",
+      "label": "Icon 1 Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "icon_1_background",
+      "label": "Icon 1 Background Color",
+      "default": "#10b981"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_1_image",
+      "label": "Icon 1 Custom Image",
+      "info": "Upload a custom image for this icon. If no image is uploaded, the selected icon will be used."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "point_2",
+      "label": "Point 2",
+      "default": "Dermatologist Tested"
+    },
+    {
+      "type": "select",
+      "id": "icon_2",
+      "label": "Icon 2",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "star", "label": "Star" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "bullet", "label": "Bullet" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "number", "label": "Number" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "icon_2_color",
+      "label": "Icon 2 Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "icon_2_background",
+      "label": "Icon 2 Background Color",
+      "default": "#10b981"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_2_image",
+      "label": "Icon 2 Custom Image",
+      "info": "Upload a custom image for this icon. If no image is uploaded, the selected icon will be used."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "point_3",
+      "label": "Point 3",
+      "default": "Cruelty Free"
+    },
+    {
+      "type": "select",
+      "id": "icon_3",
+      "label": "Icon 3",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "star", "label": "Star" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "bullet", "label": "Bullet" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "number", "label": "Number" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "icon_3_color",
+      "label": "Icon 3 Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "icon_3_background",
+      "label": "Icon 3 Background Color",
+      "default": "#10b981"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_3_image",
+      "label": "Icon 3 Custom Image",
+      "info": "Upload a custom image for this icon. If no image is uploaded, the selected icon will be used."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "point_4",
+      "label": "Point 4",
+      "default": "Made in USA"
+    },
+    {
+      "type": "select",
+      "id": "icon_4",
+      "label": "Icon 4",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "star", "label": "Star" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "bullet", "label": "Bullet" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "number", "label": "Number" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "icon_4_color",
+      "label": "Icon 4 Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "icon_4_background",
+      "label": "Icon 4 Background Color",
+      "default": "#10b981"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_4_image",
+      "label": "Icon 4 Custom Image",
+      "info": "Upload a custom image for this icon. If no image is uploaded, the selected icon will be used."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "point_5",
+      "label": "Point 5",
+      "default": "30 Day Money Back Guarantee"
+    },
+    {
+      "type": "select",
+      "id": "icon_5",
+      "label": "Icon 5",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "star", "label": "Star" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "bullet", "label": "Bullet" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "number", "label": "Number" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "icon_5_color",
+      "label": "Icon 5 Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "icon_5_background",
+      "label": "Icon 5 Background Color",
+      "default": "#10b981"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_5_image",
+      "label": "Icon 5 Custom Image",
+      "info": "Upload a custom image for this icon. If no image is uploaded, the selected icon will be used."
+    },
+    {
+      "type": "header",
+      "content": "Styling"
+    },
+    {
+      "type": "color",
+      "id": "block_background",
+      "label": "Block Background Color",
+      "default": "transparent"
+    },
+    {
+      "type": "range",
+      "id": "block_border_radius",
+      "label": "Block Border Radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "info": "Only applies when background color is set"
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "t:settings.borders",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        },
+        {
+          "value": "dashed",
+          "label": "t:options.dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "t:options.dotted"
+        },
+        {
+          "value": "double",
+          "label": "t:options.double"
+        },
+        {
+          "value": "groove",
+          "label": "t:options.groove"
+        },
+        {
+          "value": "ridge",
+          "label": "t:options.ridge"
+        },
+        {
+          "value": "inset",
+          "label": "t:options.inset"
+        },
+        {
+          "value": "outset",
+          "label": "t:options.outset"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "px",
+      "label": "t:settings.border_width",
+      "default": 1,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.border_opacity",
+      "default": 100,
+      "visible_if": "{{ block.settings.border != 'none' and block.settings.border_color_mode == 'default' }}"
+    },
+    {
+      "type": "select",
+      "id": "border_color_mode",
+      "label": "t:settings.border_color",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "t:settings.border_color_custom",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.border != 'none' and block.settings.border_color_mode == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "icon_style",
+      "label": "Icon Style",
+      "default": "circle",
+      "options": [
+        { "value": "circle", "label": "Circle" },
+        { "value": "square", "label": "Square" },
+        { "value": "none", "label": "None" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "icon_alignment",
+      "label": "Icon Alignment",
+      "default": "top",
+      "options": [
+        { "value": "top", "label": "Top" },
+        { "value": "center", "label": "Center" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon Size",
+      "min": 16,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text Size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "spacing",
+      "label": "Item Spacing",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bullet Points",
+      "category": "t:categories.basic",
+      "settings": {
+        "title": "Key Benefits",
+        "point_1": "100% Natural Ingredients",
+        "point_2": "Dermatologist Tested",
+        "point_3": "Cruelty Free",
+        "point_4": "Made in USA",
+        "point_5": "30 Day Money Back Guarantee",
+        "icon_1": "check",
+        "icon_2": "check",
+        "icon_3": "check",
+        "icon_4": "check",
+        "icon_5": "check"
+      }
+    }
+  ]
+}
+{% endschema %}

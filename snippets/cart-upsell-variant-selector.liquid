@@ -1,0 +1,135 @@
+{%- doc -%}
+  Renders a simplified variant selector for cart upsell products.
+
+  @param {object} product - The product object
+  @param {string} product_id_suffix - Unique suffix for product ID to avoid conflicts
+{%- enddoc -%}
+
+{%- liquid
+  assign has_variants = false
+  if product.variants.size > 1
+    assign has_variants = true
+  endif
+
+  # Build variant map for JavaScript
+  assign variant_map = ''
+  for variant in product.variants
+    assign variant_data = variant.id | append: ':' | append: variant.price | append: ':' | append: variant.available | append: ':' | append: variant.compare_at_price
+    if variant_map == blank
+      assign variant_map = variant_data
+    else
+      assign variant_map = variant_map | append: ',' | append: variant_data
+    endif
+  endfor
+-%}
+
+{%- if has_variants -%}
+  <div class="cart-upsell-variant-selector" data-product-id="{{ product.id }}" data-product-id-suffix="{{ product_id_suffix }}">
+    {%- for option in product.options_with_values -%}
+      {%- if option.values.size > 1 -%}
+        <div class="cart-upsell-variant-selector__option">
+          <label class="cart-upsell-variant-selector__label" for="cart-upsell-option-{{ product.id }}-{{ product_id_suffix }}-{{ option.position }}">
+            {{ option.name }}:
+          </label>
+          <select
+            class="cart-upsell-variant-selector__select"
+            id="cart-upsell-option-{{ product.id }}-{{ product_id_suffix }}-{{ option.position }}"
+            data-option-position="{{ option.position }}"
+            data-option-name="{{ option.name | escape }}"
+          >
+            {%- for value in option.values -%}
+              {%- assign variant = product.variants | where: 'option1', value | first -%}
+              {%- if option.position == 2 -%}
+                {%- assign variant = product.variants | where: 'option1', product.selected_or_first_available_variant.option1 | where: 'option2', value | first -%}
+              {%- elsif option.position == 3 -%}
+                {%- assign variant = product.variants | where: 'option1', product.selected_or_first_available_variant.option1 | where: 'option2', product.selected_or_first_available_variant.option2 | where: 'option3', value | first -%}
+              {%- endif -%}
+              <option
+                value="{{ value | escape }}"
+                {% if variant %}
+                  data-variant-id="{{ variant.id }}"
+                  data-variant-price="{{ variant.price }}"
+                  data-variant-compare-price="{{ variant.compare_at_price }}"
+                  {% if variant.available == false %}
+                    disabled
+                  {% endif %}
+                {% endif %}
+                {% if value == option.selected_value %}
+                  selected
+                {% endif %}
+              >
+                {{ value | escape }}{% if variant and variant.available == false %} - {{ 'content.unavailable' | t | default: 'Unavailable' }}{% endif %}
+              </option>
+            {%- endfor -%}
+          </select>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+    <script type="application/json" class="cart-upsell-variant-data">
+      {
+        "variants": [
+          {%- for variant in product.variants -%}
+            {
+              "id": {{ variant.id }},
+              "price": {{ variant.price }},
+              "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+              "available": {{ variant.available }},
+              "option1": {{ variant.option1 | json }},
+              "option2": {{ variant.option2 | default: '' | json }},
+              "option3": {{ variant.option3 | default: '' | json }}
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }
+    </script>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .cart-upsell-variant-selector {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--gap-xs);
+    margin-bottom: var(--margin-2xs);
+    align-items: flex-end;
+  }
+
+  .cart-upsell-variant-selector__option {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-3xs);
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .cart-upsell-variant-selector__label {
+    font-size: var(--cart-font-size--xs);
+    color: var(--color-foreground-subdued);
+    font-weight: var(--font-weight-medium, 500);
+    white-space: nowrap;
+  }
+
+  .cart-upsell-variant-selector__select {
+    font-size: var(--cart-font-size--sm);
+    padding: var(--padding-2xs) var(--padding-sm);
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--style-border-radius-inputs);
+    background-color: var(--color-input-background);
+    color: var(--color-input-text);
+    width: 100%;
+    min-height: 36px;
+    min-width: 100px;
+    cursor: pointer;
+  }
+
+  .cart-upsell-variant-selector__select:focus {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  .cart-upsell-variant-selector__select option:disabled {
+    color: var(--color-foreground-subdued);
+  }
+{% endstylesheet %}
+

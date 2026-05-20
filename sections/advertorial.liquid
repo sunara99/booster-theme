@@ -1,0 +1,428 @@
+{% liquid
+  assign show_sidebar = section.settings.show_sidebar
+  assign sidebar_block = section.blocks | where: 'id', 'sidebar' | first
+  assign advert_multi_block = false
+  if section.blocks.size >= 2
+    assign advert_multi_block = true
+  endif
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="section section--{{ section.settings.section_width }} lumin-advert-section color-{{ section.settings.color_scheme }}{% if show_sidebar and advert_multi_block %} lumin-advert-section--two-column-desktop{% endif %}"
+  data-testid="lumin-advert"
+  style="
+    --lumin-advert-max-width: {{ section.settings.max_width }}px;
+    --lumin-advert-sidebar-width: {{ section.settings.sidebar_width }}px;
+    --lumin-advert-grid-gap: {{ section.settings.advert_column_gap | default: 40 }}px;
+  "
+  {% if request.visual_preview_mode %}
+    data-shopify-visual-preview
+  {% endif %}
+>
+  <div
+    class="
+      spacing-style
+      layout-panel-flex
+      layout-panel-flex--column
+      section-content-wrapper
+    "
+    style="
+      --flex-direction: column; --flex-wrap: nowrap; --flex-wrap-mobile: wrap;
+      {% render 'gap-style', value: 12 %}
+      --horizontal-alignment: flex-start; --vertical-alignment: flex-start; --vertical-alignment-mobile: flex-start;
+      {% render 'spacing-style', settings: section.settings %}
+    "
+  >
+    <div class="lumin-advert-wrapper">
+      <div
+        class="lumin-advert-container{% if show_sidebar %} lumin-advert-container--sidebar-on{% endif %}{% if show_sidebar and advert_multi_block %} lumin-advert-container--with-sidebar-layout{% endif %}"
+      >
+        {% content_for 'blocks' %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if sidebar_block and show_sidebar == false %}
+  {% unless request.design_mode %}
+    <style>
+      .lumin-advert-section #shopify-block-{{ sidebar_block.id }} {
+        display: none !important;
+      }
+    </style>
+  {% endunless %}
+{% endif %}
+
+{% stylesheet %}
+  .lumin-advert-section {
+    --lumin-advert-max-width: 1000px;
+    --lumin-advert-sidebar-width: 300px;
+    --lumin-advert-grid-gap: 40px;
+  }
+
+  .lumin-advert-wrapper {
+    max-width: var(--lumin-advert-max-width);
+    margin: 0 auto;
+    padding: 0 var(--page-margin);
+    display: block !important;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: clip;
+  }
+
+  /* Desktop two-column + sticky sidebar: clip on wrapper breaks sticky positioning */
+  @media screen and (min-width: 750px) {
+    .lumin-advert-section--two-column-desktop .lumin-advert-wrapper {
+      overflow-x: visible;
+    }
+  }
+
+  .lumin-advert-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--lumin-advert-grid-gap);
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    isolation: isolate;
+  }
+
+  .lumin-advert-container > * {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Nested blocks (e.g. video slider) live inside group flex; default min-width:auto prevents shrinking */
+  .lumin-advert-container .group-block-content {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Block wrappers + flex children: default min-width:auto lets Swiper exceed the column */
+  .lumin-advert-container .group-block-content > *,
+  .lumin-advert-container .group-block {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Stacked: sidebar below main (mobile default + when only one block) */
+  .lumin-advert-container--sidebar-on > :last-child:not(:only-child) {
+    max-width: var(--lumin-advert-sidebar-width);
+    align-self: flex-start;
+   /* border-top: 1px solid rgb(var(--color-border-rgb) / 0.35);*/
+  }
+
+  /* Desktop: main left, sidebar right (class from Liquid avoids :has() repaint cost on mobile) */
+  @media screen and (min-width: 750px) {
+    .lumin-advert-container--sidebar-on.lumin-advert-container--with-sidebar-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, var(--lumin-advert-sidebar-width));
+      gap: var(--lumin-advert-grid-gap);
+      align-items: start;
+    }
+
+    .lumin-advert-container--sidebar-on.lumin-advert-container--with-sidebar-layout > :not(:last-child) {
+      grid-column: 1;
+      grid-row: auto;
+      width: 100%;
+    }
+
+    .lumin-advert-container--sidebar-on.lumin-advert-container--with-sidebar-layout > :last-child {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      width: 100%;
+      max-width: none;
+      align-self: start;
+     /* border-top: none;
+      border-left: 1px solid rgb(var(--color-border-rgb) / 0.35);
+      padding-left: var(--lumin-advert-grid-gap);*/
+      position: sticky;
+      top: calc(var(--header-group-height, 0px) + 20px);
+      height: fit-content;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .lumin-advert-container {
+      gap: min(var(--lumin-advert-grid-gap), 32px);
+    }
+    .lumin-advert-wrapper {
+      padding: 0;
+    }
+
+    .lumin-advert-container--sidebar-on > :last-child:not(:only-child) {
+      max-width: none;
+      align-self: stretch;
+      position: static;
+      top: auto;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.advertorial",
+  "class": "section-wrapper",
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "blocks": [
+    {
+      "type": "group"
+    }
+  ],
+  "max_blocks": 2,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "label": "t:settings.show_sidebar",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "t:settings.container_width",
+      "min": 600,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "sidebar_width",
+      "label": "t:settings.sidebar_width",
+      "min": 200,
+      "max": 400,
+      "step": 20,
+      "unit": "px",
+      "default": 300,
+      "visible_if": "{{ section.settings.show_sidebar }}"
+    },
+    {
+      "type": "range",
+      "id": "advert_column_gap",
+      "label": "t:settings.layout_gap",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40,
+      "visible_if": "{{ section.settings.show_sidebar }}"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.section_width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.advertorial",
+      "category": "t:categories.storytelling",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "show_sidebar": true,
+        "max_width": 1000
+      },
+      "blocks": {
+        "main-content": {
+          "type": "group",
+          "name": "t:names.content",
+          "settings": {
+            "content_direction": "column",
+            "gap": 24
+          },
+          "blocks": {
+            "heading": {
+              "type": "text",
+              "name": "t:names.heading",
+              "settings": {
+                "text": "<p>Your Story Headline Goes Here</p>",
+                "type_preset": "h1"
+              }
+            },
+            "subheading": {
+              "type": "text",
+              "name": "t:names.caption",
+              "settings": {
+                "text": "<p>Add your subheadline or introduction text here.</p>",
+                "type_preset": "paragraph"
+              }
+            },
+            "image": {
+              "type": "image",
+              "name": "t:names.image",
+              "settings": {
+                "image_ratio": "adapt"
+              }
+            },
+            "content": {
+              "type": "text",
+              "name": "t:names.content",
+              "settings": {
+                "text": "<p>Share your brand story, product benefits, or editorial content. Use text, images, videos, and buttons to create an engaging lumin-advert layout.</p>",
+                "type_preset": "rte",
+                "max_width": "none"
+              }
+            },
+            "button": {
+              "type": "button",
+              "name": "t:names.button",
+              "settings": {
+                "label": "Shop now",
+                "link": "shopify://collections/all",
+                "style_class": "button"
+              }
+            }
+          },
+          "block_order": ["heading", "subheading", "image", "content", "button"]
+        },
+        "sidebar": {
+          "type": "group",
+          "name": "t:names.content",
+          "settings": {
+            "content_direction": "column",
+            "gap": 20
+          },
+          "blocks": {
+            "sidebar-image": {
+              "type": "image",
+              "name": "t:names.image",
+              "settings": {
+                "image_ratio": "portrait"
+              }
+            },
+            "sidebar-text": {
+              "type": "text",
+              "name": "t:names.content",
+              "settings": {
+                "text": "<p>Featured product or offer. Customize with theme blocks.</p>",
+                "type_preset": "paragraph"
+              }
+            },
+            "sidebar-cta": {
+              "type": "button",
+              "name": "t:names.button",
+              "settings": {
+                "label": "Shop now",
+                "link": "shopify://collections/all",
+                "style_class": "button",
+                "width": "custom",
+                "custom_width": 100
+              }
+            }
+          },
+          "block_order": ["sidebar-image", "sidebar-text", "sidebar-cta"]
+        }
+      },
+      "block_order": ["main-content", "sidebar"]
+    },
+    {
+      "name": "t:names.advertorial_single",
+      "category": "t:categories.storytelling",
+      "settings": {
+        "color_scheme": "scheme-2",
+        "show_sidebar": false,
+        "max_width": 800
+      },
+      "blocks": {
+        "main-content": {
+          "type": "group",
+          "name": "t:names.content",
+          "settings": {
+            "content_direction": "column",
+            "gap": 24
+          },
+          "blocks": {
+            "heading": {
+              "type": "text",
+              "name": "t:names.heading",
+              "settings": {
+                "text": "<p>Editorial Content</p>",
+                "type_preset": "h2"
+              }
+            },
+            "content": {
+              "type": "text",
+              "name": "t:names.content",
+              "settings": {
+                "text": "<p>Create compelling editorial-style content with theme blocks. Add text, images, videos, and more.</p>",
+                "type_preset": "rte"
+              }
+            }
+          },
+          "block_order": ["heading", "content"]
+        }
+      },
+      "block_order": ["main-content"]
+    }
+  ]
+}
+{% endschema %}

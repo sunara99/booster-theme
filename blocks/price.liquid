@@ -1,0 +1,836 @@
+
+
+{%- liquid
+  assign block_settings = block.settings
+  assign product_resource = closest.product
+  assign selected_variant = product_resource.selected_or_first_available_variant
+
+  assign product_price_block_regular_color = blank
+  if block_settings.regular_price_color == 'custom' and block_settings.regular_price_color_custom != blank
+    assign product_price_block_regular_color = block_settings.regular_price_color_custom
+  elsif block_settings.regular_price_color != blank and block_settings.regular_price_color != 'custom'
+    assign product_price_block_regular_color = block_settings.regular_price_color
+  endif
+
+  assign product_price_block_price_color = blank
+  if block_settings.price_color == 'custom' and block_settings.price_color_custom != blank
+    assign product_price_block_price_color = block_settings.price_color_custom
+  elsif block_settings.price_color != blank and block_settings.price_color != 'custom'
+    assign product_price_block_price_color = block_settings.price_color
+  endif
+
+  assign product_price_block_compare_color = blank
+  if block_settings.compare_at_price_color == 'custom' and block_settings.compare_at_price_color_custom != blank
+    assign product_price_block_compare_color = block_settings.compare_at_price_color_custom
+  elsif block_settings.compare_at_price_color != blank and block_settings.compare_at_price_color != 'custom'
+    assign product_price_block_compare_color = block_settings.compare_at_price_color
+  endif
+
+  assign product_price_block_compare_strike_color = blank
+  if block_settings.compare_at_strike_color == 'custom' and block_settings.compare_at_strike_color_custom != blank
+    assign product_price_block_compare_strike_color = block_settings.compare_at_strike_color_custom
+  elsif block_settings.compare_at_strike_color != blank and block_settings.compare_at_strike_color != 'custom'
+    assign product_price_block_compare_strike_color = block_settings.compare_at_strike_color
+  endif
+-%}
+
+{% liquid
+  if block_settings.type_preset == 'rte' or block_settings.type_preset == 'paragraph'
+    assign is_rte = true
+  endif
+
+  capture text_block_classes
+    if block_settings.width == '100%'
+      echo 'text-block--align-' | append: block_settings.alignment
+      if block_settings.max_width == 'none'
+        echo ' text-block--full-width'
+      endif
+    endif
+    if block_settings.type_preset == 'custom'
+      echo ' custom-typography'
+      if block_settings.font_size != ''
+        echo ' custom-font-size'
+      endif
+    endif
+    if block_settings.color != '' or block_settings.color_mode == 'custom'
+      echo ' custom-color'
+    endif
+    if block_settings.color_mode == 'custom' and block_settings.custom_color_style == 'gradient'
+      echo ' custom-color-gradient'
+    endif
+    if block_settings.background
+      echo ' text-block--background'
+    endif
+    if is_rte
+      echo ' rte'
+    endif
+  endcapture
+%}
+
+<product-price
+  class="text-block {{ text_block_classes }} text-{{ block_settings.alignment }} {{ block_settings.type_preset | default: 'paragraph' }} spacing-style"
+  data-block-id="{{ block.id }}"
+  data-product-id="{{ product_resource.id }}"
+  data-show-sale-price-first="{% if block_settings.show_sale_price_first == true %}true{% else %}false{% endif %}"
+  data-show-sale-badge="{% if block_settings.show_sale_badge %}true{% else %}false{% endif %}"
+  data-sale-badge-type="{{ block_settings.sale_badge_type | default: 'percentage' }}"
+  data-sale-badge-label="{{ 'content.product_badge_savings' | t }}"
+  style="
+    {% render 'typography-style', settings: block_settings %}
+    {% render 'spacing-style', settings: block_settings %}
+    --width: {{ block_settings.width }};
+    {% if block_settings.show_sale_badge %}
+      --sale-badge-font-size: {{ block_settings.sale_badge_font_size }}px; 
+      --sale-badge-border-radius: {{ block_settings.sale_badge_border_radius | default: 4 }}px;
+      {% if block_settings.sale_badge_color == 'custom' and block_settings.sale_badge_color_custom != blank %}--sale-badge-text-color: {{ block_settings.sale_badge_color_custom }};
+      {% elsif block_settings.sale_badge_color != blank and block_settings.sale_badge_color != 'custom' %}--sale-badge-text-color: {{ block_settings.sale_badge_color }};{% endif %}
+      {% if block_settings.sale_badge_background_color == 'custom' and block_settings.sale_badge_background_color_custom != blank %}--sale-badge-background-color: {{ block_settings.sale_badge_background_color_custom }};{% elsif block_settings.sale_badge_background_color != blank and block_settings.sale_badge_background_color != 'custom' %}--sale-badge-background-color: {{ block_settings.sale_badge_background_color }};{% endif %}
+    {% endif %}
+    {% if product_price_block_regular_color != blank %}--product-price-block-regular-color: {{ product_price_block_regular_color }};{% endif %}
+    {% if product_price_block_price_color != blank %}--product-price-block-price-color: {{ product_price_block_price_color }};{% endif %}
+    {% if product_price_block_compare_color != blank %}--product-price-block-compare-color: {{ product_price_block_compare_color }};{% endif %}
+    {% if product_price_block_compare_strike_color != blank %}--product-price-block-compare-strike-color: {{ product_price_block_compare_strike_color }};{% endif %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {% render 'price',
+    show_unit_price: true,
+    product_resource: product_resource,
+    show_sale_price_first: block_settings.show_sale_price_first,
+    show_sale_badge: block_settings.show_sale_badge,
+    sale_badge_type: block_settings.sale_badge_type,
+    sale_badge_text: block_settings.sale_badge_text
+  %}
+
+  {% if block_settings.show_tax_info %}
+    <div class="tax-note">
+      {%- if cart.duties_included and cart.taxes_included -%}
+        {{ 'content.duties_and_taxes_included' | t }}
+      {%- elsif cart.taxes_included -%}
+        {{ 'content.taxes_included' | t }}
+      {%- elsif cart.duties_included -%}
+        {{ 'content.duties_included' | t }}
+      {%- endif -%}
+
+      {%- if shop.shipping_policy.body != blank -%}
+        {{ 'content.shipping_policy' | t }}
+      {%- endif -%}
+    </div>
+  {% endif %}
+
+  {%- if selected_variant != blank and block_settings.show_installments -%}
+    <div class="installments">
+      {%- assign product_form_installment_id = 'product-form-installment-' | append: block.id -%}
+      {%- form 'product', product_resource, id: product_form_installment_id, class: 'payment-terms' -%}
+        <input
+          type="hidden"
+          name="id"
+          value="{{ selected_variant.id }}"
+        >
+        {{ form | payment_terms }}
+      {%- endform -%}
+    </div>
+  {%- endif -%}
+</product-price>
+
+{% # theme-check-disable %}
+{% stylesheet %}
+  product-price [ref="priceContainer"] {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--gap-xs);
+  }
+  product-price.text-block--align-center >* {
+    margin-inline: auto;
+    justify-content: center;
+}
+  product-price.text-block--align-right >* {
+    margin-inline-start: auto;
+    justify-content: right;
+}
+  product-price.text-block--align-left >* {
+    margin-inline-end: auto;
+    justify-content: left;
+}
+  .tax-note:empty {
+    display: none;
+  }
+
+  form.payment-terms {
+    padding-top: 0.5em;
+    font-size: min(0.85em, var(--font-paragraph--size));
+    font-weight: var(--font-paragraph--weight);
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+  }
+
+  .installments:not(:has(shopify-payment-terms)) {
+    display: none;
+  }
+
+  product-price .sale-badge {
+    display: inline-flex;
+    gap: var(--gap-2xs);
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    padding: 0.25em 0.9em;
+    font-size: var(--sale-badge-font-size);
+    border-radius: var(--sale-badge-border-radius, 4px);
+    color: var(--sale-badge-text-color, var(--color-foreground));
+    -webkit-text-fill-color: var(--sale-badge-text-color, var(--color-foreground));
+    background: var(--sale-badge-background-color, var(--color-background));
+    vertical-align: middle;
+  }
+
+  /* Volume pricing note should match unit-price styling (small, grey text) */
+  product-price .volume-pricing-note,
+  product-price.text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) .volume-pricing-note {
+    display: block;
+    font-family: var(--font-body--family);
+    font-weight: normal;
+    font-size: var(--font-size--xs);
+    line-height: normal;
+    letter-spacing: normal;
+    text-transform: none;
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+  }
+
+  product-price[data-block-id] [ref='priceContainer'] .price {
+    color: var(--product-price-block-price-color, inherit);
+  }
+
+  product-price[data-block-id] [ref='priceContainer'] > .price:not(.price-range) {
+    color: var(--product-price-block-regular-color, var(--product-price-block-price-color, inherit));
+  }
+
+  product-price[data-block-id] [ref='priceContainer']:not(:has(.compare-at-price)) .price.price-range {
+    color: var(--product-price-block-regular-color, var(--product-price-block-price-color, inherit));
+  }
+
+  product-price[data-block-id] [ref='priceContainer'] .compare-at-price {
+    color: var(--product-price-block-compare-color, inherit);
+    opacity: 1;
+  }
+
+  product-price[data-block-id] [ref='priceContainer'] .compare-at-price .price-split::after,
+  product-price[data-block-id] [ref='priceContainer'] s.compare-at-price .price-split::after {
+    background: var(--product-price-block-compare-strike-color, currentColor);
+  }
+
+  product-price[data-block-id] [ref='priceContainer'] .compare-at-price .money,
+  product-price[data-block-id] [ref='priceContainer'] s.compare-at-price .money {
+    text-decoration-color: var(--product-price-block-compare-strike-color, currentColor);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.product_price",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.resource_reference_product_price"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:content.edit_price_in_theme_settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_price_first",
+      "label": "t:settings.show_sale_price_first",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_installments",
+      "label": "t:settings.installments",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tax_info",
+      "label": "t:settings.show_tax_info",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_badge",
+      "label": "t:sections.lumin_general.show_sale_badge",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "sale_badge_type",
+      "label": "t:sections.lumin_general.sale_badge_type",
+      "options": [
+        {
+          "value": "percentage",
+          "label": "t:sections.lumin_general.sale_badge_type_percentage"
+        },
+        {
+          "value": "amount",
+          "label": "t:sections.lumin_general.sale_badge_type_amount"
+        }
+      ],
+      "default": "percentage",
+      "visible_if": "{{ block.settings.show_sale_badge == true }}"
+    },
+    {
+      "type": "range",
+      "id": "sale_badge_font_size",
+      "label": "t:sections.lumin_general.sale_badge_text_size",
+      "min": 6,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.show_sale_badge == true }}"
+    },
+    {
+      "type": "select",
+      "id": "sale_badge_color",
+      "label": "t:sections.lumin_general.sale_badge_text_color",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "var(--color-foreground)", "label": "t:options.text" },
+        { "value": "var(--color-foreground-heading)", "label": "t:options.heading" },
+        { "value": "var(--color-primary)", "label": "t:options.link" },
+        { "value": "custom", "label": "t:options.custom" }
+      ],
+      "default": "",
+      "visible_if": "{{ block.settings.show_sale_badge == true }}"
+    },
+    {
+      "type": "color",
+      "id": "sale_badge_color_custom",
+      "label": "t:sections.lumin_general.sale_badge_custom_color",
+      "visible_if": "{{ block.settings.show_sale_badge == true and block.settings.sale_badge_color == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "sale_badge_background_color",
+      "label": "t:sections.lumin_general.sale_badge_background_color",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "var(--color-background)", "label": "t:content.background" },
+        { "value": "var(--color-foreground)", "label": "t:options.text" },
+        { "value": "var(--color-foreground-heading)", "label": "t:options.heading" },
+        { "value": "var(--color-primary)", "label": "t:options.link" },
+        { "value": "custom", "label": "t:options.custom" }
+      ],
+      "default": "",
+      "visible_if": "{{ block.settings.show_sale_badge == true }}"
+    },
+    {
+      "type": "color",
+      "id": "sale_badge_background_color_custom",
+      "label": "t:sections.lumin_general.sale_badge_custom_background_color",
+      "visible_if": "{{ block.settings.show_sale_badge == true and block.settings.sale_badge_background_color == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "sale_badge_border_radius",
+      "label": "t:sections.lumin_general.sale_badge_border_radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 4,
+      "visible_if": "{{ block.settings.show_sale_badge == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.product_price_block_colors"
+    },
+    {
+      "type": "select",
+      "id": "regular_price_color",
+      "label": "t:settings.product_price_block_regular_color",
+      "info": "t:settings.product_price_block_regular_color_info",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "var(--color-foreground)", "label": "t:options.text" },
+        { "value": "var(--color-foreground-heading)", "label": "t:options.heading" },
+        { "value": "var(--color-primary)", "label": "t:options.link" },
+        { "value": "custom", "label": "t:options.custom" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "color",
+      "id": "regular_price_color_custom",
+      "label": "t:settings.product_price_block_custom_regular_color",
+      "visible_if": "{{ block.settings.regular_price_color == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "price_color",
+      "label": "t:settings.product_price_block_sale_color",
+      "info": "t:settings.product_price_block_sale_color_info",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "var(--color-foreground)", "label": "t:options.text" },
+        { "value": "var(--color-foreground-heading)", "label": "t:options.heading" },
+        { "value": "var(--color-primary)", "label": "t:options.link" },
+        { "value": "custom", "label": "t:options.custom" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "color",
+      "id": "price_color_custom",
+      "label": "t:settings.product_price_block_custom_sale_color",
+      "visible_if": "{{ block.settings.price_color == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "compare_at_price_color",
+      "label": "t:settings.product_price_block_compare_color",
+      "options": [
+        { "value": "", "label": "t:options.default" },
+        { "value": "var(--color-foreground)", "label": "t:options.text" },
+        { "value": "var(--color-foreground-heading)", "label": "t:options.heading" },
+        { "value": "var(--color-primary)", "label": "t:options.link" },
+        { "value": "rgb(var(--color-foreground-rgb) / 0.55)", "label": "t:settings.product_price_block_compare_subdued" },
+        { "value": "custom", "label": "t:options.custom" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "color",
+      "id": "compare_at_price_color_custom",
+      "label": "t:settings.product_price_block_custom_compare_color",
+      "visible_if": "{{ block.settings.compare_at_price_color == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "compare_at_strike_color",
+      "label": "t:settings.product_price_block_compare_strike_color",
+      "info": "t:settings.product_price_block_compare_strike_info",
+      "options": [
+        { "value": "", "label": "t:settings.product_price_block_compare_strike_default" },
+        { "value": "var(--color-foreground)", "label": "t:options.text" },
+        { "value": "var(--color-foreground-heading)", "label": "t:options.heading" },
+        { "value": "var(--color-primary)", "label": "t:options.link" },
+        { "value": "rgb(var(--color-foreground-rgb) / 0.45)", "label": "t:settings.product_price_block_compare_subdued" },
+        { "value": "custom", "label": "t:options.custom" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "color",
+      "id": "compare_at_strike_color_custom",
+      "label": "t:settings.product_price_block_custom_compare_strike_color",
+      "visible_if": "{{ block.settings.compare_at_strike_color == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.typography"
+    },
+    {
+      "type": "select",
+      "id": "type_preset",
+      "label": "t:settings.preset",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "paragraph",
+          "label": "t:options.paragraph"
+        },
+        {
+          "value": "h1",
+          "label": "t:options.h1"
+        },
+        {
+          "value": "h2",
+          "label": "t:options.h2"
+        },
+        {
+          "value": "h3",
+          "label": "t:options.h3"
+        },
+        {
+          "value": "h4",
+          "label": "t:options.h4"
+        },
+        {
+          "value": "h5",
+          "label": "t:options.h5"
+        },
+        {
+          "value": "h6",
+          "label": "t:options.h6"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "info": "t:info.edit_presets_in_theme_settings"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "t:options.fit_content"
+        },
+        {
+          "value": "100%",
+          "label": "t:options.fill"
+        }
+      ],
+      "default": "100%"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "default": "left",
+      "visible_if": "{{ block.settings.width != 'fit-content' }}"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "t:options.body"
+        },
+        {
+          "value": "var(--font-subheading--family)",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "var(--font-accent--family)",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "var(--font-body--family)",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "t:settings.size",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "0.625rem",
+          "label": "10px"
+        },
+        {
+          "value": "0.75rem",
+          "label": "12px"
+        },
+        {
+          "value": "0.875rem",
+          "label": "14px"
+        },
+        {
+          "value": "1rem",
+          "label": "16px"
+        },
+        {
+          "value": "1.125rem",
+          "label": "18px"
+        },
+        {
+          "value": "1.25rem",
+          "label": "20px"
+        },
+        {
+          "value": "1.5rem",
+          "label": "24px"
+        },
+        {
+          "value": "2rem",
+          "label": "32px"
+        },
+        {
+          "value": "2.5rem",
+          "label": "40px"
+        },
+        {
+          "value": "3rem",
+          "label": "48px"
+        },
+        {
+          "value": "3.5rem",
+          "label": "56px"
+        },
+        {
+          "value": "4.5rem",
+          "label": "72px"
+        },
+        {
+          "value": "5.5rem",
+          "label": "88px"
+        },
+        {
+          "value": "7.5rem",
+          "label": "120px"
+        },
+        {
+          "value": "9.5rem",
+          "label": "152px"
+        },
+        {
+          "value": "11.5rem",
+          "label": "184px"
+        }
+      ],
+      "default": "1rem",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "t:settings.line_height",
+      "options": [
+        {
+          "value": "tight",
+          "label": "t:options.tight"
+        },
+        {
+          "value": "normal",
+          "label": "t:options.normal"
+        },
+        {
+          "value": "loose",
+          "label": "t:options.loose"
+        }
+      ],
+      "default": "normal",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "letter_spacing",
+      "label": "t:settings.letter_spacing",
+      "options": [
+        {
+          "value": "tight",
+          "label": "t:options.tight"
+        },
+        {
+          "value": "normal",
+          "label": "t:options.normal"
+        },
+        {
+          "value": "loose",
+          "label": "t:options.loose"
+        }
+      ],
+      "default": "normal",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "t:settings.case",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "color_mode",
+      "label": "t:sections.lumin_general.color_style",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ block.settings.type_preset != 'rte' }}"
+    },
+    {
+      "type": "select",
+      "id": "color",
+      "label": "t:settings.color",
+      "options": [
+        {
+          "value": "var(--color-foreground)",
+          "label": "t:options.text"
+        },
+        {
+          "value": "var(--color-foreground-heading)",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "var(--color-primary)",
+          "label": "t:options.link"
+        }
+      ],
+      "default": "var(--color-foreground)",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'default' }}"
+    },
+    {
+      "type": "select",
+      "id": "custom_color_style",
+      "label": "Custom color type",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Text color"
+        },
+        {
+          "value": "gradient",
+          "label": "Text gradient"
+        }
+      ],
+      "default": "solid",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_text_color",
+      "label": "t:sections.lumin_general.text_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'custom' and block.settings.custom_color_style == 'solid' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_gradient_color_start",
+      "label": "t:sections.lumin_general.gradient_start_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'custom' and block.settings.custom_color_style == 'gradient' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_gradient_color_end",
+      "label": "t:sections.lumin_general.gradient_end_color",
+      "default": "#666666",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'custom' and block.settings.custom_color_style == 'gradient' }}"
+    },
+    {
+      "type": "select",
+      "id": "custom_gradient_direction",
+      "label": "t:settings.gradient_direction",
+      "options": [
+        {
+          "value": "to right",
+          "label": "t:options.right"
+        },
+        {
+          "value": "to left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "to bottom",
+          "label": "t:options.down"
+        },
+        {
+          "value": "to top",
+          "label": "t:options.up"
+        }
+      ],
+      "default": "to right",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'custom' and block.settings.custom_color_style == 'gradient' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_color_bold",
+      "label": "t:sections.lumin_general.bold_text_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_color_italic",
+      "label": "t:sections.lumin_general.italic_text_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_color_underline",
+      "label": "t:sections.lumin_general.underline_text_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.type_preset != 'rte' and block.settings.color_mode == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_price",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+{% # theme-check-enable %}

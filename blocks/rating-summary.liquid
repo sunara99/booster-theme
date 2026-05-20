@@ -1,0 +1,221 @@
+{% liquid
+  assign block_settings = block.settings
+  assign rating = block_settings.rating | times: 1
+%}
+
+<div 
+  class="rating-summary rating-summary--{{ block.id }} spacing-style"
+  style="
+    padding-top: {{ block_settings.top_padding }}px;
+    padding-bottom: {{ block_settings.bottom_padding }}px;
+    {% render 'spacing-style', settings: block_settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="rating-summary__content">
+    <div class="rating-summary__stars">
+      {% for i in (1..5) %}
+        {% if i <= rating %}
+          <span 
+            class="rating-summary__star rating-summary__star--filled"
+            style="
+              font-size: {{ block_settings.stars_size }}px;
+              color: {{ block_settings.star_color }};
+            "
+          >
+            ★
+          </span>
+        {% else %}
+          <span 
+            class="rating-summary__star"
+            style="
+              font-size: {{ block_settings.stars_size }}px;
+              color: #d1d5db;
+            "
+          >
+            ☆
+          </span>
+        {% endif %}
+      {% endfor %}
+    </div>
+    
+    <div 
+      class="rating-summary__text"
+      style="
+        font-size: {{ block_settings.rating_text_size }}px;
+        color: rgb(var(--color-foreground));
+        margin-left: 0.5rem;
+      "
+    >
+      {{ block_settings.rating }}/5 Rating | {{ block_settings.review_count }}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .rating-summary {
+    display: flex;
+    align-items: center;
+  }
+  
+  .rating-summary__content {
+    display: flex;
+    align-items: center;
+  }
+  
+  .rating-summary__stars {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+  
+  .rating-summary__star {
+    line-height: 1;
+  }
+  
+  .rating-summary__star--filled {
+    color: #fbbf24;
+  }
+  
+  .rating-summary__text {
+    font-weight: 500;
+  }
+  
+  /* Mobile responsive */
+  @media screen and (max-width: 749px) {
+    .rating-summary__content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .rating-summary__text {
+      margin-left: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Rating Summary",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "range",
+      "id": "rating",
+      "label": "Rating",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "default": 4.8
+    },
+    {
+      "type": "text",
+      "id": "review_count",
+      "label": "Review Count",
+      "default": "12,000+ Reviews"
+    },
+    {
+      "type": "range",
+      "id": "stars_size",
+      "label": "Stars Size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "rating_text_size",
+      "label": "Rating Text Size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Color",
+      "default": "#fbbf24"
+    },
+    {
+      "type": "range",
+      "id": "top_padding",
+      "label": "Top Padding",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "bottom_padding",
+      "label": "Bottom Padding",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right Padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rating Summary",
+      "category": "t:categories.basic",
+      "settings": {
+        "rating": 4.8,
+        "review_count": "12,000+ Reviews",
+        "star_color": "#fbbf24"
+      }
+    }
+  ]
+}
+{% endschema %}

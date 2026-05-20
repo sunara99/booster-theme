@@ -1,0 +1,114 @@
+{% comment %}
+  Renders a product card for the bundle deals section.
+  @param {product} product - The product object
+  @param {number} block_index - Block index
+  @param {boolean} [show_badge] - Whether to show the savings badge
+  @param {string} [badge_color] - Badge text color
+  @param {string} [badge_background] - Badge background color
+  @param {boolean} [show_variant_selector] - Show variant dropdown (default: true)
+  @param {boolean} [show_vendor] - Show product vendor (default: true)
+{% endcomment %}
+
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign has_variants = false
+  if product.has_only_default_variant == false
+    assign has_variants = true
+  endif
+
+  assign savings_percent = 0
+  if selected_variant.compare_at_price > selected_variant.price
+    assign savings_percent = selected_variant.compare_at_price | minus: selected_variant.price | times: 100 | divided_by: selected_variant.compare_at_price
+  endif
+
+  assign placeholder_prefix = 'product-apparel-'
+  assign placeholder_variants = 4
+  assign block_idx = block_index | default: 0
+  assign variant = block_idx | modulo: placeholder_variants | plus: 1
+  assign placeholder_name = placeholder_prefix | append: variant
+-%}
+
+<div
+  class="bundle-product-card border-style spacing-style"
+  data-product-id="{{ product.id }}"
+  data-variant-id="{{ selected_variant.id }}"
+  data-price="{{ selected_variant.price }}"
+  data-compare-price="{{ selected_variant.compare_at_price | default: 0 }}"
+  style=" border: 1px solid var(--color-border);"
+>
+  <div class="bundle-product-card__media">
+    <a href="{{ product.url }}" class="bundle-product-card__image-link">
+      {% if product.featured_image != blank %}
+        <img
+          src="{{ product.featured_image | image_url: width: 400 }}"
+          alt="{{ product.featured_image.alt | escape }}"
+          loading="lazy"
+          width="400"
+          height="400"
+          class="bundle-product-card__image"
+        >
+      {% else %}
+        {{ placeholder_name | placeholder_svg_tag: 'bundle-product-card__placeholder' }}
+      {% endif %}
+    </a>
+    {% if show_badge != false and savings_percent > 0 %}
+      <span
+        class="bundle-product-card__badge"
+        {% if badge_color != blank or badge_background != blank %}
+          style="{% if badge_color != blank %}color: {{ badge_color }};{% endif %}{% if badge_background != blank %}background: {{ badge_background }};{% endif %}"
+        {% endif %}
+      >Save {{ savings_percent }}%</span>
+    {% endif %}
+  </div>
+   <div class="bundle-product-card__content">
+    {% if show_vendor != false and product.vendor != blank %}
+      <p class="bundle-product-card__vendor">{{ product.vendor }}</p>
+    {% endif %}
+    <h3 class="bundle-product-card__title">
+      <a href="{{ product.url }}">{{ product.title }}</a>
+    </h3>
+    <div class="bundle-product-card__price{% unless selected_variant.compare_at_price > selected_variant.price %} bundle-product-card__price--no-compare{% endunless %}">
+      <span class="bundle-product-card__current-price">
+        {%- render 'price-split', context: 'bundles', cents: selected_variant.price -%}
+      </span>
+      {% if selected_variant.compare_at_price > selected_variant.price %}
+        <span class="bundle-product-card__compare-price">
+          {%- render 'price-split', context: 'bundles', cents: selected_variant.compare_at_price -%}
+        </span>
+      {% endif %}
+    </div>
+    {% if has_variants %}
+      {% unless show_variant_selector == false %}
+        <div class="bundle-product-card__variants">
+          <select
+            class="bundle-product-card__variant-select"
+            data-product-index="{{ block_index }}"
+            aria-label="Select variant"
+          >
+            {% for variant in product.variants %}
+              <option
+                value="{{ variant.id }}"
+                data-price="{{ variant.price }}"
+                data-compare-price="{{ variant.compare_at_price | default: 0 }}"
+                data-image="{{ variant.image | default: product.featured_image | image_url: width: 400 }}"
+                {% if variant.id == selected_variant.id %}selected{% endif %}
+                {% unless variant.available %}disabled{% endunless %}
+              >
+                {{ variant.title }} - {{ variant.price | money }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      {% endunless %}
+    {% endif %}
+    <button
+      type="button"
+      class="bundle-product-card__add-button button button--secondary"
+      data-product-index="{{ block_index }}"
+      data-product-available="{{ product.available }}"
+      {% unless product.available %}disabled{% endunless %}
+    >
+      Add to bundle
+    </button>
+  </div>
+</div>

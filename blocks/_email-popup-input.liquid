@@ -1,0 +1,63 @@
+{% comment %}
+  Email input block - exclusive to email popup section (private theme block).
+  Renders inside the parent customer form. Add this block to show the email signup field.
+{% endcomment %}
+
+{% assign block_settings = block.settings %}
+<input type="hidden" name="contact[tags]" value="newsletter">
+<div class="email-popup__form-row" {{ block.shopify_attributes }}>
+  <label for="Email-popup-{{ block.id }}" class="visually-hidden">
+    {{ 'blocks.email_signup.label' | t }}
+  </label>
+  <input
+    id="Email-popup-{{ block.id }}"
+    class="email-popup__input"
+    type="email"
+    name="contact[email]"
+    value="{{ form.email }}"
+    autocorrect="off"
+    autocapitalize="off"
+    autocomplete="email"
+    placeholder="{{ block_settings.placeholder | default: 'Email address' }}"
+    required
+    {% if form.errors %}
+      aria-invalid="true"
+      aria-describedby="email-popup-error-{{ section.id }}"
+    {% elsif form.posted_successfully? %}
+      aria-describedby="email-popup-success-{{ section.id }}"
+    {% endif %}
+  >
+  <button type="submit" class="email-popup__submit">
+    {{ block_settings.button_text | default: 'SUBMIT' }}
+  </button> 
+</div>
+
+{% schema %}
+{
+  "name": "Email input",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Email placeholder",
+      "default": "Email address"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "SUBMIT"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Email input",
+      "settings": {
+        "placeholder": "Email address",
+        "button_text": "SUBMIT"
+      }
+    }
+  ]
+}
+{% endschema %}

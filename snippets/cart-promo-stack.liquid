@@ -1,0 +1,59 @@
+{%- doc -%}
+  Renders countdown, promo banner, image banner, and free-shipping bar for the cart drawer or cart page.
+  Image banner order vs the others follows `settings.cart_image_banner_stack_order`: `1`–`4` (see Cart image banner theme settings).
+  @param {string} context - `'drawer'` or `'page'`
+{%- enddoc -%}
+
+{% liquid
+  assign stack_order = settings.cart_image_banner_stack_order | default: '3'
+%}
+
+{% capture cart_promo_stack_timer %}
+  {% if settings.show_cart_above_promo_richtext %}
+    {% render 'cart-timer', context: context %}
+  {% endif %}
+{% endcapture %}
+
+{% capture cart_promo_stack_promo %}
+  {% if settings.show_cart_promo_banner %}
+    {% render 'cart-promo-banner' %}
+  {% endif %}
+{% endcapture %}
+
+{% capture cart_promo_stack_image %}
+  {% render 'cart-image-banner', context: context %}
+{% endcapture %}
+
+{% capture cart_promo_stack_shipping %}
+  {% if settings.show_free_shipping_progress %}
+    {% render 'free-shipping-progress' %}
+  {% endif %}
+{% endcapture %}
+
+{% case stack_order %}
+  {% when '1', 'first' %}
+    {{ cart_promo_stack_image }}
+    {{ cart_promo_stack_timer }}
+    {{ cart_promo_stack_promo }}
+    {{ cart_promo_stack_shipping }}
+  {% when '2', 'after_timer' %}
+    {{ cart_promo_stack_timer }}
+    {{ cart_promo_stack_image }}
+    {{ cart_promo_stack_promo }}
+    {{ cart_promo_stack_shipping }}
+  {% when '4', 'last' %}
+    {{ cart_promo_stack_timer }}
+    {{ cart_promo_stack_promo }}
+    {{ cart_promo_stack_shipping }}
+    {{ cart_promo_stack_image }}
+  {% when '3', 'after_promo' %}
+    {{ cart_promo_stack_timer }}
+    {{ cart_promo_stack_promo }}
+    {{ cart_promo_stack_image }}
+    {{ cart_promo_stack_shipping }}
+  {% else %}
+    {{ cart_promo_stack_timer }}
+    {{ cart_promo_stack_promo }}
+    {{ cart_promo_stack_image }}
+    {{ cart_promo_stack_shipping }}
+{% endcase %}

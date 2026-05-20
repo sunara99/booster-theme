@@ -1,0 +1,2690 @@
+
+{% assign block_id = block.id | replace: '_', '' | downcase %}
+{% assign default_tab_tabs = 1 %}
+{% for j in (1..6) %}
+  {% assign check_key = 'tab_' | append: j | append: '_enabled' %}
+  {% if block.settings[check_key] %}
+    {% assign default_tab_tabs = j %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+{% assign default_tab_accordion = 0 %}
+{% if block.settings.tab_1_open_by_default %}
+  {% assign default_tab_accordion = 1 %}
+{% endif %}
+
+{% style %}
+  .lumin-tabs-container-{{ block_id }} {
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    display: block;
+    font-family: var(--tabs-label-font-family);
+    font-style: var(--tabs-label-font-style);
+    font-weight: var(--tabs-label-font-weight);
+    font-size: var(--tabs-label-font-size);
+    line-height: var(--tabs-label-font-line-height);
+   /* text-transform: var(--tabs-label-font-case); */
+    {% if block.settings.block_border != 'none' %}
+    border: var(--block-border-width) var(--block-border-style) rgb(var(--color-border-rgb) / var(--block-border-opacity));
+    border-radius: var(--block-border-radius);
+    {% if block.settings.block_border_radius > 0 %}overflow: hidden;{% endif %}
+    {% endif %}
+  }
+
+  .lumin-tabs-button-{{ block_id }},
+  .lumin-tabs-accordion-header-{{ block_id }} {
+    font-family: var(--tabs-label-font-family);
+    font-style: var(--tabs-label-font-style);
+    font-weight: var(--tabs-label-font-weight);
+    font-size: var(--tabs-label-font-size);
+    line-height: var(--tabs-label-font-line-height);
+    text-transform: var(--tabs-label-font-case);
+  }
+
+  .lumin-tabs-nav-wrapper-{{ block_id }} {
+    display: flex;
+    justify-content: {% case block.settings.tabs_alignment %}{% when 'center' %}center{% when 'right' %}flex-end{% else %}flex-start{% endcase %};
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-bottom: {{ block.settings.content_spacing }}px;
+    border-bottom: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    width: 100%;
+  }
+
+  {% if block.settings.block_border == 'solid' %}
+  .lumin-tabs-nav-wrapper-{{ block_id }} {
+    border-bottom: none;
+  }
+  {% endif %}
+
+  .lumin-tabs-nav-wrapper-{{ block_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lumin-tabs-nav-{{ block_id }} { 
+    display: flex;
+    gap: {{ block.settings.tab_spacing }}px;
+    flex-wrap: nowrap;
+    min-width: min-content;
+  }
+
+  .lumin-tabs-button-{{ block_id }} {
+    background: none;
+    border: none;
+    padding: {{ block.settings.tab_padding_vertical }}px {{ block.settings.tab_padding_horizontal }}px;
+    cursor: pointer;
+    font-size: {{ block.settings.tab_font_size }}px;
+    color: {{ block.settings.tab_text_color }};
+    border-bottom: {{ block.settings.active_border_width }}px solid transparent;
+    margin-bottom: {% if block.settings.block_border == 'solid' %}0{% else %}-{{ block.settings.border_width }}px{% endif %};
+    transition: all 0.3s ease;
+    position: relative;
+    flex-shrink: 0;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .lumin-tabs-button-icon-{{ block_id }},
+  .lumin-tabs-accordion-icon-wrap-{{ block_id }} {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+  }
+
+  .lumin-tabs-button-icon-{{ block_id }} svg,
+  .lumin-tabs-button-icon-{{ block_id }} img,
+  .lumin-tabs-accordion-icon-wrap-{{ block_id }} svg,
+  .lumin-tabs-accordion-icon-wrap-{{ block_id }} img {
+    display: block;
+  }
+
+  .lumin-tabs-label-wrap-{{ block_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    text-align: left;
+    min-width: 0;
+    line-height: 1.1;
+  }
+
+  .lumin-tabs-label-wrap-{{ block_id }} .lumin-tabs-subheading-{{ block_id }} {
+    white-space: normal;
+  }
+
+  .lumin-tabs-subheading-{{ block_id }} {
+    font-size: 0.85em;
+    font-weight: 400;
+    opacity: 0.8;
+    line-height: 1.3;
+  }
+
+  .lumin-tabs-button-{{ block_id }}:hover {
+    color: {{ block.settings.tab_hover_color }};
+  }
+
+  .lumin-tabs-button-{{ block_id }}.active {
+    color: {{ block.settings.tab_active_color }};
+    border-bottom-color: {{ block.settings.active_border_color }};
+  }
+
+  .lumin-tabs-panels-{{ block_id }} {
+    position: relative;
+  }
+
+  .lumin-tabs-content-{{ block_id }} {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .lumin-tabs-content-{{ block_id }}.active {
+    position: relative;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .lumin-tabs-image-{{ block_id }} {
+    width: 100%;
+    height: auto;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .lumin-tabs-image-placeholder-{{ block_id }} {
+    width: 100%;
+    background-color: #f4f4f4;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    position: relative;
+  }
+
+  .lumin-tabs-image-placeholder-{{ block_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 400px;
+    max-height: 400px;
+  }
+
+  .lumin-tabs-empty-state-{{ block_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .lumin-tabs-description-{{ block_id }} {
+    color: {{ block.settings.content_text_color }};
+    font-size: {{ block.settings.content_font_size }}px;
+    line-height: 1.6;
+    margin-bottom: {{ block.settings.content_item_spacing }}px;
+  }
+
+  .lumin-tabs-description-{{ block_id }}:last-child {
+    margin-bottom: 0;
+  }
+
+  .lumin-tabs-page-content-{{ block_id }} {
+    color: {{ block.settings.content_text_color }};
+    font-size: {{ block.settings.content_font_size }}px;
+    line-height: 1.6;
+    margin-bottom: {{ block.settings.content_item_spacing }}px;
+  }
+
+  .lumin-tabs-page-content-{{ block_id }}:last-child {
+    margin-bottom: 0;
+  }
+
+  .lumin-tabs-richtext-{{ block_id }} {
+    color: {{ block.settings.content_text_color }};
+    font-size: {{ block.settings.content_font_size }}px;
+    line-height: 1.6;
+    margin-bottom: {{ block.settings.content_item_spacing }}px;
+  }
+  .lumin-tabs-richtext-{{ block_id }} h1, .lumin-tabs-richtext-{{ block_id }} h2, .lumin-tabs-richtext-{{ block_id }} h3, .lumin-tabs-richtext-{{ block_id }} h4, .lumin-tabs-richtext-{{ block_id }} h5, .lumin-tabs-richtext-{{ block_id }} h6 {
+    margin-bottom: 1rem;
+  }
+
+  .lumin-tabs-richtext-{{ block_id }}:last-child {
+    margin-bottom: 0;
+  }
+
+  .lumin-tabs-image-wrapper-{{ block_id }} {
+    margin-bottom: {{ block.settings.content_item_spacing }}px;
+  }
+
+  .lumin-tabs-image-wrapper-{{ block_id }}:last-child {
+    margin-bottom: 0;
+  }
+
+  .lumin-tabs-image-richtext-side-by-side-{{ block_id }} {
+    display: flex;
+    /* flex-wrap: wrap; */
+    gap: {{ block.settings.content_item_spacing }}px;
+    margin-bottom: {{ block.settings.content_item_spacing }}px;
+    align-items: {% case block.settings.image_richtext_side_by_side_align %}{% when 'center' %}center{% when 'bottom' %}flex-end{% else %}flex-start{% endcase %};
+  }
+
+  .lumin-tabs-image-richtext-side-by-side-{{ block_id }}:last-child {
+    margin-bottom: 0;
+  }
+
+  .lumin-tabs-image-richtext-side-by-side-{{ block_id }} .lumin-tabs-image-wrapper-{{ block_id }},
+  .lumin-tabs-image-richtext-side-by-side-{{ block_id }} .lumin-tabs-richtext-{{ block_id }} {
+    min-width: 0;
+    margin-bottom: 0;
+  }
+
+  .lumin-tabs-image-richtext-side-by-side-{{ block_id }} .lumin-tabs-image-wrapper-{{ block_id }} {
+    flex: 0 0 {{ block.settings.image_richtext_side_by_side_image_width }}%;
+    max-width: {{ block.settings.image_richtext_side_by_side_image_width }}%;
+  }
+
+  .lumin-tabs-image-richtext-side-by-side-{{ block_id }} .lumin-tabs-richtext-{{ block_id }} {
+    flex: 1 1 0;
+  }
+
+  .lumin-tabs-image-richtext-side-by-side-{{ block_id }} .lumin-tabs-image-{{ block_id }} {
+    width: 100%;
+    height: auto;
+  }
+
+  {% for i in (1..6) %}
+    {% assign stack_key = 'tab_' | append: i | append: '_image_richtext_stack_mobile' %}
+    {% if block.settings[stack_key] %}
+      @media screen and (max-width: 749px) {
+        .lumin-tabs-image-richtext-side-by-side--tab-{{ i }}-{{ block_id }} {
+          flex-direction: column;
+        }
+        .lumin-tabs-image-richtext-side-by-side--tab-{{ i }}-{{ block_id }} .lumin-tabs-image-wrapper-{{ block_id }} {
+          flex: 0 0 auto;
+          width: 100%;
+          max-width: 100%;
+        }
+      }
+    {% endif %}
+  {% endfor %}
+
+  .lumin-tabs-empty-content-{{ block_id }} {
+    color: #999;
+    font-style: italic;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .lumin-tabs-accordion-{{ block_id }} {
+    display: none;
+  }
+
+  .lumin-tabs-accordion-item-{{ block_id }} {
+    border-bottom: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+  }
+
+  {% if block.settings.block_border == 'solid' %}
+  .lumin-tabs-accordion-item-{{ block_id }}:last-child {
+    border-bottom: none;
+  }
+  {% endif %}
+
+  .lumin-tabs-accordion-header-{{ block_id }} {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: {{ block.settings.accordion_padding }}px 0;
+    cursor: pointer;
+    font-size: {{ block.settings.tab_font_size }}px;
+    color: {{ block.settings.tab_text_color }};
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.3s ease;
+  }
+
+  .lumin-tabs-accordion-header-{{ block_id }}:hover {
+    color: {{ block.settings.tab_hover_color }};
+  }
+
+  .lumin-tabs-accordion-header-{{ block_id }}.active {
+    color: {{ block.settings.tab_active_color }};
+  }
+
+  .lumin-tabs-accordion-{{ block_id }} .lumin-tabs-accordion-toggle-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lumin-tabs-accordion-{{ block_id }} .lumin-tabs-accordion-toggle-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lumin-tabs-accordion-{{ block_id }} .icon-caret {
+    transition: transform 0.35s ease-in-out;
+  }
+
+  .lumin-tabs-accordion-header-{{ block_id }}.active .icon-caret svg {
+    transform: rotate(180deg);
+  }
+
+  .lumin-tabs-accordion-{{ block_id }} .icon-plus :is(.horizontal, .vertical) {
+    transition: transform 0.35s ease-in-out;
+    transform-origin: 50% 50%;
+  }
+
+  .lumin-tabs-accordion-header-{{ block_id }}.active .icon-plus .horizontal {
+    transform: rotate(90deg);
+  }
+
+  .lumin-tabs-accordion-header-{{ block_id }}.active .icon-plus .vertical {
+    transform: rotate(90deg);
+    opacity: 0;
+  }
+
+  .lumin-tabs-accordion-{{ block_id }}.lumin-tabs-accordion--caret .icon-plus {
+    display: none;
+  }
+
+  .lumin-tabs-accordion-{{ block_id }}.lumin-tabs-accordion--plus .icon-caret {
+    display: none;
+  }
+
+  .lumin-tabs-accordion-content-{{ block_id }} {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+
+  .lumin-tabs-accordion-content-{{ block_id }}.active {
+    grid-template-rows: 1fr;
+  }
+
+  .lumin-tabs-accordion-content-inner-{{ block_id }} {
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+    transition: padding-bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .lumin-tabs-accordion-content-{{ block_id }}.active .lumin-tabs-accordion-content-inner-{{ block_id }} {
+    padding-bottom: {{ block.settings.accordion_padding }}px;
+  }
+
+  {% if block.settings.show_as_accordion_desktop %}
+    @media screen and (min-width: 750px) {
+      .lumin-tabs-nav-wrapper-{{ block_id }},
+      .lumin-tabs-nav-{{ block_id }},
+      .lumin-tabs-panels-{{ block_id }} {
+        display: none;
+      }
+
+      .lumin-tabs-accordion-{{ block_id }} {
+        display: block;
+      }
+    }
+  {% endif %}
+
+  {% if block.settings.show_as_accordion_mobile %}
+    @media screen and (max-width: 749px) {
+      .lumin-tabs-nav-wrapper-{{ block_id }},
+      .lumin-tabs-nav-{{ block_id }},
+      .lumin-tabs-panels-{{ block_id }} {
+        display: none;
+      }
+
+      .lumin-tabs-accordion-{{ block_id }} {
+        display: block;
+      }
+    }
+  {% endif %}
+{% endstyle %}
+
+<content-tabs-{{ block_id }}
+  class="lumin-tabs-container-{{ block_id }} spacing-style{% if block.settings.inherit_color_scheme == false %} color-{{ block.settings.color_scheme }}{% endif %}"
+  style="
+    --tabs-label-font-family: var(--font-{{ block.settings.type_preset | default: 'h6' }}--family);
+    --tabs-label-font-style: var(--font-{{ block.settings.type_preset | default: 'h6' }}--style);
+    --tabs-label-font-weight: var(--font-{{ block.settings.type_preset | default: 'h6' }}--weight);
+    --tabs-label-font-size: var(--font-{{ block.settings.type_preset | default: 'h6' }}--size);
+    --tabs-label-font-line-height: var(--font-{{ block.settings.type_preset | default: 'h6' }}--line-height);
+    --tabs-label-font-case: var(--font-{{ block.settings.type_preset | default: 'h6' }}--case);
+    {% if block.settings.block_border != 'none' %}
+    --block-border-width: {{ block.settings.block_border_width }}px;
+    --block-border-style: {{ block.settings.block_border }};
+    --block-border-opacity: {{ block.settings.block_border_opacity | divided_by: 100.0 }};
+    --block-border-radius: {{ block.settings.block_border_radius }}px;
+    {% endif %}
+    {% render 'spacing-style', settings: block.settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="lumin-tabs-nav-wrapper-{{ block_id }}">
+    <div class="lumin-tabs-nav-{{ block_id }}" role="tablist">
+    {% for i in (1..6) %}
+      {% liquid
+        assign tab_enabled_key = 'tab_' | append: i | append: '_enabled'
+        assign tab_label_key = 'tab_' | append: i | append: '_label'
+        assign tab_subheading_key = 'tab_' | append: i | append: '_subheading'
+        assign tab_icon_key = 'tab_' | append: i | append: '_icon'
+        assign tab_icon_image_key = 'tab_' | append: i | append: '_icon_image'
+        assign tab_icon_width_key = 'tab_' | append: i | append: '_icon_width'
+
+        assign tab_enabled = block.settings[tab_enabled_key]
+        assign tab_label = block.settings[tab_label_key]
+        assign tab_subheading = block.settings[tab_subheading_key]
+        assign tab_icon = block.settings[tab_icon_key]
+        assign tab_icon_image = block.settings[tab_icon_image_key]
+        assign tab_icon_width = block.settings[tab_icon_width_key] | default: 20
+      %}
+
+      {% if tab_enabled %}
+        <button
+          class="lumin-tabs-button-{{ block_id }} {% if i == default_tab_tabs %}active{% endif %}"
+          data-tab="tab-{{ i }}"
+          role="tab"
+          aria-selected="{% if i == default_tab_tabs %}true{% else %}false{% endif %}"
+          aria-controls="lumin-tabs-panel-{{ block_id }}-{{ i }}"
+        >
+          {%- capture tab_icon_content -%}
+            {%- render 'icon-or-image',
+              icon: tab_icon,
+              image_upload: tab_icon_image,
+              width: tab_icon_width,
+              class_name: 'lumin-tabs-button-icon-' | append: block_id
+            -%}
+          {%- endcapture -%}
+          {%- if tab_icon_content != blank -%}
+            <span class="lumin-tabs-button-icon-{{ block_id }}">{{ tab_icon_content }}</span>
+          {%- endif -%}
+          <span class="lumin-tabs-label-wrap-{{ block_id }}">
+            <span>{{ tab_label }}</span>
+            {%- if tab_subheading != blank and block.settings.show_subheading_on_tabs -%}
+              <span class="lumin-tabs-subheading-{{ block_id }}">{{ tab_subheading }}</span>
+            {%- endif -%}
+          </span>
+        </button>
+      {% endif %}
+    {% endfor %}
+    </div>
+  </div>
+
+  <div class="lumin-tabs-panels-{{ block_id }}">
+    {% for i in (1..6) %}
+      {% liquid
+        assign tab_enabled_key = 'tab_' | append: i | append: '_enabled'
+        assign tab_show_description_key = 'tab_' | append: i | append: '_show_description'
+        assign tab_image_key = 'tab_' | append: i | append: '_image'
+        assign tab_page_key = 'tab_' | append: i | append: '_page'
+        assign tab_richtext_key = 'tab_' | append: i | append: '_richtext'
+        assign tab_description_order_key = 'tab_' | append: i | append: '_description_order'
+        assign tab_image_order_key = 'tab_' | append: i | append: '_image_order'
+        assign tab_page_order_key = 'tab_' | append: i | append: '_page_order'
+        assign tab_richtext_order_key = 'tab_' | append: i | append: '_richtext_order'
+        assign tab_side_by_side_key = 'tab_' | append: i | append: '_image_richtext_side_by_side'
+
+        assign tab_enabled = block.settings[tab_enabled_key]
+        assign tab_show_description = block.settings[tab_show_description_key]
+        assign tab_image = block.settings[tab_image_key]
+        assign tab_page = block.settings[tab_page_key]
+        assign tab_richtext = block.settings[tab_richtext_key]
+        assign tab_description_order = block.settings[tab_description_order_key]
+        assign tab_image_order = block.settings[tab_image_order_key]
+        assign tab_page_order = block.settings[tab_page_order_key]
+        assign tab_richtext_order = block.settings[tab_richtext_order_key]
+        assign tab_image_richtext_side_by_side = block.settings[tab_side_by_side_key]
+
+        assign content_items = ''
+        
+        if tab_show_description and product.description != blank
+          assign content_items = content_items | append: 'description:' | append: tab_description_order | append: ','
+        endif
+        
+        if tab_image != blank
+          assign content_items = content_items | append: 'image:' | append: tab_image_order | append: ','
+        endif
+        
+        if tab_page != blank
+          assign content_items = content_items | append: 'page:' | append: tab_page_order | append: ','
+        endif
+        
+        if tab_richtext != blank
+          assign content_items = content_items | append: 'richtext:' | append: tab_richtext_order | append: ','
+        endif
+
+        assign has_content = false
+        if content_items != ''
+          assign has_content = true
+        endif
+      %}
+
+      {% if tab_enabled %}
+        <div
+          class="lumin-tabs-content-{{ block_id }} {% if i == default_tab_tabs %}active{% endif %}"
+          id="lumin-tabs-panel-{{ block_id }}-{{ i }}"
+          data-tab-content="tab-{{ i }}"
+          role="tabpanel"
+        >
+          {% if has_content %}
+            {% assign items_array = content_items | split: ',' %}
+            {% assign sorted_items = '' %}
+            
+            {% for order_num in (1..4) %}
+              {% for item in items_array %}
+                {% if item != blank %}
+                  {% assign item_parts = item | split: ':' %}
+                  {% assign item_type = item_parts[0] %}
+                  {% assign item_order = item_parts[1] | plus: 0 %}
+                  
+                  {% if item_order == order_num %}
+                    {% assign sorted_items = sorted_items | append: item_type | append: ',' %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            {% endfor %}
+            
+            {% assign sorted_array = sorted_items | split: ',' %}
+            {% assign show_image_richtext_side_by_side = false %}
+            {% if tab_image != blank and tab_richtext != blank and tab_image_richtext_side_by_side %}
+              {% assign show_image_richtext_side_by_side = true %}
+            {% endif %}
+            
+            {% for content_type in sorted_array %}
+              {% if content_type == 'description' %}
+                <div class="lumin-tabs-description-{{ block_id }}">
+                  {{ product.description }}
+                </div>
+              {% elsif content_type == 'image' %}
+                {% if show_image_richtext_side_by_side %}
+                  <div class="lumin-tabs-image-richtext-side-by-side-{{ block_id }} lumin-tabs-image-richtext-side-by-side--tab-{{ i }}-{{ block_id }}">
+                    {% assign image_order_num = tab_image_order | plus: 0 %}
+                    {% assign richtext_order_num = tab_richtext_order | plus: 0 %}
+                    {% if image_order_num <= richtext_order_num %}
+                      <div class="lumin-tabs-image-wrapper-{{ block_id }}">
+                        <img
+                          src="{{ tab_image | image_url: width: 1200 }}"
+                          alt="{{ tab_image.alt | escape }}"
+                          loading="lazy"
+                          width="{{ tab_image.width }}"
+                          height="{{ tab_image.height }}"
+                          class="lumin-tabs-image-{{ block_id }}"
+                        >
+                      </div>
+                      <div class="lumin-tabs-richtext-{{ block_id }}">
+                        {{ tab_richtext }}
+                      </div>
+                    {% else %}
+                      <div class="lumin-tabs-richtext-{{ block_id }}">
+                        {{ tab_richtext }}
+                      </div>
+                      <div class="lumin-tabs-image-wrapper-{{ block_id }}">
+                        <img
+                          src="{{ tab_image | image_url: width: 1200 }}"
+                          alt="{{ tab_image.alt | escape }}"
+                          loading="lazy"
+                          width="{{ tab_image.width }}"
+                          height="{{ tab_image.height }}"
+                          class="lumin-tabs-image-{{ block_id }}"
+                        >
+                      </div>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <div class="lumin-tabs-image-wrapper-{{ block_id }}">
+                    <img
+                      src="{{ tab_image | image_url: width: 1200 }}"
+                      alt="{{ tab_image.alt | escape }}"
+                      loading="lazy"
+                      width="{{ tab_image.width }}"
+                      height="{{ tab_image.height }}"
+                      class="lumin-tabs-image-{{ block_id }}"
+                    >
+                  </div>
+                {% endif %}
+              {% elsif content_type == 'page' %}
+                <div class="lumin-tabs-page-content-{{ block_id }}">
+                  {{ tab_page.content }}
+                </div>
+              {% elsif content_type == 'richtext' %}
+                {% unless show_image_richtext_side_by_side %}
+                  <div class="lumin-tabs-richtext-{{ block_id }}">
+                    {{ tab_richtext }}
+                  </div>
+                {% endunless %}
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <div class="lumin-tabs-empty-content-{{ block_id }}">
+              Next, add content for this tab
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="lumin-tabs-accordion-{{ block_id }} lumin-tabs-accordion--{{ block.settings.accordion_icon | default: 'caret' }}">
+    {% for i in (1..6) %}
+      {% liquid
+        assign tab_enabled_key = 'tab_' | append: i | append: '_enabled'
+        assign tab_label_key = 'tab_' | append: i | append: '_label'
+        assign tab_show_description_key = 'tab_' | append: i | append: '_show_description'
+        assign tab_image_key = 'tab_' | append: i | append: '_image'
+        assign tab_page_key = 'tab_' | append: i | append: '_page'
+        assign tab_richtext_key = 'tab_' | append: i | append: '_richtext'
+        assign tab_description_order_key = 'tab_' | append: i | append: '_description_order'
+        assign tab_image_order_key = 'tab_' | append: i | append: '_image_order'
+        assign tab_page_order_key = 'tab_' | append: i | append: '_page_order'
+        assign tab_richtext_order_key = 'tab_' | append: i | append: '_richtext_order'
+        assign tab_side_by_side_key = 'tab_' | append: i | append: '_image_richtext_side_by_side'
+        assign tab_subheading_key = 'tab_' | append: i | append: '_subheading'
+        assign tab_icon_key = 'tab_' | append: i | append: '_icon'
+        assign tab_icon_image_key = 'tab_' | append: i | append: '_icon_image'
+        assign tab_icon_width_key = 'tab_' | append: i | append: '_icon_width'
+
+        assign tab_enabled = block.settings[tab_enabled_key]
+        assign tab_label = block.settings[tab_label_key]
+        assign tab_subheading = block.settings[tab_subheading_key]
+        assign tab_icon = block.settings[tab_icon_key]
+        assign tab_icon_image = block.settings[tab_icon_image_key]
+        assign tab_icon_width = block.settings[tab_icon_width_key] | default: 20
+        assign tab_show_description = block.settings[tab_show_description_key]
+        assign tab_image = block.settings[tab_image_key]
+        assign tab_page = block.settings[tab_page_key]
+        assign tab_richtext = block.settings[tab_richtext_key]
+        assign tab_description_order = block.settings[tab_description_order_key]
+        assign tab_image_order = block.settings[tab_image_order_key]
+        assign tab_page_order = block.settings[tab_page_order_key]
+        assign tab_richtext_order = block.settings[tab_richtext_order_key]
+        assign tab_image_richtext_side_by_side = block.settings[tab_side_by_side_key]
+
+        assign content_items = ''
+        
+        if tab_show_description and product.description != blank
+          assign content_items = content_items | append: 'description:' | append: tab_description_order | append: ','
+        endif
+        
+        if tab_image != blank
+          assign content_items = content_items | append: 'image:' | append: tab_image_order | append: ','
+        endif
+        
+        if tab_page != blank
+          assign content_items = content_items | append: 'page:' | append: tab_page_order | append: ','
+        endif
+        
+        if tab_richtext != blank
+          assign content_items = content_items | append: 'richtext:' | append: tab_richtext_order | append: ','
+        endif
+
+        assign has_content = false
+        if content_items != ''
+          assign has_content = true
+        endif
+      %}
+
+      {% if tab_enabled %}
+        <div class="lumin-tabs-accordion-item-{{ block_id }}">
+          <button
+            class="lumin-tabs-accordion-header-{{ block_id }} {% if i == default_tab_accordion %}active{% endif %}"
+            data-accordion="accordion-{{ i }}"
+            aria-expanded="{% if i == default_tab_accordion %}true{% else %}false{% endif %}"
+            aria-controls="lumin-tabs-accordion-panel-{{ block_id }}-{{ i }}"
+          >
+            <span style="display: flex; align-items: center; gap: 8px;">
+              {%- capture accordion_icon_content -%}
+                {%- render 'icon-or-image',
+                  icon: tab_icon,
+                  image_upload: tab_icon_image,
+                  width: tab_icon_width,
+                  class_name: 'lumin-tabs-accordion-icon-wrap-' | append: block_id
+                -%}
+              {%- endcapture -%}
+              {%- if accordion_icon_content != blank -%}
+                <span class="lumin-tabs-accordion-icon-wrap-{{ block_id }}">{{ accordion_icon_content }}</span>
+              {%- endif -%}
+              <span class="lumin-tabs-label-wrap-{{ block_id }}">
+                <span>{{ tab_label }}</span>
+                {%- if tab_subheading != blank and block.settings.show_subheading_on_accordion -%}
+                  <span class="lumin-tabs-subheading-{{ block_id }}">{{ tab_subheading }}</span>
+                {%- endif -%}
+              </span>
+            </span>
+            <span class="lumin-tabs-accordion-toggle-icon">
+              <span class="svg-wrapper icon-caret icon-animated">
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </span>
+              <span class="svg-wrapper icon-plus">
+                {{- 'icon-plus.svg' | inline_asset_content -}}
+              </span>
+            </span>
+          </button>
+          <div
+            class="lumin-tabs-accordion-content-{{ block_id }} {% if i == default_tab_accordion %}active{% endif %}"
+            id="lumin-tabs-accordion-panel-{{ block_id }}-{{ i }}"
+            data-accordion-content="accordion-{{ i }}"
+          >
+            <div class="lumin-tabs-accordion-content-inner-{{ block_id }}">
+            {% if has_content %}
+              {% assign items_array = content_items | split: ',' %}
+              {% assign sorted_items = '' %}
+              
+              {% for order_num in (1..4) %}
+                {% for item in items_array %}
+                  {% if item != blank %}
+                    {% assign item_parts = item | split: ':' %}
+                    {% assign item_type = item_parts[0] %}
+                    {% assign item_order = item_parts[1] | plus: 0 %}
+                    
+                    {% if item_order == order_num %}
+                      {% assign sorted_items = sorted_items | append: item_type | append: ',' %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+              
+              {% assign sorted_array = sorted_items | split: ',' %}
+              {% assign show_image_richtext_side_by_side = false %}
+              {% if tab_image != blank and tab_richtext != blank and tab_image_richtext_side_by_side %}
+                {% assign show_image_richtext_side_by_side = true %}
+              {% endif %}
+              
+              {% for content_type in sorted_array %}
+                {% if content_type == 'description' %}
+                  <div class="lumin-tabs-description-{{ block_id }}">
+                    {{ product.description }}
+                  </div>
+                {% elsif content_type == 'image' %}
+                  {% if show_image_richtext_side_by_side %}
+                    <div class="lumin-tabs-image-richtext-side-by-side-{{ block_id }} lumin-tabs-image-richtext-side-by-side--tab-{{ i }}-{{ block_id }}">
+                      {% assign image_order_num = tab_image_order | plus: 0 %}
+                      {% assign richtext_order_num = tab_richtext_order | plus: 0 %}
+                      {% if image_order_num <= richtext_order_num %}
+                        <div class="lumin-tabs-image-wrapper-{{ block_id }}">
+                          <img
+                            src="{{ tab_image | image_url: width: 1200 }}"
+                            alt="{{ tab_image.alt | escape }}"
+                            loading="lazy"
+                            width="{{ tab_image.width }}"
+                            height="{{ tab_image.height }}"
+                            class="lumin-tabs-image-{{ block_id }}"
+                          >
+                        </div>
+                        <div class="lumin-tabs-richtext-{{ block_id }}">
+                          {{ tab_richtext }}
+                        </div>
+                      {% else %}
+                        <div class="lumin-tabs-richtext-{{ block_id }}">
+                          {{ tab_richtext }}
+                        </div>
+                        <div class="lumin-tabs-image-wrapper-{{ block_id }}">
+                          <img
+                            src="{{ tab_image | image_url: width: 1200 }}"
+                            alt="{{ tab_image.alt | escape }}"
+                            loading="lazy"
+                            width="{{ tab_image.width }}"
+                            height="{{ tab_image.height }}"
+                            class="lumin-tabs-image-{{ block_id }}"
+                          >
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <div class="lumin-tabs-image-wrapper-{{ block_id }}">
+                      <img
+                        src="{{ tab_image | image_url: width: 1200 }}"
+                        alt="{{ tab_image.alt | escape }}"
+                        loading="lazy"
+                        width="{{ tab_image.width }}"
+                        height="{{ tab_image.height }}"
+                        class="lumin-tabs-image-{{ block_id }}"
+                      >
+                    </div>
+                  {% endif %}
+                {% elsif content_type == 'page' %}
+                  <div class="lumin-tabs-page-content-{{ block_id }}">
+                    {{ tab_page.content }}
+                  </div>
+                {% elsif content_type == 'richtext' %}
+                  {% unless show_image_richtext_side_by_side %}
+                    <div class="lumin-tabs-richtext-{{ block_id }}">
+                      {{ tab_richtext }}
+                    </div>
+                  {% endunless %}
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              <div class="lumin-tabs-empty-content-{{ block_id }}">
+                Next, add content for this tab
+              </div>
+            {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</content-tabs-{{ block_id }}>
+
+<script>
+  (function() {
+    class ContentTabs{{ block_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.tabButtons = this.querySelectorAll('.lumin-tabs-button-{{ block_id }}');
+        this.tabPanels = this.querySelectorAll('.lumin-tabs-content-{{ block_id }}');
+        this.accordionHeaders = this.querySelectorAll('.lumin-tabs-accordion-header-{{ block_id }}');
+        this.accordionContents = this.querySelectorAll('.lumin-tabs-accordion-content-{{ block_id }}');
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.tabButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            this.switchTab(tabId);
+          });
+        });
+
+        this.accordionHeaders.forEach((header) => {
+          header.addEventListener('click', () => {
+            const accordionId = header.getAttribute('data-accordion');
+            this.toggleAccordion(accordionId);
+          });
+        });
+      }
+
+      scrollTabButtonIntoViewIfNeeded(btn) {
+        const wrap = btn.closest('.lumin-tabs-nav-wrapper-{{ block_id }}');
+        if (!wrap) return;
+        const W = wrap.clientWidth;
+        const maxScroll = Math.max(0, wrap.scrollWidth - W);
+        if (maxScroll < 1) return;
+
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const behavior = reduced ? 'auto' : 'smooth';
+        const pad = 12;
+
+        const wrapRect = wrap.getBoundingClientRect();
+        const btnRect = btn.getBoundingClientRect();
+
+        const btnLeftInContent = wrap.scrollLeft + (btnRect.left - wrapRect.left);
+        const btnW = btnRect.width;
+
+        let targetLeft;
+        if (btnW > W) {
+          targetLeft = Math.max(0, Math.min(btnLeftInContent - pad, maxScroll));
+        } else {
+          const btnCenter = btnLeftInContent + btnW / 2;
+          targetLeft = btnCenter - W / 2;
+        }
+
+        targetLeft = Math.max(0, Math.min(targetLeft, maxScroll));
+
+        const delta = targetLeft - wrap.scrollLeft;
+        if (Math.abs(delta) > 0.5) {
+          wrap.scrollBy({ left: delta, behavior });
+        }
+      }
+
+      switchTab(tabId) {
+        this.tabButtons.forEach((btn) => {
+          const isActive = btn.getAttribute('data-tab') === tabId;
+          btn.classList.toggle('active', isActive);
+          btn.setAttribute('aria-selected', isActive);
+          if (isActive) {
+            this.scrollTabButtonIntoViewIfNeeded(btn);
+          }
+        });
+
+        this.tabPanels.forEach((panel) => {
+          const isActive = panel.getAttribute('data-tab-content') === tabId;
+          panel.classList.toggle('active', isActive);
+        });
+      }
+
+      toggleAccordion(accordionId) {
+        const targetHeader = this.querySelector(`.lumin-tabs-accordion-header-{{ block_id }}[data-accordion="${accordionId}"]`);
+        const targetContent = this.querySelector(`[data-accordion-content="${accordionId}"]`);
+        if (!targetHeader || !targetContent) return;
+
+        const wasTargetOpen = targetHeader.classList.contains('active');
+
+        if (wasTargetOpen) {
+          targetHeader.classList.remove('active');
+          targetHeader.setAttribute('aria-expanded', 'false');
+          targetContent.classList.remove('active');
+          return;
+        }
+
+        this.accordionHeaders.forEach((header) => {
+          const id = header.getAttribute('data-accordion');
+          if (id === accordionId) return;
+          const content = this.querySelector(`[data-accordion-content="${id}"]`);
+          header.classList.remove('active');
+          header.setAttribute('aria-expanded', 'false');
+          if (content) content.classList.remove('active');
+        });
+
+        targetHeader.classList.add('active');
+        targetHeader.setAttribute('aria-expanded', 'true');
+        targetContent.classList.add('active');
+      }
+    }
+
+    customElements.define('content-tabs-{{ block_id }}', ContentTabs{{ block_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Tabs",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Display mode"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_as_accordion_mobile",
+      "label": "Show as accordion on mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_as_accordion_desktop",
+      "label": "Show as accordion on desktop",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "accordion_icon",
+      "label": "Accordion icon",
+      "options": [
+        { "value": "caret", "label": "Caret" },
+        { "value": "plus", "label": "Plus" }
+      ],
+      "default": "caret"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_subheading_on_tabs",
+      "label": "Show subheading on tabs",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_subheading_on_accordion",
+      "label": "Show subheading on accordion",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "type_preset",
+      "label": "Heading preset",
+      "options": [
+        { "value": "", "label": "Default" },
+        { "value": "paragraph", "label": "Paragraph" },
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" }
+      ],
+      "default": "h6",
+      "info": "Edit presets in theme settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "inherit_color_scheme",
+      "label": "Inherit color scheme",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1",
+      "visible_if": "{{ block.settings.inherit_color_scheme == false }}"
+    },
+    {
+      "type": "header",
+      "content": "Borders"
+    },
+    {
+      "type": "select",
+      "id": "block_border",
+      "label": "Border style",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "solid", "label": "Solid" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "block_border_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Border thickness",
+      "default": 1,
+      "visible_if": "{{ block.settings.block_border != \"none\" }}"
+    },
+    {
+      "type": "range",
+      "id": "block_border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Border opacity",
+      "default": 100,
+      "visible_if": "{{ block.settings.block_border != \"none\" }}"
+    },
+    {
+      "type": "range",
+      "id": "block_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Tab 1"
+    },
+    
+    {
+      "type": "checkbox",
+      "id": "tab_1_enabled",
+      "label": "Enable tab 1",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_1_open_by_default",
+      "label": "Open by default (accordion)",
+      "default": true,
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_1_label",
+      "label": "Tab label",
+      "default": "Description",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_1_subheading",
+      "label": "Subheading",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_1_icon",
+      "label": "Icon",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "3d-model", "label": "3D model" },
+        { "value": "apple", "label": "Apple" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "banana", "label": "Banana" },
+        { "value": "bluesky", "label": "Bluesky" },
+        { "value": "bottle", "label": "Bottle" },
+        { "value": "box", "label": "Box" },
+        { "value": "caret", "label": "Caret" },
+        { "value": "carrot", "label": "Carrot" },
+        { "value": "chat_bubble", "label": "Chat bubble" },
+        { "value": "check_box", "label": "Check box" },
+        { "value": "check_circle", "label": "Checkmark" },
+        { "value": "clipboard", "label": "Clipboard" },
+        { "value": "dairy", "label": "Dairy" },
+        { "value": "dairy_free", "label": "Dairy free" },
+        { "value": "discord", "label": "Discord" },
+        { "value": "double-sided-caret", "label": "Double-sided caret" },
+        { "value": "dryer", "label": "Dryer" },
+        { "value": "error", "label": "Error" },
+        { "value": "eye", "label": "Eye" },
+        { "value": "facebook", "label": "Facebook" },
+        { "value": "fire", "label": "Fire" },
+        { "value": "gluten_free", "label": "Gluten free" },
+        { "value": "heart", "label": "Heart" },
+        { "value": "instagram", "label": "Instagram" },
+        { "value": "iron", "label": "Iron" },
+        { "value": "leaf", "label": "Leaf" },
+        { "value": "leather", "label": "Leather" },
+        { "value": "lightning_bolt", "label": "Lightning bolt" },
+        { "value": "linkedin", "label": "LinkedIn" },
+        { "value": "lipstick", "label": "Lipstick" },
+        { "value": "lock", "label": "Lock" },
+        { "value": "map_pin", "label": "Map pin" },
+        { "value": "mastodon", "label": "Mastodon" },
+        { "value": "next", "label": "Next" },
+        { "value": "nut_free", "label": "Nut free" },
+        { "value": "pants", "label": "Pants" },
+        { "value": "paw_print", "label": "Paw print" },
+        { "value": "pepper", "label": "Pepper" },
+        { "value": "perfume", "label": "Perfume" },
+        { "value": "pinterest", "label": "Pinterest" },
+        { "value": "previous", "label": "Previous" },
+        { "value": "plane", "label": "Plane" },
+        { "value": "plant", "label": "Plant" },
+        { "value": "price_tag", "label": "Price tag" },
+        { "value": "question_mark", "label": "Question mark" },
+        { "value": "recycle", "label": "Recycle" },
+        { "value": "reddit", "label": "Reddit" },
+        { "value": "return", "label": "Return" },
+        { "value": "ruler", "label": "Ruler" },
+        { "value": "serving_dish", "label": "Serving dish" },
+        { "value": "shirt", "label": "Shirt" },
+        { "value": "shoe", "label": "Shoe" },
+        { "value": "silhouette", "label": "Silhouette" },
+        { "value": "snapchat", "label": "Snapchat" },
+        { "value": "snowflake", "label": "Snowflake" },
+        { "value": "spotify", "label": "Spotify" },
+        { "value": "star", "label": "Star" },
+        { "value": "stopwatch", "label": "Stopwatch" },
+        { "value": "telegram", "label": "Telegram" },
+        { "value": "threads", "label": "Threads" },
+        { "value": "tiktok", "label": "TikTok" },
+        { "value": "truck", "label": "Truck" },
+        { "value": "tumblr", "label": "Tumblr" },
+        { "value": "twitch", "label": "Twitch" },
+        { "value": "twitter", "label": "Twitter" },
+        { "value": "vimeo", "label": "Vimeo" },
+        { "value": "washing", "label": "Washing" },
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "x", "label": "X" },
+        { "value": "youtube", "label": "YouTube" }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_1_icon_image",
+      "label": "Custom image (overrides icon)",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "tab_1_icon_width",
+      "label": "Icon size",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_1_show_description",
+      "label": "Show product description",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_1_description_order",
+      "label": "Description order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "1",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_1_image",
+      "label": "Image",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_1_image_order",
+      "label": "Image order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "2",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "page",
+      "id": "tab_1_page",
+      "label": "Page"
+    },
+    {
+      "type": "select",
+      "id": "tab_1_page_order",
+      "label": "Page order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "3",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_1_richtext",
+      "label": "Custom content",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_1_richtext_order",
+      "label": "Custom content order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "4",
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_1_image_richtext_side_by_side",
+      "label": "Show image and custom content side by side",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_1_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_1_image_richtext_stack_mobile",
+      "label": "Stack vertically on mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.tab_1_image_richtext_side_by_side == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Tab 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_2_enabled",
+      "label": "Enable tab 2",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_2_label",
+      "label": "Tab label",
+      "default": "Details",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_2_subheading",
+      "label": "Subheading",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_2_icon",
+      "label": "Icon",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "3d-model", "label": "3D model" },
+        { "value": "apple", "label": "Apple" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "banana", "label": "Banana" },
+        { "value": "bluesky", "label": "Bluesky" },
+        { "value": "bottle", "label": "Bottle" },
+        { "value": "box", "label": "Box" },
+        { "value": "caret", "label": "Caret" },
+        { "value": "carrot", "label": "Carrot" },
+        { "value": "chat_bubble", "label": "Chat bubble" },
+        { "value": "check_box", "label": "Check box" },
+        { "value": "check_circle", "label": "Checkmark" },
+        { "value": "clipboard", "label": "Clipboard" },
+        { "value": "dairy", "label": "Dairy" },
+        { "value": "dairy_free", "label": "Dairy free" },
+        { "value": "discord", "label": "Discord" },
+        { "value": "double-sided-caret", "label": "Double-sided caret" },
+        { "value": "dryer", "label": "Dryer" },
+        { "value": "error", "label": "Error" },
+        { "value": "eye", "label": "Eye" },
+        { "value": "facebook", "label": "Facebook" },
+        { "value": "fire", "label": "Fire" },
+        { "value": "gluten_free", "label": "Gluten free" },
+        { "value": "heart", "label": "Heart" },
+        { "value": "instagram", "label": "Instagram" },
+        { "value": "iron", "label": "Iron" },
+        { "value": "leaf", "label": "Leaf" },
+        { "value": "leather", "label": "Leather" },
+        { "value": "lightning_bolt", "label": "Lightning bolt" },
+        { "value": "linkedin", "label": "LinkedIn" },
+        { "value": "lipstick", "label": "Lipstick" },
+        { "value": "lock", "label": "Lock" },
+        { "value": "map_pin", "label": "Map pin" },
+        { "value": "mastodon", "label": "Mastodon" },
+        { "value": "next", "label": "Next" },
+        { "value": "nut_free", "label": "Nut free" },
+        { "value": "pants", "label": "Pants" },
+        { "value": "paw_print", "label": "Paw print" },
+        { "value": "pepper", "label": "Pepper" },
+        { "value": "perfume", "label": "Perfume" },
+        { "value": "pinterest", "label": "Pinterest" },
+        { "value": "previous", "label": "Previous" },
+        { "value": "plane", "label": "Plane" },
+        { "value": "plant", "label": "Plant" },
+        { "value": "price_tag", "label": "Price tag" },
+        { "value": "question_mark", "label": "Question mark" },
+        { "value": "recycle", "label": "Recycle" },
+        { "value": "reddit", "label": "Reddit" },
+        { "value": "return", "label": "Return" },
+        { "value": "ruler", "label": "Ruler" },
+        { "value": "serving_dish", "label": "Serving dish" },
+        { "value": "shirt", "label": "Shirt" },
+        { "value": "shoe", "label": "Shoe" },
+        { "value": "silhouette", "label": "Silhouette" },
+        { "value": "snapchat", "label": "Snapchat" },
+        { "value": "snowflake", "label": "Snowflake" },
+        { "value": "spotify", "label": "Spotify" },
+        { "value": "star", "label": "Star" },
+        { "value": "stopwatch", "label": "Stopwatch" },
+        { "value": "telegram", "label": "Telegram" },
+        { "value": "threads", "label": "Threads" },
+        { "value": "tiktok", "label": "TikTok" },
+        { "value": "truck", "label": "Truck" },
+        { "value": "tumblr", "label": "Tumblr" },
+        { "value": "twitch", "label": "Twitch" },
+        { "value": "twitter", "label": "Twitter" },
+        { "value": "vimeo", "label": "Vimeo" },
+        { "value": "washing", "label": "Washing" },
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "x", "label": "X" },
+        { "value": "youtube", "label": "YouTube" }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_2_icon_image",
+      "label": "Custom image (overrides icon)",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "tab_2_icon_width",
+      "label": "Icon size",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_2_show_description",
+      "label": "Show product description",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_2_description_order",
+      "label": "Description order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "1",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_2_image",
+      "label": "Image",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_2_image_order",
+      "label": "Image order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "2",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "page",
+      "id": "tab_2_page",
+      "label": "Page"
+    },
+    {
+      "type": "select",
+      "id": "tab_2_page_order",
+      "label": "Page order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "3",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_2_richtext",
+      "label": "Custom content",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_2_richtext_order",
+      "label": "Custom content order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "4",
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_2_image_richtext_side_by_side",
+      "label": "Show image and custom content side by side",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_2_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_2_image_richtext_stack_mobile",
+      "label": "Stack vertically on mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.tab_2_image_richtext_side_by_side == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Tab 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_3_enabled",
+      "label": "Enable tab 3",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_3_label",
+      "label": "Tab label",
+      "default": "Shipping",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_3_subheading",
+      "label": "Subheading",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_3_icon",
+      "label": "Icon",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "3d-model", "label": "3D model" },
+        { "value": "apple", "label": "Apple" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "banana", "label": "Banana" },
+        { "value": "bluesky", "label": "Bluesky" },
+        { "value": "bottle", "label": "Bottle" },
+        { "value": "box", "label": "Box" },
+        { "value": "caret", "label": "Caret" },
+        { "value": "carrot", "label": "Carrot" },
+        { "value": "chat_bubble", "label": "Chat bubble" },
+        { "value": "check_box", "label": "Check box" },
+        { "value": "check_circle", "label": "Checkmark" },
+        { "value": "clipboard", "label": "Clipboard" },
+        { "value": "dairy", "label": "Dairy" },
+        { "value": "dairy_free", "label": "Dairy free" },
+        { "value": "discord", "label": "Discord" },
+        { "value": "double-sided-caret", "label": "Double-sided caret" },
+        { "value": "dryer", "label": "Dryer" },
+        { "value": "error", "label": "Error" },
+        { "value": "eye", "label": "Eye" },
+        { "value": "facebook", "label": "Facebook" },
+        { "value": "fire", "label": "Fire" },
+        { "value": "gluten_free", "label": "Gluten free" },
+        { "value": "heart", "label": "Heart" },
+        { "value": "instagram", "label": "Instagram" },
+        { "value": "iron", "label": "Iron" },
+        { "value": "leaf", "label": "Leaf" },
+        { "value": "leather", "label": "Leather" },
+        { "value": "lightning_bolt", "label": "Lightning bolt" },
+        { "value": "linkedin", "label": "LinkedIn" },
+        { "value": "lipstick", "label": "Lipstick" },
+        { "value": "lock", "label": "Lock" },
+        { "value": "map_pin", "label": "Map pin" },
+        { "value": "mastodon", "label": "Mastodon" },
+        { "value": "next", "label": "Next" },
+        { "value": "nut_free", "label": "Nut free" },
+        { "value": "pants", "label": "Pants" },
+        { "value": "paw_print", "label": "Paw print" },
+        { "value": "pepper", "label": "Pepper" },
+        { "value": "perfume", "label": "Perfume" },
+        { "value": "pinterest", "label": "Pinterest" },
+        { "value": "previous", "label": "Previous" },
+        { "value": "plane", "label": "Plane" },
+        { "value": "plant", "label": "Plant" },
+        { "value": "price_tag", "label": "Price tag" },
+        { "value": "question_mark", "label": "Question mark" },
+        { "value": "recycle", "label": "Recycle" },
+        { "value": "reddit", "label": "Reddit" },
+        { "value": "return", "label": "Return" },
+        { "value": "ruler", "label": "Ruler" },
+        { "value": "serving_dish", "label": "Serving dish" },
+        { "value": "shirt", "label": "Shirt" },
+        { "value": "shoe", "label": "Shoe" },
+        { "value": "silhouette", "label": "Silhouette" },
+        { "value": "snapchat", "label": "Snapchat" },
+        { "value": "snowflake", "label": "Snowflake" },
+        { "value": "spotify", "label": "Spotify" },
+        { "value": "star", "label": "Star" },
+        { "value": "stopwatch", "label": "Stopwatch" },
+        { "value": "telegram", "label": "Telegram" },
+        { "value": "threads", "label": "Threads" },
+        { "value": "tiktok", "label": "TikTok" },
+        { "value": "truck", "label": "Truck" },
+        { "value": "tumblr", "label": "Tumblr" },
+        { "value": "twitch", "label": "Twitch" },
+        { "value": "twitter", "label": "Twitter" },
+        { "value": "vimeo", "label": "Vimeo" },
+        { "value": "washing", "label": "Washing" },
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "x", "label": "X" },
+        { "value": "youtube", "label": "YouTube" }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_3_icon_image",
+      "label": "Custom image (overrides icon)",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "tab_3_icon_width",
+      "label": "Icon size",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_3_show_description",
+      "label": "Show product description",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_3_description_order",
+      "label": "Description order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "1",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_3_image",
+      "label": "Image",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_3_image_order",
+      "label": "Image order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "2",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "page",
+      "id": "tab_3_page",
+      "label": "Page"
+    },
+    {
+      "type": "select",
+      "id": "tab_3_page_order",
+      "label": "Page order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "3",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_3_richtext",
+      "label": "Custom content",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_3_richtext_order",
+      "label": "Custom content order",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        }
+      ],
+      "default": "4",
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_3_image_richtext_side_by_side",
+      "label": "Show image and custom content side by side",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_3_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_3_image_richtext_stack_mobile",
+      "label": "Stack vertically on mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.tab_3_image_richtext_side_by_side == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Tab 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_4_enabled",
+      "label": "Enable tab 4",
+      "default": false
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_4_label",
+      "label": "Tab label",
+      "default": "Tab 4",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_4_subheading",
+      "label": "Subheading",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_4_icon",
+      "label": "Icon",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "3d-model", "label": "3D model" },
+        { "value": "apple", "label": "Apple" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "banana", "label": "Banana" },
+        { "value": "bluesky", "label": "Bluesky" },
+        { "value": "bottle", "label": "Bottle" },
+        { "value": "box", "label": "Box" },
+        { "value": "caret", "label": "Caret" },
+        { "value": "carrot", "label": "Carrot" },
+        { "value": "chat_bubble", "label": "Chat bubble" },
+        { "value": "check_box", "label": "Check box" },
+        { "value": "check_circle", "label": "Checkmark" },
+        { "value": "clipboard", "label": "Clipboard" },
+        { "value": "dairy", "label": "Dairy" },
+        { "value": "dairy_free", "label": "Dairy free" },
+        { "value": "discord", "label": "Discord" },
+        { "value": "double-sided-caret", "label": "Double-sided caret" },
+        { "value": "dryer", "label": "Dryer" },
+        { "value": "error", "label": "Error" },
+        { "value": "eye", "label": "Eye" },
+        { "value": "facebook", "label": "Facebook" },
+        { "value": "fire", "label": "Fire" },
+        { "value": "gluten_free", "label": "Gluten free" },
+        { "value": "heart", "label": "Heart" },
+        { "value": "instagram", "label": "Instagram" },
+        { "value": "iron", "label": "Iron" },
+        { "value": "leaf", "label": "Leaf" },
+        { "value": "leather", "label": "Leather" },
+        { "value": "lightning_bolt", "label": "Lightning bolt" },
+        { "value": "linkedin", "label": "LinkedIn" },
+        { "value": "lipstick", "label": "Lipstick" },
+        { "value": "lock", "label": "Lock" },
+        { "value": "map_pin", "label": "Map pin" },
+        { "value": "mastodon", "label": "Mastodon" },
+        { "value": "next", "label": "Next" },
+        { "value": "nut_free", "label": "Nut free" },
+        { "value": "pants", "label": "Pants" },
+        { "value": "paw_print", "label": "Paw print" },
+        { "value": "pepper", "label": "Pepper" },
+        { "value": "perfume", "label": "Perfume" },
+        { "value": "pinterest", "label": "Pinterest" },
+        { "value": "previous", "label": "Previous" },
+        { "value": "plane", "label": "Plane" },
+        { "value": "plant", "label": "Plant" },
+        { "value": "price_tag", "label": "Price tag" },
+        { "value": "question_mark", "label": "Question mark" },
+        { "value": "recycle", "label": "Recycle" },
+        { "value": "reddit", "label": "Reddit" },
+        { "value": "return", "label": "Return" },
+        { "value": "ruler", "label": "Ruler" },
+        { "value": "serving_dish", "label": "Serving dish" },
+        { "value": "shirt", "label": "Shirt" },
+        { "value": "shoe", "label": "Shoe" },
+        { "value": "silhouette", "label": "Silhouette" },
+        { "value": "snapchat", "label": "Snapchat" },
+        { "value": "snowflake", "label": "Snowflake" },
+        { "value": "spotify", "label": "Spotify" },
+        { "value": "star", "label": "Star" },
+        { "value": "stopwatch", "label": "Stopwatch" },
+        { "value": "telegram", "label": "Telegram" },
+        { "value": "threads", "label": "Threads" },
+        { "value": "tiktok", "label": "TikTok" },
+        { "value": "truck", "label": "Truck" },
+        { "value": "tumblr", "label": "Tumblr" },
+        { "value": "twitch", "label": "Twitch" },
+        { "value": "twitter", "label": "Twitter" },
+        { "value": "vimeo", "label": "Vimeo" },
+        { "value": "washing", "label": "Washing" },
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "x", "label": "X" },
+        { "value": "youtube", "label": "YouTube" }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_4_icon_image",
+      "label": "Custom image (overrides icon)",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "tab_4_icon_width",
+      "label": "Icon size",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_4_show_description",
+      "label": "Show product description",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_4_description_order",
+      "label": "Description order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "1",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_4_image",
+      "label": "Image",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_4_image_order",
+      "label": "Image order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "2",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "page",
+      "id": "tab_4_page",
+      "label": "Page"
+    },
+    {
+      "type": "select",
+      "id": "tab_4_page_order",
+      "label": "Page order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "3",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_4_richtext",
+      "label": "Custom content",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_4_richtext_order",
+      "label": "Custom content order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "4",
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_4_image_richtext_side_by_side",
+      "label": "Show image and custom content side by side",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_4_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_4_image_richtext_stack_mobile",
+      "label": "Stack vertically on mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.tab_4_image_richtext_side_by_side == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Tab 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_5_enabled",
+      "label": "Enable tab 5",
+      "default": false
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_5_label",
+      "label": "Tab label",
+      "default": "Tab 5",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_5_subheading",
+      "label": "Subheading",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_5_icon",
+      "label": "Icon",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "3d-model", "label": "3D model" },
+        { "value": "apple", "label": "Apple" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "banana", "label": "Banana" },
+        { "value": "bluesky", "label": "Bluesky" },
+        { "value": "bottle", "label": "Bottle" },
+        { "value": "box", "label": "Box" },
+        { "value": "caret", "label": "Caret" },
+        { "value": "carrot", "label": "Carrot" },
+        { "value": "chat_bubble", "label": "Chat bubble" },
+        { "value": "check_box", "label": "Check box" },
+        { "value": "check_circle", "label": "Checkmark" },
+        { "value": "clipboard", "label": "Clipboard" },
+        { "value": "dairy", "label": "Dairy" },
+        { "value": "dairy_free", "label": "Dairy free" },
+        { "value": "discord", "label": "Discord" },
+        { "value": "double-sided-caret", "label": "Double-sided caret" },
+        { "value": "dryer", "label": "Dryer" },
+        { "value": "error", "label": "Error" },
+        { "value": "eye", "label": "Eye" },
+        { "value": "facebook", "label": "Facebook" },
+        { "value": "fire", "label": "Fire" },
+        { "value": "gluten_free", "label": "Gluten free" },
+        { "value": "heart", "label": "Heart" },
+        { "value": "instagram", "label": "Instagram" },
+        { "value": "iron", "label": "Iron" },
+        { "value": "leaf", "label": "Leaf" },
+        { "value": "leather", "label": "Leather" },
+        { "value": "lightning_bolt", "label": "Lightning bolt" },
+        { "value": "linkedin", "label": "LinkedIn" },
+        { "value": "lipstick", "label": "Lipstick" },
+        { "value": "lock", "label": "Lock" },
+        { "value": "map_pin", "label": "Map pin" },
+        { "value": "mastodon", "label": "Mastodon" },
+        { "value": "next", "label": "Next" },
+        { "value": "nut_free", "label": "Nut free" },
+        { "value": "pants", "label": "Pants" },
+        { "value": "paw_print", "label": "Paw print" },
+        { "value": "pepper", "label": "Pepper" },
+        { "value": "perfume", "label": "Perfume" },
+        { "value": "pinterest", "label": "Pinterest" },
+        { "value": "previous", "label": "Previous" },
+        { "value": "plane", "label": "Plane" },
+        { "value": "plant", "label": "Plant" },
+        { "value": "price_tag", "label": "Price tag" },
+        { "value": "question_mark", "label": "Question mark" },
+        { "value": "recycle", "label": "Recycle" },
+        { "value": "reddit", "label": "Reddit" },
+        { "value": "return", "label": "Return" },
+        { "value": "ruler", "label": "Ruler" },
+        { "value": "serving_dish", "label": "Serving dish" },
+        { "value": "shirt", "label": "Shirt" },
+        { "value": "shoe", "label": "Shoe" },
+        { "value": "silhouette", "label": "Silhouette" },
+        { "value": "snapchat", "label": "Snapchat" },
+        { "value": "snowflake", "label": "Snowflake" },
+        { "value": "spotify", "label": "Spotify" },
+        { "value": "star", "label": "Star" },
+        { "value": "stopwatch", "label": "Stopwatch" },
+        { "value": "telegram", "label": "Telegram" },
+        { "value": "threads", "label": "Threads" },
+        { "value": "tiktok", "label": "TikTok" },
+        { "value": "truck", "label": "Truck" },
+        { "value": "tumblr", "label": "Tumblr" },
+        { "value": "twitch", "label": "Twitch" },
+        { "value": "twitter", "label": "Twitter" },
+        { "value": "vimeo", "label": "Vimeo" },
+        { "value": "washing", "label": "Washing" },
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "x", "label": "X" },
+        { "value": "youtube", "label": "YouTube" }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_5_icon_image",
+      "label": "Custom image (overrides icon)",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "tab_5_icon_width",
+      "label": "Icon size",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_5_show_description",
+      "label": "Show product description",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_5_description_order",
+      "label": "Description order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "1",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_5_image",
+      "label": "Image",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_5_image_order",
+      "label": "Image order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "2",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "page",
+      "id": "tab_5_page",
+      "label": "Page"
+    },
+    {
+      "type": "select",
+      "id": "tab_5_page_order",
+      "label": "Page order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "3",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_5_richtext",
+      "label": "Custom content",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_5_richtext_order",
+      "label": "Custom content order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "4",
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_5_image_richtext_side_by_side",
+      "label": "Show image and custom content side by side",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_5_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_5_image_richtext_stack_mobile",
+      "label": "Stack vertically on mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.tab_5_image_richtext_side_by_side == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Tab 6"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_6_enabled",
+      "label": "Enable tab 6",
+      "default": false
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_6_label",
+      "label": "Tab label",
+      "default": "Tab 6",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "tab_6_subheading",
+      "label": "Subheading",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_6_icon",
+      "label": "Icon",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "3d-model", "label": "3D model" },
+        { "value": "apple", "label": "Apple" },
+        { "value": "arrow", "label": "Arrow" },
+        { "value": "banana", "label": "Banana" },
+        { "value": "bluesky", "label": "Bluesky" },
+        { "value": "bottle", "label": "Bottle" },
+        { "value": "box", "label": "Box" },
+        { "value": "caret", "label": "Caret" },
+        { "value": "carrot", "label": "Carrot" },
+        { "value": "chat_bubble", "label": "Chat bubble" },
+        { "value": "check_box", "label": "Check box" },
+        { "value": "check_circle", "label": "Checkmark" },
+        { "value": "clipboard", "label": "Clipboard" },
+        { "value": "dairy", "label": "Dairy" },
+        { "value": "dairy_free", "label": "Dairy free" },
+        { "value": "discord", "label": "Discord" },
+        { "value": "double-sided-caret", "label": "Double-sided caret" },
+        { "value": "dryer", "label": "Dryer" },
+        { "value": "error", "label": "Error" },
+        { "value": "eye", "label": "Eye" },
+        { "value": "facebook", "label": "Facebook" },
+        { "value": "fire", "label": "Fire" },
+        { "value": "gluten_free", "label": "Gluten free" },
+        { "value": "heart", "label": "Heart" },
+        { "value": "instagram", "label": "Instagram" },
+        { "value": "iron", "label": "Iron" },
+        { "value": "leaf", "label": "Leaf" },
+        { "value": "leather", "label": "Leather" },
+        { "value": "lightning_bolt", "label": "Lightning bolt" },
+        { "value": "linkedin", "label": "LinkedIn" },
+        { "value": "lipstick", "label": "Lipstick" },
+        { "value": "lock", "label": "Lock" },
+        { "value": "map_pin", "label": "Map pin" },
+        { "value": "mastodon", "label": "Mastodon" },
+        { "value": "next", "label": "Next" },
+        { "value": "nut_free", "label": "Nut free" },
+        { "value": "pants", "label": "Pants" },
+        { "value": "paw_print", "label": "Paw print" },
+        { "value": "pepper", "label": "Pepper" },
+        { "value": "perfume", "label": "Perfume" },
+        { "value": "pinterest", "label": "Pinterest" },
+        { "value": "previous", "label": "Previous" },
+        { "value": "plane", "label": "Plane" },
+        { "value": "plant", "label": "Plant" },
+        { "value": "price_tag", "label": "Price tag" },
+        { "value": "question_mark", "label": "Question mark" },
+        { "value": "recycle", "label": "Recycle" },
+        { "value": "reddit", "label": "Reddit" },
+        { "value": "return", "label": "Return" },
+        { "value": "ruler", "label": "Ruler" },
+        { "value": "serving_dish", "label": "Serving dish" },
+        { "value": "shirt", "label": "Shirt" },
+        { "value": "shoe", "label": "Shoe" },
+        { "value": "silhouette", "label": "Silhouette" },
+        { "value": "snapchat", "label": "Snapchat" },
+        { "value": "snowflake", "label": "Snowflake" },
+        { "value": "spotify", "label": "Spotify" },
+        { "value": "star", "label": "Star" },
+        { "value": "stopwatch", "label": "Stopwatch" },
+        { "value": "telegram", "label": "Telegram" },
+        { "value": "threads", "label": "Threads" },
+        { "value": "tiktok", "label": "TikTok" },
+        { "value": "truck", "label": "Truck" },
+        { "value": "tumblr", "label": "Tumblr" },
+        { "value": "twitch", "label": "Twitch" },
+        { "value": "twitter", "label": "Twitter" },
+        { "value": "vimeo", "label": "Vimeo" },
+        { "value": "washing", "label": "Washing" },
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "x", "label": "X" },
+        { "value": "youtube", "label": "YouTube" }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_6_icon_image",
+      "label": "Custom image (overrides icon)",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "tab_6_icon_width",
+      "label": "Icon size",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_6_show_description",
+      "label": "Show product description",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_6_description_order",
+      "label": "Description order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "1",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "tab_6_image",
+      "label": "Image",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_6_image_order",
+      "label": "Image order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "2",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "page",
+      "id": "tab_6_page",
+      "label": "Page"
+    },
+    {
+      "type": "select",
+      "id": "tab_6_page_order",
+      "label": "Page order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "3",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_6_richtext",
+      "label": "Custom content",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "tab_6_richtext_order",
+      "label": "Custom content order",
+      "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}, {"value": "3", "label": "3"}, {"value": "4", "label": "4"}],
+      "default": "4",
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_6_image_richtext_side_by_side",
+      "label": "Show image and custom content side by side",
+      "default": false,
+      "visible_if": "{{ block.settings.tab_6_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "tab_6_image_richtext_stack_mobile",
+      "label": "Stack vertically on mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.tab_6_image_richtext_side_by_side == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "tabs_alignment",
+      "label": "Tab alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "tab_spacing",
+      "label": "Tab spacing",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "content_spacing",
+      "label": "Content spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "content_item_spacing",
+      "label": "Content item spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "image_richtext_side_by_side_align",
+      "label": "Side-by-side content alignment",
+      "info": "Vertical alignment when image and custom content are shown side by side",
+      "options": [
+        { "value": "top", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "bottom", "label": "Bottom" }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "range",
+      "id": "image_richtext_side_by_side_image_width",
+      "label": "Side-by-side image width",
+      "info": "Width of the image when image and custom content are side by side. When “Stack vertically on mobile” is off for a tab, this width also applies on small screens.",
+      "min": 20,
+      "max": 75,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "accordion_padding",
+      "label": "Accordion padding",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Tab style"
+    },
+    {
+      "type": "range",
+      "id": "tab_padding_vertical",
+      "label": "Vertical padding",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "tab_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "tab_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "tab_text_color",
+      "label": "Text color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "tab_hover_color",
+      "label": "Hover color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_color",
+      "label": "Active color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#E6E6E6"
+    },
+    {
+      "type": "range",
+      "id": "active_border_width",
+      "label": "Active border width",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "active_border_color",
+      "label": "Active border color",
+      "default": "#000F9F"
+    },
+    {
+      "type": "header",
+      "content": "Content style"
+    },
+    {
+      "type": "range",
+      "id": "content_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "content_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tabs"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,58 @@
+{% # theme-check-disable %}
+{%- unless settings.type_body_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_body_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_subheading_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_subheading_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_heading_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_heading_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+{%- unless settings.type_accent_font.system? -%}
+  <link
+    rel="preload"
+    as="font"
+    href="{{ settings.type_accent_font | font_url }}"
+    type="font/woff2"
+    crossorigin
+    fetchpriority="low"
+  >
+{%- endunless -%}
+
+{%- comment -%} Preload custom fonts if enabled {%- endcomment -%}
+{%- if settings.enable_custom_fonts and settings.custom_font_name != blank -%}
+  {%- if settings.custom_font_regular != blank -%}
+    <link rel="preload" as="font" href="{{ settings.custom_font_regular }}" type="font/woff2" crossorigin fetchpriority="low">
+  {%- endif -%}
+  {%- if settings.custom_font_bold != blank -%}
+    <link rel="preload" as="font" href="{{ settings.custom_font_bold }}" type="font/woff2" crossorigin fetchpriority="low">
+  {%- endif -%}
+  {%- if settings.custom_font_italic != blank -%}
+    <link rel="preload" as="font" href="{{ settings.custom_font_italic }}" type="font/woff2" crossorigin fetchpriority="low">
+  {%- endif -%}
+  {%- if settings.custom_font_bold_italic != blank -%}
+    <link rel="preload" as="font" href="{{ settings.custom_font_bold_italic }}" type="font/woff2" crossorigin fetchpriority="low">
+  {%- endif -%}
+{%- endif -%}
+{% # theme-check-enable %}

@@ -1,0 +1,142 @@
+{%- liquid
+  assign s = block.settings
+  assign label_stripped = s.label | default: '' | strip
+  assign field_raw = s.field_name | strip | handleize
+  if field_raw == blank
+    assign field_key = 'dropdown_selection'
+  else
+    assign field_key = field_raw
+  endif
+
+  assign lines_joined = s.options | default: '' | strip | newline_to_br | split: '<br />'
+  assign select_id = 'ContactForm-select-' | append: block.id
+
+  assign posted = form[field_key]
+-%}
+
+{%- capture select_options -%}
+      {% if s.show_placeholder %}
+        <option value="" disabled {% if posted == blank %}selected{% endif %}>
+          {{ s.placeholder_label | escape }}
+        </option>
+      {% endif %}
+      {% for line in lines_joined %}
+        {% assign opt = line | strip %}
+        {% if opt != blank %}
+          <option
+            value="{{ opt | escape }}"
+            {% if posted == opt %}
+              selected
+            {% endif %}
+          >
+            {{- opt | escape -}}
+          </option>
+        {% endif %}
+      {% endfor %}
+{%- endcapture -%}
+
+{%- if label_stripped != blank -%}
+  <div class="contact-form__floating-select-wrapper" {{ block.shopify_attributes }}>
+    <div class="contact-form__floating-select">
+      <select
+        id="{{ select_id }}"
+        class="contact-form__input contact-form__floating-select-control"
+        name="contact[{{ field_key }}]"
+        {% if s.required %}
+          required
+          aria-required="true"
+        {% endif %}
+      >
+        {{ select_options }}
+      </select>
+      <label class="contact-form__floating-select-label" for="{{ select_id }}">
+        {{- s.label | escape -}}
+      </label>
+      <span class="contact-form__floating-select-chevron" aria-hidden="true">
+        {{- 'icon-caret.svg' | inline_asset_content -}}
+      </span>
+    </div>
+  </div>
+{%- else -%}
+  <div {{ block.shopify_attributes }}>
+    <select
+      id="{{ select_id }}"
+      class="contact-form__input contact-form__input--select-plain"
+      name="contact[{{ field_key }}]"
+      {% if s.required %}
+        required
+        aria-required="true"
+      {% endif %}
+      {% if s.show_placeholder and s.placeholder_label != blank %}
+        aria-label="{{ s.placeholder_label | escape }}"
+      {% else %}
+        aria-label="{{ 'blocks.contact_form.select' | t }}"
+      {% endif %}
+    >
+      {{ select_options }}
+    </select>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  /**
+   * Must beat .contact-form__input { padding: … } from the parent contact-form block
+   * when stylesheets are merged (otherwise the floating label has no reserved space).
+   */
+  .contact-form__floating-select .contact-form__input.contact-form__floating-select-control {
+    padding-block: calc(var(--padding-xl) + 0.65rem) var(--padding-md);
+    padding-inline: var(--padding-xl) calc(var(--padding-xl) + 1.25rem);
+    min-height: calc(var(--padding-lg) * 2 + 1.35em);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .contact-form__input.contact-form__input--select-plain {
+    min-height: calc(var(--padding-lg) * 2 + 1.2em);
+    cursor: pointer;
+  }
+
+  .contact-form__floating-select-wrapper {
+    width: 100%;
+  }
+
+  .contact-form__floating-select {
+    position: relative;
+    width: 100%;
+  }
+
+  .contact-form__floating-select .contact-form__floating-select-label {
+    position: absolute;
+    inset-inline-start: var(--padding-xl);
+    top: var(--padding-md);
+    z-index: 1;
+    font-size: max(0.75rem, var(--font-size--xs));
+    line-height: 1.2;
+    color: var(--color-foreground-muted);
+    pointer-events: none;
+    transition: color 0.15s ease;
+  }
+
+  .contact-form__floating-select .contact-form__input.contact-form__floating-select-control:focus + .contact-form__floating-select-label {
+    color: var(--color-foreground);
+  }
+
+  .contact-form__floating-select-chevron {
+    position: absolute;
+    inset-inline-end: var(--padding-md);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+    pointer-events: none;
+    width: var(--icon-size-xs, 14px);
+    height: var(--icon-size-xs, 14px);
+  }
+
+  .contact-form__floating-select-chevron svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+{% endstylesheet %}

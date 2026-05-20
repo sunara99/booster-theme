@@ -1,0 +1,70 @@
+{%- doc -%}
+  Renders the search action button.
+
+  @param {string} [style] - The style of the search action.
+  @param {string} [class] - Additional classes for the search action.
+  @param {string} [display_style] - The display style ('icon' or 'text').
+
+  @example
+  {% render 'search', style: 'default', class: 'custom-class', display_style: 'icon' %}
+{%- enddoc -%}
+
+{% assign display_style = display_style | default: 'icon' %}
+
+{% unless style == 'none' %}
+  <search-button class="search-action{% if display_style == 'text' %} search-action--text{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}">
+    <button
+      on:click="#search-modal/showDialog"
+      class="button button-unstyled search-modal__button header-actions__action{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      aria-label="{{ 'content.search_input_label' | t }}"
+      aria-haspopup="dialog"
+    >
+      <span class="{% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
+        {{ 'content.search' | t }}
+      </span>
+
+      <span
+        class="svg-wrapper {% if display_style != 'icon' %}desktop:hidden{% endif %}"
+        aria-hidden="true"
+      >
+        {{ 'icon-search.svg' | inline_asset_content }}
+      </span>
+    </button>
+  </search-button>
+{% endunless %}
+
+{% stylesheet %}
+  .search-action {
+    --search-border-radius: var(--style-border-radius-inputs);
+    --search-border-width: var(--style-border-width-inputs);
+
+    display: flex;
+  }
+
+  .header__column--center .search-action {
+    width: auto;
+    flex-grow: 1;
+  }
+
+  :is(.header__column--left, .header__column--center) .search-action {
+    @media screen and (min-width: 750px) {
+      margin-inline: calc(var(--padding-lg) * -1);
+    }
+  }
+
+  .header__column--right .search-action {
+    @media screen and (min-width: 750px) {
+      margin-inline: calc(var(--gap-md) * -1) calc(var(--gap-xs) * -1);
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .header__column--right .search-action--text {
+      margin-inline: 0;
+    }
+
+    :is(.header__column--left, .header__column--center) .search-action--text {
+      margin-inline: 0;
+    }
+  }
+{% endstylesheet %}

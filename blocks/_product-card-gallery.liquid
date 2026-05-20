@@ -1,0 +1,274 @@
+
+
+{% assign product = closest.product %}
+
+{% liquid
+  assign sale_badge_style = settings.badge_sale_style | default: 'sale'
+  assign sale_badge_text = settings.badge_sale_text | default: 'Save' | strip
+  if sale_badge_text == blank
+    assign sale_badge_text = 'Save'
+  endif
+
+  assign sale_badge_label = 'content.product_badge_sale' | t
+  if product != blank and product.compare_at_price > product.price
+    assign sale_variant = product.selected_or_first_available_variant
+    assign savings_amount = sale_variant.compare_at_price | minus: sale_variant.price
+    assign savings_percent = savings_amount | times: 100 | divided_by: sale_variant.compare_at_price
+  endif
+%}
+
+{% capture children %}
+  {% unless product == blank %}
+    <div
+      class="product-badges product-badges--{{ settings.badge_position }}"
+      style="
+        --badge-border-radius: {{ settings.badge_corner_radius }}px;
+        --badge-font-family: var(--font-{{ settings.badge_font_family }}--family); --badge-font-weight: var(--font-{{ settings.badge_font_family }}--weight); --badge-text-transform: {{ settings.badge_text_transform }};
+      "
+    >
+      {%- liquid
+        if settings.show_sold_out_badge == nil
+          assign show_sold_out_badge_on = true
+        else
+          assign show_sold_out_badge_on = settings.show_sold_out_badge
+        endif
+        if settings.show_sale_badge == nil
+          assign show_sale_badge_on = true
+        else
+          assign show_sale_badge_on = settings.show_sale_badge
+        endif
+        if product.available == false and show_sold_out_badge_on
+          assign show_sold_out = true
+        else
+          assign show_sold_out = false
+        endif
+        if product.compare_at_price > product.price and show_sale_badge_on
+          assign show_sale = true
+        else
+          assign show_sale = false
+        endif
+      -%}
+      {%- if show_sold_out or show_sale -%}
+        <div
+          class="
+            product-badges__badge product-badges__badge--rectangle
+            {% if show_sold_out %} color-{{ settings.badge_sold_out_color_scheme }}{% elsif show_sale %} color-{{ settings.badge_sale_color_scheme }}{% endif %}
+          "
+        >
+          {%- if show_sold_out -%}
+            {{ 'content.product_badge_sold_out' | t }}
+          {%- elsif show_sale -%}
+            {%- if sale_badge_style == 'save_percent' -%}
+              {{ 'content.product_badge_savings' | t }} {{ savings_percent }}%
+            {%- elsif sale_badge_style == 'save_amount' -%}
+              {{ 'content.product_badge_savings' | t }}
+              {% render 'price-split', cents: savings_amount, context: 'product_cards' %}
+            {%- else -%}
+            {{ 'content.product_badge_sale' | t }}
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+    {%  if settings.quick_add or settings.mobile_quick_add %}
+      {% render 'quick-add', product: product, section_id: section.id, block: block %}
+    {% endif %}
+  {% endunless %}
+{% endcapture %}
+
+{% render 'card-gallery', children: children %}
+
+{% # Title and price for the zoomed out grid view %}
+<div class="product-grid-view-zoom-out--details">
+  {% if product == blank %}
+    <h3 class="h4">{{ 'content.product_card_placeholder' | t }}</h3>
+  {% else %}
+    <h3 class="h4">{{ product.title }}</h3>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  .product-badges {
+    --badge-inset: max(var(--padding-xs), calc((var(--border-radius) + var(--padding-xs)) * (1 - cos(45deg))));
+
+    position: absolute;
+    z-index: var(--layer-flat);
+  }
+
+  .product-badges--bottom-left {
+    bottom: calc(var(--badge-inset) + var(--padding-block-start));
+    left: calc(var(--badge-inset) + var(--padding-inline-start));
+  }
+
+  .product-badges--top-left {
+    top: calc(var(--badge-inset) + var(--padding-block-start));
+    left: calc(var(--badge-inset) + var(--padding-inline-start));
+  }
+
+  .product-badges--top-right {
+    top: calc(var(--badge-inset) + var(--padding-block-start));
+    right: calc(var(--badge-inset) + var(--padding-inline-start));
+  }
+
+  .product-badges__badge {
+    --badge-font-size: var(--font-size--xs);
+
+    display: flex;
+    gap: var(--gap-2xs);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--color-foreground);
+    background: var(--color-background);
+    font-size: var(--badge-font-size);
+    font-family: var(--badge-font-family);
+    font-weight: var(--badge-font-weight);
+    text-transform: var(--badge-text-transform);
+    border-radius: var(--badge-border-radius);
+  }
+
+  .product-badges__badge--rectangle {
+    padding-block: var(--badge-rectangle-padding-block);
+    padding-inline: var(--badge-rectangle-padding-inline);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.product_image",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.resource_reference_product_media"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "t:options.auto"
+        },
+        {
+          "value": "portrait",
+          "label": "t:options.portrait"
+        },
+        {
+          "value": "square",
+          "label": "t:options.square"
+        },
+        {
+          "value": "landscape",
+          "label": "t:options.landscape"
+        }
+      ],
+      "default": "portrait",
+      "label": "t:settings.aspect_ratio",
+      "info": "t:info.aspect_ratio_adjusted"
+    },
+    {
+      "type": "header",
+      "content": "t:content.borders"
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.thickness",
+      "default": 1,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.opacity",
+      "default": 100,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_card_media",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

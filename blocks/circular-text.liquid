@@ -1,0 +1,613 @@
+{%- liquid
+  assign s = block.settings
+  assign phrase = s.text | strip | replace: '<br />', ' ' | replace: '<br/>', ' ' | replace: '<br>', ' ' | strip_html | strip
+  assign escaped_phrase = phrase | escape
+  assign len = phrase.size
+  assign fs = s.font_size | default: 11
+  assign d = s.diameter | default: 220
+  assign chars_per_lap = 36 | times: d | divided_by: 220 | times: 11 | divided_by: fs
+  if chars_per_lap < 14
+    assign chars_per_lap = 14
+  endif
+  assign fill_once_at = chars_per_lap | times: 2 | divided_by: 3
+  assign repeat_mode = s.text_repeat_mode | default: 'auto'
+  if repeat_mode != 'auto'
+    assign repeat_times = repeat_mode | plus: 0
+    if repeat_times < 1
+      assign repeat_times = 1
+    elsif repeat_times > 6
+      assign repeat_times = 6
+    endif
+  else
+    if len >= fill_once_at
+      assign repeat_times = 1
+    else
+      assign repeat_times = chars_per_lap | divided_by: len
+      if repeat_times < 2
+        assign repeat_times = 2
+      endif
+      if repeat_times > 6
+        assign repeat_times = 6
+      endif
+    endif
+  endif
+  assign font_stack = 'var(--font-body--family)'
+  assign font_weight_var = 'var(--font-body--weight)'
+  assign font_style_var = 'var(--font-body--style)'
+  if s.font == 'heading'
+    assign font_stack = 'var(--font-heading--family)'
+    assign font_weight_var = 'var(--font-heading--weight)'
+    assign font_style_var = 'var(--font-heading--style)'
+  endif
+  assign text_transform = 'none'
+  if s.enable_uppercase
+    assign text_transform = 'uppercase'
+  endif
+  assign surface_bg = 'transparent'
+  unless s.background == false
+    if s.background_color != blank
+      assign surface_bg = s.background_color
+    else
+      assign surface_bg = '#00000026'
+    endif
+  endunless
+-%}
+
+{%- if phrase != blank -%}
+  {%- liquid
+    assign abs_classes = ''
+    if s.use_absolute_position
+      assign abs_h = s.absolute_alignment_horizontal | default: 'center'
+      assign abs_v = s.absolute_alignment_vertical | default: 'center'
+      assign abs_classes = ' circular-text--absolute circular-text--h-' | append: abs_h | append: ' circular-text--v-' | append: abs_v
+    endif
+  -%}
+  <div
+    class="circular-text circular-text--{{ block.id }}{{ abs_classes }}"
+    style="
+      --circular-text-size: {{ s.diameter }}px;
+      --circular-text-duration: {{ s.rotation_seconds }}s;
+      --circular-text-font-size: {{ s.font_size }}px;
+      --circular-text-spacing: {{ s.letter_spacing | divided_by: 100.0 }}em;
+      --circular-text-color: {{ s.text_color }};
+      --circular-text-bg: {{ surface_bg }};
+      --circular-text-font-stack: {{ font_stack }};
+      --circular-text-font-weight: {{ font_weight_var }};
+      --circular-text-font-style: {{ font_style_var }};
+      --circular-text-transform: {{ text_transform }};
+      {%- if s.use_absolute_position -%}
+      --circular-text-z-index: {{ s.absolute_z_index | default: 2 }};
+      {%- endif -%}
+    "
+    role="img"
+    aria-label="{{ escaped_phrase }}"
+    {{ block.shopify_attributes }}
+  >
+    {%- if s.link != blank -%}
+      <a
+        href="{{ s.link }}"
+        class="circular-text__link"
+        {% if s.open_in_new_tab %}
+          target="_blank" rel="noopener noreferrer"
+        {% endif %}
+      >
+    {%- endif -%}
+    <div class="circular-text__surface">
+      <div class="circular-text__ring">
+        <svg
+          class="circular-text__svg"
+          viewBox="0 0 200 200"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <defs>
+            <path
+              id="circular-text-path-{{ block.id }}"
+              d="M 100 28 A 72 72 0 1 1 100 172 A 72 72 0 1 1 100 28"
+            />
+          </defs>
+          <g
+            class="circular-text__spin circular-text__spin--{{ s.rotation_direction }}"
+            style="transform-origin: 100px 100px;"
+          >
+            <text
+              class="circular-text__label"
+              fill="currentColor"
+            >
+              <textPath href="#circular-text-path-{{ block.id }}" startOffset="0%">
+                {%- for i in (1..repeat_times) -%}
+                  {{- escaped_phrase -}}
+                  {%- unless forloop.last %} · {% endunless -%}
+                {%- endfor -%}
+              </textPath>
+            </text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="circular-text__center">
+        {%- assign center_icon_class = 'circular-text__icon circular-text__icon--' | append: block.id -%}
+        {%- capture center_icon -%}
+          {% render 'icon-or-image',
+            icon: s.icon,
+            image_upload: s.image_upload,
+            width: s.icon_width,
+            class_name: center_icon_class
+          %}
+        {%- endcapture -%}
+        {%- if center_icon != blank -%}
+          {{ center_icon }}
+        {%- endif -%}
+      </div>
+    </div>
+    {%- if s.link != blank -%}
+      </a>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .circular-text {
+    display: inline-block;
+    color: var(--circular-text-color, currentColor);
+  }
+
+  .circular-text--absolute {
+    position: absolute;
+    z-index: var(--circular-text-z-index, 2);
+    width: max-content;
+    height: max-content;
+    display: block;
+    margin: 0;
+  }
+
+  .circular-text--absolute.circular-text--h-left {
+    left: 0;
+    right: auto;
+  }
+
+  .circular-text--absolute.circular-text--h-center {
+    left: 0;
+    right: 0;
+    width: max-content;
+    margin-inline: auto;
+  }
+
+  .circular-text--absolute.circular-text--h-right {
+    right: 0;
+    left: auto;
+  }
+
+  .circular-text--absolute.circular-text--v-top {
+    top: 0;
+    bottom: auto;
+  }
+
+  .circular-text--absolute.circular-text--v-center {
+    top: 0;
+    bottom: 0;
+    height: max-content;
+    margin-block: auto;
+  }
+
+  .circular-text--absolute.circular-text--v-bottom {
+    bottom: 0;
+    top: auto;
+  }
+
+  .circular-text__link {
+    display: inline-block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .circular-text__surface {
+    position: relative;
+    width: var(--circular-text-size, 200px);
+    height: var(--circular-text-size, 200px);
+    border-radius: 50%;
+    background-color: var(--circular-text-bg, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .circular-text__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: visible;
+  }
+
+  .circular-text__svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+
+  .circular-text__label {
+    font-family: var(--circular-text-font-stack, var(--font-body--family));
+    font-size: var(--circular-text-font-size, 11px);
+    font-weight: var(--circular-text-font-weight, var(--font-body--weight));
+    font-style: var(--circular-text-font-style, var(--font-body--style));
+    letter-spacing: var(--circular-text-spacing, 0.12em);
+    text-transform: var(--circular-text-transform, none);
+    dominant-baseline: middle;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .circular-text__spin--clockwise {
+      animation: circular-text-rotate-cw var(--circular-text-duration, 24s) linear infinite;
+    }
+
+    .circular-text__spin--counter_clockwise {
+      animation: circular-text-rotate-ccw var(--circular-text-duration, 24s) linear infinite;
+    }
+  }
+
+  @keyframes circular-text-rotate-cw {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes circular-text-rotate-ccw {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  .circular-text__center {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+  }
+
+  .circular-text__icon {
+    display: block;
+    height: auto;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.circular_text",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "t:settings.text",
+      "default": "Give the gift of eyewear"
+    },
+    {
+      "type": "select",
+      "id": "text_repeat_mode",
+      "label": "t:settings.circular_text_repeat",
+      "info": "t:settings.circular_text_repeat_info",
+      "options": [
+        {
+          "value": "auto",
+          "label": "t:options.auto"
+        },
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        },
+        {
+          "value": "5",
+          "label": "5"
+        },
+        {
+          "value": "6",
+          "label": "6"
+        }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "range",
+      "id": "diameter",
+      "label": "t:settings.size",
+      "min": 80,
+      "max": 400,
+      "step": 4,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "t:settings.circular_text_ring_font_size",
+      "min": 6,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "t:settings.letter_spacing",
+      "info": "t:settings.circular_text_letter_spacing_info",
+      "min": -20,
+      "max": 50,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_uppercase",
+      "label": "t:settings.circular_text_uppercase",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "body",
+          "label": "t:options.body"
+        },
+        {
+          "value": "heading",
+          "label": "t:options.heading"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.text",
+      "default": "#2c2c2c"
+    },
+    {
+      "type": "checkbox",
+      "id": "background",
+      "label": "t:settings.background",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "alpha": true,
+      "default": "#00000026",
+      "info": "t:settings.circular_text_background_overlay_info",
+      "visible_if": "{{ block.settings.background }}"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.circular_text_position_heading"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_absolute_position",
+      "label": "t:settings.circular_text_absolute",
+      "info": "t:settings.circular_text_absolute_info",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "absolute_alignment_horizontal",
+      "label": "t:settings.circular_text_position_horizontal",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "center",
+      "visible_if": "{{ block.settings.use_absolute_position }}"
+    },
+    {
+      "type": "select",
+      "id": "absolute_alignment_vertical",
+      "label": "t:settings.circular_text_position_vertical",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:options.top"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "center",
+      "visible_if": "{{ block.settings.use_absolute_position }}"
+    },
+    {
+      "type": "range",
+      "id": "absolute_z_index",
+      "label": "t:settings.z_index",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 2,
+      "visible_if": "{{ block.settings.use_absolute_position }}"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.motion"
+    },
+    {
+      "type": "select",
+      "id": "rotation_direction",
+      "label": "t:settings.rotation_direction",
+      "options": [
+        {
+          "value": "clockwise",
+          "label": "t:options.clockwise"
+        },
+        {
+          "value": "counter_clockwise",
+          "label": "t:options.counter_clockwise"
+        }
+      ],
+      "default": "clockwise"
+    },
+    {
+      "type": "range",
+      "id": "rotation_seconds",
+      "label": "t:settings.rotation_period",
+      "min": 4,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "t:content.icon"
+    },
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "t:settings.icon",
+      "options": [
+        { "value": "none", "label": "t:options.none" },
+        { "value": "apple", "label": "t:options.apple" },
+        { "value": "arrow", "label": "t:options.arrow" },
+        { "value": "banana", "label": "t:options.banana" },
+        { "value": "bottle", "label": "t:options.bottle" },
+        { "value": "box", "label": "t:options.box" },
+        { "value": "carrot", "label": "t:options.carrot" },
+        { "value": "chat_bubble", "label": "t:options.chat_bubble" },
+        { "value": "check_box", "label": "t:options.check_box" },
+        { "value": "check_circle", "label": "t:options.checkmark" },
+        { "value": "clipboard", "label": "t:options.clipboard" },
+        { "value": "dairy", "label": "t:options.dairy" },
+        { "value": "dairy_free", "label": "t:options.dairy_free" },
+        { "value": "dryer", "label": "t:options.dryer" },
+        { "value": "eye", "label": "t:options.eye" },
+        { "value": "fire", "label": "t:options.fire" },
+        { "value": "gluten_free", "label": "t:options.gluten_free" },
+        { "value": "heart", "label": "t:options.heart" },
+        { "value": "iron", "label": "t:options.iron" },
+        { "value": "leaf", "label": "t:options.leaf" },
+        { "value": "leather", "label": "t:options.leather" },
+        { "value": "lightning_bolt", "label": "t:options.lightning_bolt" },
+        { "value": "lipstick", "label": "t:options.lipstick" },
+        { "value": "lock", "label": "t:options.lock" },
+        { "value": "map_pin", "label": "t:options.map_pin" },
+        { "value": "nut_free", "label": "t:options.nut_free" },
+        { "value": "pants", "label": "t:options.pants" },
+        { "value": "paw_print", "label": "t:options.paw_print" },
+        { "value": "pepper", "label": "t:options.pepper" },
+        { "value": "perfume", "label": "t:options.perfume" },
+        { "value": "plane", "label": "t:options.plane" },
+        { "value": "plant", "label": "t:options.plant" },
+        { "value": "price_tag", "label": "t:options.price_tag" },
+        { "value": "question_mark", "label": "t:options.question_mark" },
+        { "value": "recycle", "label": "t:options.recycle" },
+        { "value": "return", "label": "t:options.return" },
+        { "value": "ruler", "label": "t:options.ruler" },
+        { "value": "serving_dish", "label": "t:options.serving_dish" },
+        { "value": "shirt", "label": "t:options.shirt" },
+        { "value": "shoe", "label": "t:options.shoe" },
+        { "value": "silhouette", "label": "t:options.silhouette" },
+        { "value": "bluesky", "label": "t:options.social_bluesky" },
+        { "value": "facebook", "label": "t:options.social_facebook" },
+        { "value": "instagram", "label": "t:options.social_instagram" },
+        { "value": "linkedin", "label": "t:options.social_linkedin" },
+        { "value": "pinterest", "label": "t:options.social_pinterest" },
+        { "value": "snapchat", "label": "t:options.social_snapchat" },
+        { "value": "spotify", "label": "t:options.social_spotify" },
+        { "value": "threads", "label": "t:options.social_threads" },
+        { "value": "tiktok", "label": "t:options.social_tiktok" },
+        { "value": "tumblr", "label": "t:options.social_tumblr" },
+        { "value": "twitter", "label": "t:options.social_twitter" },
+        { "value": "vimeo", "label": "t:options.social_vimeo" },
+        { "value": "youtube", "label": "t:options.social_youtube" },
+        { "value": "whatsapp", "label": "t:options.social_whatsapp" },
+        { "value": "snowflake", "label": "t:options.snowflake" },
+        { "value": "star", "label": "t:options.star" },
+        { "value": "stopwatch", "label": "t:options.stopwatch" },
+        { "value": "truck", "label": "t:options.truck" },
+        { "value": "washing", "label": "t:options.washing" }
+      ],
+      "default": "arrow"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_upload",
+      "label": "t:settings.image_icon"
+    },
+    {
+      "type": "range",
+      "id": "icon_width",
+      "label": "t:settings.width",
+      "min": 12,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "t:content.block_link"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:settings.link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "t:settings.open_new_tab",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.circular_text",
+      "category": "t:categories.decorative",
+      "settings": {
+        "text": "Give the gift of eyewear",
+        "icon": "arrow",
+        "background": true,
+        "background_color": "#00000026",
+        "rotation_direction": "clockwise",
+        "rotation_seconds": 4
+      }
+    }
+  ]
+}
+{% endschema %}

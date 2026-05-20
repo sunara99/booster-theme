@@ -1,0 +1,305 @@
+/**
+ * Product-style prices: superscript cents, compare strikethrough (sup-safe).
+ * Colors and weights inherit from each section/snippet so theme controls them.
+ */
+
+ .price-split {
+  display: inline;
+  white-space: nowrap;
+}
+
+.price-split__visual {
+  font-variant-numeric: tabular-nums;
+}
+
+.price-split__fraction {
+  font-size: 0.58em !important;
+  font-weight: inherit;
+  line-height: 0;
+  vertical-align: super;
+  margin-left: 2px;
+}
+
+.price-split__code {
+  font-size: 0.72em;
+  font-weight: 400;
+  margin-inline-start: 0.25em;
+  opacity: 0.85;
+}
+
+/* Compare / struck — wrapper color comes from theme; split text matches it */
+.compare-at-price,
+s.compare-at-price {
+  opacity: 1;
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+}
+
+.compare-at-price .price-split__visual,
+s.compare-at-price .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.compare-at-price .price-split,
+s.compare-at-price .price-split {
+  position: relative;
+  display: inline-block;
+}
+
+.compare-at-price .price-split::after,
+s.compare-at-price .price-split::after {
+  content: '';
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  top: 52%;
+  height: max(1.5px, 0.07em);
+  background: currentColor;
+  transform: translateY(-50%) rotate(-11deg);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.compare-at-price .money,
+s.compare-at-price .money {
+  text-decoration: line-through;
+}
+
+/* Cart line items: superscript strike + line-through use theme compare-strike setting */
+.cart-items s.compare-at-price .price-split::after {
+  background: var(--cart-compare-strike-color, currentColor);
+}
+
+.cart-items s.compare-at-price .money {
+  text-decoration-color: var(--cart-compare-strike-color, currentColor);
+}
+
+/* Cart upsell compare strike: see cart-upsell-product-card.liquid (.cart-upsell-product-card__compare-inner::after) — avoids base.css .compare-at-price and global .price-split::after fights */
+
+.sticky-add-to-cart__price .compare-at-price .money,
+.sticky-add-to-cart__price .price--compare .money {
+  text-decoration: line-through;
+}
+
+.cart-upsell-variant-popup__price-compare .money {
+  text-decoration: line-through;
+  text-decoration-color: var(--cart-compare-strike-color, currentColor);
+}
+
+.quantity-breaks__original-price .money {
+  text-decoration: line-through;
+}
+
+.quantity-breaks-gift-card__original-price .money {
+  text-decoration: line-through;
+}
+
+.cart-upsell-variant-popup__price-compare .price-split,
+.variant-option__lumin-compare-price .price-split,
+.quantity-breaks__original-price .price-split,
+.quantity-breaks-gift-card__original-price .price-split {
+  position: relative;
+  display: inline-block;
+}
+
+/* Totals / non-sale line items — inherit scheme */
+.cart__total-value .price-split__visual,
+.cart__original-total-value .price-split__visual,
+.cart__savings-value .price-split__visual,
+.cart__discount-value .price-split__visual,
+.bundle-deals__subtotal-value .price-split__visual,
+.bundle-deals__discount-value .price-split__visual,
+.bundle-deals__total-value .price-split__visual,
+.bundle-deals__checkout-total .price-split__visual,
+.free-shipping-progress__current .money .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.bundle-deals__item-compare-price .price-split,
+.bundle-product-card__compare-price .price-split {
+  position: relative;
+  display: inline-block;
+}
+
+.bundle-deals__item-compare-price .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.bundle-deals__item-compare-price .money {
+  text-decoration: line-through;
+}
+
+.bundle-product-card__compare-price {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.bundle-product-card__compare-price .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.bundle-product-card__compare-price .money {
+  text-decoration: line-through;
+}
+
+.bundle-product-card__compare-price .price-split::after {
+  content: '';
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  top: 52%;
+  height: max(1.5px, 0.07em);
+  background: currentColor;
+  transform: translateY(-50%) rotate(-11deg);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.bundle-deals__item-compare-price {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.bundle-deals__item-compare-price .price-split::after {
+  content: '';
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  top: 52%;
+  height: max(1.5px, 0.07em);
+  background: currentColor;
+  transform: translateY(-50%) rotate(-11deg);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.cart-upsell-product-card__price-compare .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.cart-upsell-product-card__price-compare {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.cart-upsell-variant-popup__price-compare {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+  margin-inline-start: 0.35em;
+}
+
+.cart-upsell-variant-popup__price-compare .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.cart-upsell-variant-popup__price-compare .price-split::after {
+  content: '';
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  top: 52%;
+  height: max(1.5px, 0.07em);
+  background: var(--cart-compare-strike-color, currentColor);
+  transform: translateY(-50%) rotate(-11deg);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.cart-upsell-variant-popup__price-current .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.quantity-breaks__original-price .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.quantity-breaks__original-price {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.quantity-breaks__original-price .price-split::after {
+  content: '';
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  top: 52%;
+  height: max(1.5px, 0.07em);
+  background: currentColor;
+  transform: translateY(-50%) rotate(-11deg);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.variant-option__lumin-current-price .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.variant-option__lumin-compare-price {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.variant-option__lumin-compare-price .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.quantity-breaks-gift-card__discounted-price .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.quantity-breaks-gift-card__original-price {
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.quantity-breaks-gift-card__original-price .price-split__visual {
+  color: inherit;
+  font-weight: inherit;
+}
+
+.quantity-breaks-gift-card__original-price .price-split::after {
+  content: '';
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  top: 52%;
+  height: max(1.5px, 0.07em);
+  background: currentColor;
+  transform: translateY(-50%) rotate(-11deg);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.variant-option__lumin-compare-price .price-split::after {
+  content: '';
+  position: absolute;
+  left: -0.06em;
+  right: -0.06em;
+  top: 52%;
+  height: max(1.5px, 0.07em);
+  background: currentColor;
+  transform: translateY(-50%) rotate(-11deg);
+  border-radius: 1px;
+  pointer-events: none;
+}

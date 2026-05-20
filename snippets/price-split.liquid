@@ -1,0 +1,105 @@
+{%- doc -%}
+  Renders a price with superscript cents when theme settings allow for this context.
+
+  @param {number} cents - Amount in store currency subunits (Shopify cents)
+  @param {boolean} [use_currency] - Show ISO code after the amount (matches money_with_currency)
+  @param {string} [context] - Where this price appears: product_page, product_cards, cart, cart_summary, quick_order, quantity_breaks, bundles, upsells
+
+  @example
+  {% render 'price-split', cents: variant.price, context: 'product_page' %}
+{%- enddoc -%}
+{%- liquid
+  assign cents = cents | default: 0 | plus: 0
+  assign use_currency = use_currency | default: false
+  assign ctx = context | default: 'product_page'
+
+  assign split_master = settings.prices_superscript_enabled
+  unless split_master == true or split_master == false
+    assign split_master = true
+  endunless
+
+  assign show_superscript = false
+  if split_master
+    case ctx
+      when 'product_page'
+        assign show_superscript = settings.prices_superscript_product_pages
+      when 'product_cards'
+        assign show_superscript = settings.prices_superscript_product_cards
+      when 'cart'
+        assign show_superscript = settings.prices_superscript_cart
+      when 'cart_summary'
+        assign show_superscript = settings.prices_superscript_cart_summary
+      when 'quick_order'
+        assign show_superscript = settings.prices_superscript_quick_order
+      when 'quantity_breaks'
+        assign show_superscript = settings.prices_superscript_quantity_breaks
+      when 'bundles'
+        assign show_superscript = settings.prices_superscript_bundles
+      when 'upsells'
+        assign show_superscript = settings.prices_superscript_upsells
+      else
+        assign show_superscript = settings.prices_superscript_product_pages
+    endcase
+    unless show_superscript == true or show_superscript == false
+      assign show_superscript = true
+    endunless
+  endif
+-%}
+{%- unless show_superscript -%}
+  <span class="money">
+    {%- if use_currency -%}
+      {{- cents | money_with_currency -}}
+    {%- else -%}
+      {{- cents | money -}}
+    {%- endif -%}
+  </span>
+{%- else -%}
+  {%- liquid
+    assign whole = cents | divided_by: 100
+    assign frac = cents | modulo: 100
+    assign amount_without_currency = cents | money_without_currency | strip
+    if amount_without_currency contains '.'
+      assign whole_display = amount_without_currency | split: '.' | first
+    elsif amount_without_currency contains ','
+      assign whole_display = amount_without_currency | split: ',' | first
+    else
+      assign whole_display = whole
+    endif
+    if frac < 10
+      assign frac_pad = frac | prepend: '0'
+    else
+      assign frac_pad = frac
+    endif
+    assign _mf = shop.money_format | strip
+    if _mf contains '{{amount}}'
+      assign _ps = _mf | split: '{{amount}}'
+      assign currency_prefix = _ps[0] | strip_html | strip
+      assign currency_suffix = _ps[1] | strip_html | strip
+      if currency_prefix != blank
+        assign currency_prefix = cart.currency.symbol
+      elsif currency_suffix != blank
+        assign currency_suffix = cart.currency.symbol
+      endif
+    else
+      assign currency_prefix = cart.currency.symbol
+      assign currency_suffix = ''
+    endif
+  -%}
+  <span class="price-split">
+    <span class="visually-hidden">
+      {%- if use_currency -%}
+        {{- cents | money_with_currency -}}
+      {%- else -%}
+        {{- cents | money -}}
+      {%- endif -%}
+    </span>
+    <span class="price-split__visual" aria-hidden="true">
+      {{- currency_prefix -}}
+      <span class="price-split__integer">{{ whole_display }}</span><sup class="price-split__fraction">{{ frac_pad }}</sup>
+      {{- currency_suffix -}}
+      {%- if use_currency -%}
+        <span class="price-split__code">{{ cart.currency.iso_code }}</span>
+      {%- endif -%}
+    </span>
+  </span>
+{%- endunless -%}

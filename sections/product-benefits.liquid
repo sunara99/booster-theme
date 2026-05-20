@@ -1,0 +1,864 @@
+{%- comment -%}
+  Product benefits section: headline, center product image, 4 benefit blocks in 2x2 grid.
+  Layout: [ benefit 1 | benefit 2 ] [ product image ] [ benefit 3 | benefit 4 ]
+{%- endcomment -%}
+
+{% liquid
+  assign headline = section.settings.headline
+  assign headline_italic = section.settings.headline_italic
+  assign product = section.settings.product
+  assign fallback_image = section.settings.image
+  assign center_image = product.featured_image | default: fallback_image
+  assign benefit_blocks = section.blocks | where: 'type', 'benefit'
+  assign left_count = benefit_blocks.size | plus: 1 | divided_by: 2
+  assign right_count = benefit_blocks.size | minus: left_count
+  assign left_benefits = benefit_blocks | slice: 0, left_count
+  assign right_benefits = benefit_blocks | slice: left_count, right_count
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+{% liquid
+  assign mobile_image_position = section.settings.mobile_image_position | default: 'middle'
+  assign two_benefits = false
+  if benefit_blocks.size == 2
+    assign two_benefits = true
+  endif
+  assign image_border = section.settings.border | default: 'none'
+  assign image_border_width = section.settings.border_width | default: 1
+  assign image_border_opacity = section.settings.border_opacity | divided_by: 100.0
+  assign image_border_color_mode = section.settings.border_color_mode | default: 'default'
+  assign image_border_color = section.settings.border_color | default: '#000000'
+%}
+<div
+  class="section section--{{ section.settings.section_width }} product-benefits spacing-style color-{{ section.settings.color_scheme }}{% if section.settings.mobile_center_text_icon %} product-benefits--mobile-center{% endif %} product-benefits--mobile-image-{{ mobile_image_position }}{% if two_benefits %} product-benefits--two-benefits{% endif %}{% if image_border != 'none' and image_border_color_mode == 'custom' %} product-benefits--image-border-color-custom{% endif %}"
+  style="
+    {% render 'spacing-style', settings: section.settings %}
+    --product-benefits-image-max-width-mobile: {{ section.settings.image_max_width_mobile | default: 200 }}px;
+    --product-benefits-image-max-width-desktop: {{ section.settings.image_max_width_desktop | default: 280 }}px;
+    --product-benefits-image-border-radius: {{ section.settings.image_border_radius | default: 0 }}{{ section.settings.image_border_radius_unit | default: 'px' }};
+    {% if image_border != 'none' %}
+      --product-benefits-image-border-width: {{ image_border_width }}px;
+      --product-benefits-image-border-style: {{ image_border }};
+      --product-benefits-image-border-opacity: {{ image_border_opacity }};
+      {% if image_border_color_mode == 'custom' %}--product-benefits-image-border-color: {{ image_border_color }};{% endif %}
+    {% else %}
+      --product-benefits-image-border-width: 0;
+      --product-benefits-image-border-style: none;
+    {% endif %}
+  "
+>
+  <div class="product-benefits__inner page-width">
+    {% if headline != blank or headline_italic != blank %}
+      <div class="product-benefits__headline">
+        {% if headline != blank %}
+          <span class="product-benefits__headline-main">{{ headline }}</span>
+        {% endif %}
+        {% if headline_italic != blank %}
+          <span class="product-benefits__headline-italic" {% if headline != blank %}style="margin-top: 0.8rem;"{% endif %}>{{ headline_italic }}</span>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="product-benefits__grid">
+      <div class="product-benefits__column product-benefits__column--left">
+        {% for block in left_benefits %}
+          {% render 'product-benefit-block', block: block %}
+        {% endfor %}
+      </div>
+
+      <div class="product-benefits__column product-benefits__column--center">
+        {% if center_image != blank %}
+          <div class="product-benefits__image-wrap">
+            {{
+              center_image
+              | image_url: width: 400
+              | image_tag:
+                loading: 'lazy',
+                alt: center_image.alt | default: product.title | default: 'Product image',
+                class: 'product-benefits__image',
+                widths: '200, 300, 400, 500',
+                sizes: '(min-width: 990px) 300px, 200px'
+            }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="product-benefits__column product-benefits__column--right">
+        {% for block in right_benefits %}
+          {% render 'product-benefit-block', block: block %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .product-benefits__inner {
+    padding-inline: 0;
+  }
+
+  .product-benefits__headline {
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-style: normal;
+    text-align: center;
+    margin-block-end: 2.5rem;
+    max-width: 42rem;
+    margin-inline: auto;
+    line-height: 1.25;
+    color: rgb(var(--color-foreground));
+  }
+
+  .product-benefits__headline-main {
+    display: block;
+  }
+
+  .product-benefits__headline-italic {
+    display: block;
+  }
+
+  .product-benefits__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: center;
+    justify-items: center;
+  }
+
+  @media screen and (min-width: 750px) {
+    .product-benefits__grid {
+      grid-template-columns: 1fr auto 1fr;
+      gap: 2rem 3rem;
+      align-items: center;
+    }
+  }
+
+  .product-benefits__column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    max-width: 25rem;
+  }
+
+  @media screen and (max-width: 749px) {
+    .product-benefits--mobile-image-first .product-benefits__column--left { order: 2; }
+    .product-benefits--mobile-image-first .product-benefits__column--center { order: 1; }
+    .product-benefits--mobile-image-first .product-benefits__column--right { order: 3; }
+    .product-benefits--mobile-image-middle .product-benefits__column--left { order: 1; }
+    .product-benefits--mobile-image-middle .product-benefits__column--center { order: 2; }
+    .product-benefits--mobile-image-middle .product-benefits__column--right { order: 3; }
+    .product-benefits--mobile-image-last .product-benefits__column--left { order: 1; }
+    .product-benefits--mobile-image-last .product-benefits__column--center { order: 3; }
+    .product-benefits--mobile-image-last .product-benefits__column--right { order: 2; }
+
+    /* Two benefits: show side by side in one row on mobile */
+    .product-benefits--two-benefits .product-benefits__grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+    }
+    .product-benefits--two-benefits .product-benefits__column--left,
+    .product-benefits--two-benefits .product-benefits__column--right {
+      max-width: none;
+    }
+    .product-benefits--two-benefits .product-benefits__column--left { grid-column: 1; }
+    .product-benefits--two-benefits .product-benefits__column--right { grid-column: 2; }
+    .product-benefits--two-benefits .product-benefits__column--center { grid-column: 1 / -1; }
+    .product-benefits--mobile-image-first.product-benefits--two-benefits .product-benefits__column--left,
+    .product-benefits--mobile-image-first.product-benefits--two-benefits .product-benefits__column--right { grid-row: 2; }
+    .product-benefits--mobile-image-first.product-benefits--two-benefits .product-benefits__column--center { grid-row: 1; }
+    .product-benefits--mobile-image-middle.product-benefits--two-benefits .product-benefits__column--left,
+    .product-benefits--mobile-image-middle.product-benefits--two-benefits .product-benefits__column--right { grid-row: 1; }
+    .product-benefits--mobile-image-middle.product-benefits--two-benefits .product-benefits__column--center,
+    .product-benefits--mobile-image-last.product-benefits--two-benefits .product-benefits__column--center { grid-row: 2; }
+    .product-benefits--mobile-image-last.product-benefits--two-benefits .product-benefits__column--left,
+    .product-benefits--mobile-image-last.product-benefits--two-benefits .product-benefits__column--right { grid-row: 1; }
+  }
+
+  @media screen and (min-width: 750px) {
+    .product-benefits__column--left {
+      justify-self: end;
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .product-benefits__column--center {
+      max-width: var(--product-benefits-image-max-width-desktop, 500px);
+    }
+
+    .product-benefits__column--right {
+      justify-self: start;
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+
+  .product-benefits__image-wrap {
+    width: 100%;
+    max-width: var(--product-benefits-image-max-width-mobile, 200px);
+    margin-inline: auto;
+    border-radius: var(--product-benefits-image-border-radius, 0);
+    overflow: hidden;
+    border-width: var(--product-benefits-image-border-width, 0);
+    border-style: var(--product-benefits-image-border-style, none);
+  }
+
+  .product-benefits:not(.product-benefits--image-border-color-custom) .product-benefits__image-wrap {
+    border-color: rgb(var(--color-foreground) / var(--product-benefits-image-border-opacity, 1));
+  }
+
+  .product-benefits--image-border-color-custom .product-benefits__image-wrap {
+    border-color: var(--product-benefits-image-border-color);
+  }
+
+  @media screen and (min-width: 750px) {
+    .product-benefits__image-wrap {
+      max-width: var(--product-benefits-image-max-width-desktop, 280px);
+    }
+  }
+
+  .product-benefits__image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .product-benefit {
+    color: rgb(var(--color-foreground));
+  }
+
+  .product-benefit__icon,
+  .product-benefit__media {
+    width: var(--product-benefit-icon-size, 2rem);
+    height: var(--product-benefit-icon-size, 2rem);
+    margin-block-end: 0.35rem;
+    color: rgb(var(--color-foreground));
+    flex-shrink: 0;
+  }
+
+  .product-benefit--icon-color-custom .product-benefit__icon,
+  .product-benefit--icon-color-custom .product-benefit__media {
+    color: var(--product-benefit-icon-color);
+  }
+
+  .product-benefit__media--has-bg {
+    width: auto;
+    height: auto;
+    min-width: auto;
+    min-height: auto;
+  }
+
+  .product-benefit__media .product-benefit__icon-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .product-benefit__icon-bg {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--product-benefit-icon-size) * var(--product-benefit-icon-bg-scale, 1.5));
+    height: calc(var(--product-benefit-icon-size) * var(--product-benefit-icon-bg-scale, 1.5));
+    min-width: calc(var(--product-benefit-icon-size) / 2);
+    min-height: calc(var(--product-benefit-icon-size) / 2);
+    margin-inline: inherit;
+  }
+  .product-benefit__icon-bg img{
+    width:var(--product-benefit-icon-size);
+    min-width:var(--product-benefit-icon-size);
+    height:auto;
+  }
+
+  .product-benefit__icon-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--product-benefit-icon-bg-color);
+    opacity: var(--product-benefit-icon-bg-opacity, 0.8);
+    border-radius: inherit;
+    z-index: 0;
+  }
+
+  .product-benefit__icon-bg--gradient::before {
+    background-color: transparent;
+    background-image: var(--product-benefit-icon-bg-gradient);
+  }
+
+  .product-benefit__icon-bg > * {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    transform-origin: center center;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .product-benefit__icon-bg--circle {
+    border-radius: 50%;
+  }
+
+  .product-benefit__icon-bg--organic {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+
+  .product-benefit__icon-bg .product-benefit__icon-svg {
+    width: var(--product-benefit-icon-size);
+    height: var(--product-benefit-icon-size);
+    min-width: var(--product-benefit-icon-size);
+    max-width: var(--product-benefit-icon-size);
+    min-height: var(--product-benefit-icon-size);
+    max-height: var(--product-benefit-icon-size);
+    flex-shrink: 0;
+    display: block;
+    vertical-align: middle;
+  }
+
+  .product-benefit__icon-bg .product-benefit__image {
+    width: var(--product-benefit-icon-size);
+    height: var(--product-benefit-icon-size);
+    min-width: var(--product-benefit-icon-size);
+    max-width: var(--product-benefit-icon-size);
+    min-height: var(--product-benefit-icon-size);
+    max-height: var(--product-benefit-icon-size);
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  .product-benefit__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .product-benefits__column--left .product-benefit__icon,
+  .product-benefits__column--left .product-benefit__media {
+    margin-inline-start: auto;
+  }
+
+  @media screen and (max-width: 749px) {
+    .product-benefits__column--left .product-benefit__icon,
+    .product-benefits__column--left .product-benefit__media {
+      margin-inline-start: inherit;
+    }
+    .product-benefits__column {
+      flex-direction: row;
+    }
+  }
+
+  .product-benefits__column--right .product-benefit__icon,
+  .product-benefits__column--right .product-benefit__media {
+    margin-inline-end: auto;
+  }
+
+  @media screen and (max-width: 749px) {
+    .product-benefits--mobile-center .product-benefits__column {
+      align-items: flex-start;
+      text-align: center;
+    }
+    .product-benefits--mobile-center .product-benefits__column--left .product-benefit__icon,
+    .product-benefits--mobile-center .product-benefits__column--left .product-benefit__media,
+    .product-benefits--mobile-center .product-benefits__column--right .product-benefit__icon,
+    .product-benefits--mobile-center .product-benefits__column--right .product-benefit__media {
+      margin-inline: auto;
+    }
+    .product-benefits--mobile-center .product-benefit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  .product-benefit__title {
+    font-family: var(--font-body--family);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.3;
+    margin-block-end: 0.5rem;
+    margin-block-start: 0.5rem;
+  }
+
+  .product-benefit__description {
+    font-size: 0.9375rem;
+    opacity: 0.9;
+    margin-block-start: 0.5rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product benefits",
+  "tag": "section",
+  "class": "section-product-benefits",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Headline"
+    },
+    {
+      "type": "richtext",
+      "id": "headline",
+      "label": "Headline (first line)"
+    },
+    {
+      "type": "richtext",
+      "id": "headline_italic",
+      "label": "Headline (italic line)"
+    },
+    {
+      "type": "header",
+      "content": "Center image"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product (uses featured image)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image (if no product selected)"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width_mobile",
+      "label": "Image max width (mobile)",
+      "min": 100,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "image_max_width_desktop",
+      "label": "Image max width (desktop)",
+      "min": 160,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "t:settings.borders",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        },
+        {
+          "value": "dashed",
+          "label": "t:options.dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "t:options.dotted"
+        },
+        {
+          "value": "double",
+          "label": "t:options.double"
+        },
+        {
+          "value": "groove",
+          "label": "t:options.groove"
+        },
+        {
+          "value": "ridge",
+          "label": "t:options.ridge"
+        },
+        {
+          "value": "inset",
+          "label": "t:options.inset"
+        },
+        {
+          "value": "outset",
+          "label": "t:options.outset"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "px",
+      "label": "t:settings.border_width",
+      "default": 1,
+      "visible_if": "{{ section.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.border_opacity",
+      "default": 100,
+      "visible_if": "{{ section.settings.border != 'none' and section.settings.border_color_mode == 'default' }}"
+    },
+    {
+      "type": "select",
+      "id": "border_color_mode",
+      "label": "t:settings.border_color",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:options.default"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "default",
+      "visible_if": "{{ section.settings.border != 'none' }}"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "t:settings.border_color_custom",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.border != 'none' and section.settings.border_color_mode == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "image_border_radius_unit",
+      "label": "Border radius unit",
+      "options": [
+        { "value": "px", "label": "px" },
+        { "value": "%", "label": "%" }
+      ],
+      "default": "px"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_center_text_icon",
+      "label": "Center text and icon on mobile",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "mobile_image_position",
+      "label": "Image position on mobile",
+      "options": [
+        { "value": "first", "label": "First" },
+        { "value": "middle", "label": "Middle" },
+        { "value": "last", "label": "Last" }
+      ],
+      "default": "middle"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "limit": 4,
+      "settings": [
+       
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "t:settings.icon",
+      "options": [
+        { "value": "none", "label": "t:options.none" },
+        { "value": "apple", "label": "t:options.apple" },
+        { "value": "arrow", "label": "t:options.arrow" },
+        { "value": "banana", "label": "t:options.banana" },
+        { "value": "bottle", "label": "t:options.bottle" },
+        { "value": "box", "label": "t:options.box" },
+        { "value": "carrot", "label": "t:options.carrot" },
+        { "value": "chat_bubble", "label": "t:options.chat_bubble" },
+        { "value": "check_box", "label": "t:options.check_box" },
+        { "value": "check_circle", "label": "t:options.checkmark" },
+        { "value": "clipboard", "label": "t:options.clipboard" },
+        { "value": "dairy", "label": "t:options.dairy" },
+        { "value": "dairy_free", "label": "t:options.dairy_free" },
+        { "value": "dryer", "label": "t:options.dryer" },
+        { "value": "eye", "label": "t:options.eye" },
+        { "value": "fire", "label": "t:options.fire" },
+        { "value": "gluten_free", "label": "t:options.gluten_free" },
+        { "value": "heart", "label": "t:options.heart" },
+        { "value": "iron", "label": "t:options.iron" },
+        { "value": "leaf", "label": "t:options.leaf" },
+        { "value": "leather", "label": "t:options.leather" },
+        { "value": "lightning_bolt", "label": "t:options.lightning_bolt" },
+        { "value": "lipstick", "label": "t:options.lipstick" },
+        { "value": "lock", "label": "t:options.lock" },
+        { "value": "map_pin", "label": "t:options.map_pin" },
+        { "value": "nut_free", "label": "t:options.nut_free" },
+        { "value": "pants", "label": "t:options.pants" },
+        { "value": "paw_print", "label": "t:options.paw_print" },
+        { "value": "pepper", "label": "t:options.pepper" },
+        { "value": "perfume", "label": "t:options.perfume" },
+        { "value": "plane", "label": "t:options.plane" },
+        { "value": "plant", "label": "t:options.plant" },
+        { "value": "price_tag", "label": "t:options.price_tag" },
+        { "value": "question_mark", "label": "t:options.question_mark" },
+        { "value": "recycle", "label": "t:options.recycle" },
+        { "value": "return", "label": "t:options.return" },
+        { "value": "ruler", "label": "t:options.ruler" },
+        { "value": "serving_dish", "label": "t:options.serving_dish" },
+        { "value": "shirt", "label": "t:options.shirt" },
+        { "value": "shoe", "label": "t:options.shoe" },
+        { "value": "silhouette", "label": "t:options.silhouette" },
+        { "value": "bluesky", "label": "t:options.social_bluesky" },
+        { "value": "facebook", "label": "t:options.social_facebook" },
+        { "value": "instagram", "label": "t:options.social_instagram" },
+        { "value": "linkedin", "label": "t:options.social_linkedin" },
+        { "value": "pinterest", "label": "t:options.social_pinterest" },
+        { "value": "snapchat", "label": "t:options.social_snapchat" },
+        { "value": "spotify", "label": "t:options.social_spotify" },
+        { "value": "threads", "label": "t:options.social_threads" },
+        { "value": "tiktok", "label": "t:options.social_tiktok" },
+        { "value": "tumblr", "label": "t:options.social_tumblr" },
+        { "value": "twitter", "label": "t:options.social_twitter" },
+        { "value": "vimeo", "label": "t:options.social_vimeo" },
+        { "value": "youtube", "label": "t:options.social_youtube" },
+        { "value": "whatsapp", "label": "t:options.social_whatsapp" },
+        { "value": "snowflake", "label": "t:options.snowflake" },
+        { "value": "star", "label": "t:options.star" },
+        { "value": "stopwatch", "label": "t:options.stopwatch" },
+        { "value": "truck", "label": "t:options.truck" },
+        { "value": "washing", "label": "t:options.washing" }
+      ],
+      "default": "check_box"
+    },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom image",
+          "info": "If blank, the icon above is shown."
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "label": "Icon size",
+          "min": 16,
+          "max": 56,
+          "step": 2,
+          "unit": "px",
+          "default": 32
+        },
+        {
+          "type": "select",
+          "id": "icon_color_mode",
+          "label": "Icon color",
+          "options": [
+            { "value": "default", "label": "Default" },
+            { "value": "custom", "label": "Custom" }
+          ],
+          "default": "default"
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Custom icon color",
+          "default": "#000000",
+          "visible_if": "{{ block.settings.icon_color_mode == 'custom' }}"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Laser-Sharp Presence"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Superfoods help tune neurotransmitters to keep you clear, calm, and present.*"
+        },
+        {
+          "type": "header",
+          "content": "Icon background"
+        },
+        {
+          "type": "checkbox",
+          "id": "icon_background_enabled",
+          "label": "Show icon background",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "icon_background_type",
+          "label": "Background type",
+          "options": [
+            { "value": "solid", "label": "Solid" },
+            { "value": "gradient", "label": "Gradient" }
+          ],
+          "default": "solid"
+        },
+        {
+          "type": "color",
+          "id": "icon_background_color",
+          "label": "Background",
+          "info": "Main background color (or first gradient color)",
+          "default": "#E8F4F8"
+        },
+        {
+          "type": "color",
+          "id": "icon_background_gradient_color",
+          "label": "Gradient end color",
+          "info": "Second color when background type is Gradient",
+          "default": "#E8E0F4",
+          "visible_if": "{{ block.settings.icon_background_type == 'gradient' }}"
+        },
+        {
+          "type": "range",
+          "id": "icon_background_gradient_angle",
+          "label": "Gradient angle",
+          "info": "Direction of the gradient in degrees",
+          "min": 0,
+          "max": 360,
+          "step": 15,
+          "unit": "deg",
+          "default": 135,
+          "visible_if": "{{ block.settings.icon_background_type == 'gradient' }}"
+        },
+        {
+          "type": "range",
+          "id": "icon_background_opacity",
+          "label": "Background opacity",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 80
+        },
+        {
+          "type": "select",
+          "id": "icon_background_shape",
+          "label": "Background shape",
+          "options": [
+            { "value": "circle", "label": "Circle" },
+            { "value": "organic", "label": "Organic (blob)" }
+          ],
+          "default": "organic"
+        },
+        {
+          "type": "range",
+          "id": "icon_background_scale",
+          "label": "Background size",
+          "min": 50,
+          "max": 200,
+          "step": 10,
+          "unit": "%",
+          "default": 150,
+          "info": "Size relative to icon"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product benefits",
+      "category": "Product",
+      "settings": {
+        "padding-block-start": 48,
+        "padding-block-end": 48
+      },
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "icon": "starburst",
+            "title": "Laser-Sharp Presence",
+            "description": "Superfoods help tune neurotransmitters to keep you clear, calm, and present.*"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon": "arrow",
+            "title": "Root-Level Wellness",
+            "description": "Targets underlying factors like fatigue, stress, and hormone imbalance.*"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon": "waves",
+            "title": "Steady, Clean Energy",
+            "description": "Slow-release botanicals power your day — without the jitters or crash.*"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon": "spiral",
+            "title": "Balanced Drive",
+            "description": "Cortisol-calming ingredients help ease stress and support healthy desire.*"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

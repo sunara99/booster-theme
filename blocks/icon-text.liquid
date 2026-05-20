@@ -1,0 +1,464 @@
+{%- liquid
+  assign s = block.settings
+  assign icon_block_class = 'icon-text-block__icon icon-text-block-' | append: block.id
+  if s.layout == 'column'
+    case s.vertical_alignment
+      when 'left'
+        assign align_value = 'flex-start'
+        assign text_align_value = 'left'
+      when 'right'
+        assign align_value = 'flex-end'
+        assign text_align_value = 'right'
+      else
+        assign align_value = 'center'
+        assign text_align_value = 'center'
+    endcase
+  else
+    assign align_value = 'center'
+    assign text_align_value = 'left'
+  endif
+-%}
+
+<div
+  class="icon-text-block icon-text-block--{{ block.id }}{% if s.layout == 'column' and s.vertical_on_mobile == false %} icon-text-block--horizontal-on-mobile{% endif %}"
+  style="
+    --icon-text-block-bg: {{ s.background_color | default: 'transparent' }};
+    /*--icon-text-block-text: {{ s.text_color | default: 'rgb(0, 0, 0)' }};*/
+    --icon-text-block-gap: {{ s.gap }}px;
+    --icon-text-block-direction: {{ s.layout }};
+    --icon-text-block-align: {{ align_value }};
+    --icon-text-block-text-align: {{ text_align_value }};
+    --icon-text-block-radius: {{ s.corner_radius }}px;
+    --icon-text-block-padding: {{ s.padding_top }}px {{ s.padding_sides }}px {{ s.padding_bottom }}px;
+    {% if s.font_size != blank %}--icon-text-block-font-size: {{ s.font_size }};{% endif %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {%- if s.link != blank -%}
+    <a
+      href="{{ s.link }}"
+      class="icon-text-block__link"
+      {% if s.open_in_new_tab %}
+        target="_blank" rel="noopener"
+      {% endif %}
+    >
+  {%- endif -%}
+
+  <div class="icon-text-block__inner">
+    {%- capture icon_content -%}
+      {% render 'icon-or-image',
+        icon: s.icon,
+        image_upload: s.image_upload,
+        width: s.icon_width,
+        image_corner_radius: s.image_corner_radius,
+        class_name: icon_block_class
+      %}
+    {%- endcapture -%}
+
+    {%- if icon_content != blank -%}
+      <div class="icon-text-block__icon-wrap">
+        {{ icon_content }}
+      </div>
+    {%- endif -%}
+
+    {%- if s.text != blank -%}
+      <div class="icon-text-block__text">
+        {{ s.text }}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if s.link != blank -%}
+    </a>
+  {%- endif -%}
+</div>
+
+<style>
+  .icon-text-block--{{ block.id }} {
+    background-color: var(--icon-text-block-bg);
+    /*color: var(--icon-text-block-text);*/
+    border-radius: var(--icon-text-block-radius);
+    padding: var(--icon-text-block-padding);
+  }
+
+  .icon-text-block__link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .icon-text-block__inner {
+    display: flex;
+    flex-direction: var(--icon-text-block-direction);
+    align-items: var(--icon-text-block-align);
+    gap: var(--icon-text-block-gap);
+  }
+
+  .icon-text-block__icon-wrap {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-text-block--{{ block.id }} .icon-text-block__icon,
+  .icon-text-block--{{ block.id }} .icon-text-block__icon-wrap img {
+    display: block;
+  }
+
+  .icon-text-block__text {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--icon-text-block-font-size, inherit);
+    line-height: 1.5;
+    margin: 0;
+    text-align: var(--icon-text-block-text-align);
+  }
+
+  .icon-text-block__text p:first-child {
+    margin-top: 0;
+  }
+
+  .icon-text-block__text p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .icon-text-block--horizontal-on-mobile .icon-text-block__inner {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .icon-text-block--horizontal-on-mobile .icon-text-block__text {
+      text-align: left;
+    }
+    .layout-panel-flex--row:not(.mobile-column) {
+        flex-wrap: nowrap;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:names.icon_text",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:content.icon"
+    },
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "t:settings.icon",
+      "options": [
+        { "value": "none", "label": "t:options.none" },
+        { "value": "apple", "label": "t:options.apple" },
+        { "value": "arrow", "label": "t:options.arrow" },
+        { "value": "banana", "label": "t:options.banana" },
+        { "value": "bottle", "label": "t:options.bottle" },
+        { "value": "box", "label": "t:options.box" },
+        { "value": "carrot", "label": "t:options.carrot" },
+        { "value": "chat_bubble", "label": "t:options.chat_bubble" },
+        { "value": "check_box", "label": "t:options.check_box" },
+        { "value": "check_circle", "label": "t:options.checkmark" },
+        { "value": "clipboard", "label": "t:options.clipboard" },
+        { "value": "dairy", "label": "t:options.dairy" },
+        { "value": "dairy_free", "label": "t:options.dairy_free" },
+        { "value": "dryer", "label": "t:options.dryer" },
+        { "value": "eye", "label": "t:options.eye" },
+        { "value": "fire", "label": "t:options.fire" },
+        { "value": "gluten_free", "label": "t:options.gluten_free" },
+        { "value": "heart", "label": "t:options.heart" },
+        { "value": "iron", "label": "t:options.iron" },
+        { "value": "leaf", "label": "t:options.leaf" },
+        { "value": "leather", "label": "t:options.leather" },
+        { "value": "lightning_bolt", "label": "t:options.lightning_bolt" },
+        { "value": "lipstick", "label": "t:options.lipstick" },
+        { "value": "lock", "label": "t:options.lock" },
+        { "value": "map_pin", "label": "t:options.map_pin" },
+        { "value": "nut_free", "label": "t:options.nut_free" },
+        { "value": "pants", "label": "t:options.pants" },
+        { "value": "paw_print", "label": "t:options.paw_print" },
+        { "value": "pepper", "label": "t:options.pepper" },
+        { "value": "perfume", "label": "t:options.perfume" },
+        { "value": "plane", "label": "t:options.plane" },
+        { "value": "plant", "label": "t:options.plant" },
+        { "value": "price_tag", "label": "t:options.price_tag" },
+        { "value": "question_mark", "label": "t:options.question_mark" },
+        { "value": "recycle", "label": "t:options.recycle" },
+        { "value": "return", "label": "t:options.return" },
+        { "value": "ruler", "label": "t:options.ruler" },
+        { "value": "serving_dish", "label": "t:options.serving_dish" },
+        { "value": "shirt", "label": "t:options.shirt" },
+        { "value": "shoe", "label": "t:options.shoe" },
+        { "value": "silhouette", "label": "t:options.silhouette" },
+        { "value": "bluesky", "label": "t:options.social_bluesky" },
+        { "value": "facebook", "label": "t:options.social_facebook" },
+        { "value": "instagram", "label": "t:options.social_instagram" },
+        { "value": "linkedin", "label": "t:options.social_linkedin" },
+        { "value": "pinterest", "label": "t:options.social_pinterest" },
+        { "value": "snapchat", "label": "t:options.social_snapchat" },
+        { "value": "spotify", "label": "t:options.social_spotify" },
+        { "value": "threads", "label": "t:options.social_threads" },
+        { "value": "tiktok", "label": "t:options.social_tiktok" },
+        { "value": "tumblr", "label": "t:options.social_tumblr" },
+        { "value": "twitter", "label": "t:options.social_twitter" },
+        { "value": "vimeo", "label": "t:options.social_vimeo" },
+        { "value": "youtube", "label": "t:options.social_youtube" },
+        { "value": "whatsapp", "label": "t:options.social_whatsapp" },
+        { "value": "snowflake", "label": "t:options.snowflake" },
+        { "value": "star", "label": "t:options.star" },
+        { "value": "stopwatch", "label": "t:options.stopwatch" },
+        { "value": "truck", "label": "t:options.truck" },
+        { "value": "washing", "label": "t:options.washing" }
+      ],
+      "default": "check_box"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_upload",
+      "label": "t:settings.image_icon"
+    },
+    {
+      "type": "range",
+      "id": "image_corner_radius",
+      "label": "t:settings.image_border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.image_upload != blank }}"
+    },
+    {
+      "type": "range",
+      "id": "icon_width",
+      "label": "t:settings.width",
+      "min": 12,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "t:content.text"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:settings.text"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "t:settings.size",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "0.625rem",
+          "label": "10px"
+        },
+        {
+          "value": "0.75rem",
+          "label": "12px"
+        },
+        {
+          "value": "0.875rem",
+          "label": "14px"
+        },
+        {
+          "value": "1rem",
+          "label": "16px"
+        },
+        {
+          "value": "1.125rem",
+          "label": "18px"
+        },
+        {
+          "value": "1.25rem",
+          "label": "20px"
+        },
+        {
+          "value": "1.5rem",
+          "label": "24px"
+        },
+        {
+          "value": "2rem",
+          "label": "32px"
+        },
+        {
+          "value": "2.5rem",
+          "label": "40px"
+        },
+        {
+          "value": "3rem",
+          "label": "48px"
+        },
+        {
+          "value": "3.5rem",
+          "label": "56px"
+        },
+        {
+          "value": "4.5rem",
+          "label": "72px"
+        },
+        {
+          "value": "5.5rem",
+          "label": "88px"
+        },
+        {
+          "value": "7.5rem",
+          "label": "120px"
+        },
+        {
+          "value": "9.5rem",
+          "label": "152px"
+        },
+        {
+          "value": "11.5rem",
+          "label": "184px"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "t:settings.direction",
+      "options": [
+        {
+          "value": "row",
+          "label": "t:options.horizontal"
+        },
+        {
+          "value": "column",
+          "label": "t:options.vertical"
+        }
+      ],
+      "default": "row"
+    },
+    {
+      "type": "select",
+      "id": "vertical_alignment",
+      "label": "t:settings.alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "center",
+      "visible_if": "{{ block.settings.layout == 'column' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "vertical_on_mobile",
+      "label": "t:settings.vertical_on_mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.layout == 'column' }}"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "t:settings.gap",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.text"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "t:settings.corner_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_sides",
+      "label": "t:settings.padding_horizontal",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.block_link"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:settings.link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "t:settings.open_new_tab",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.icon_text",
+      "category": "t:categories.basic",
+      "settings": {
+        "icon": "eye",
+        "text": "<p>Visible Results You Can Feel</p>"
+      }
+    }
+  ]
+}
+{% endschema %}

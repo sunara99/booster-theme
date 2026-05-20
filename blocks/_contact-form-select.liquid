@@ -1,0 +1,51 @@
+{% render 'contact-form-select-field', block: block %}
+
+{% schema %}
+{
+  "name": "t:names.contact_form_select",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:settings.label",
+      "default": "Select your option",
+      "info": "t:settings.contact_form_select_label_info"
+    },
+    {
+      "type": "textarea",
+      "id": "options",
+      "label": "t:settings.dropdown_choices",
+      "default": "Option 1\nOption 2\nOption 3",
+      "info": "t:settings.dropdown_choices_info"
+    },
+    {
+      "type": "text",
+      "id": "field_name",
+      "label": "t:settings.form_field_name",
+      "default": "topic",
+      "info": "t:settings.form_field_name_info"
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "t:settings.required",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_placeholder",
+      "label": "t:settings.show_placeholder_option",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "placeholder_label",
+      "label": "t:settings.placeholder",
+      "default": "Choose an option",
+      "visible_if": "{{ block.settings.show_placeholder }}"
+    }
+  ],
+  "presets": []
+}
+{% endschema %}

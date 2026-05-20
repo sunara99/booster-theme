@@ -1,0 +1,122 @@
+{% comment %}
+  Renders N variant pickers for quantity break options.
+  Allows user to select N variants (e.g. N different sizes) when buying N.
+  @param product - The product
+  @param variant - The currently selected variant (for default selection)
+  @param option_index - The option index (1-6)
+  @param option_quantity - The quantity for this option (1-10)
+  @param image_url_width - Image width for variant images
+  @param show_color_swatches - Whether to show color swatches when available (default: true)
+  @param show_variant_pickers_heading - Whether to show the option-name heading above the rows (default: true)
+  @param show_variant_picker_row_numbers - Whether to show #1, #2 labels before each select (default: true)
+{% endcomment %}
+{% liquid
+  if show_variant_pickers_heading == nil
+    assign show_variant_pickers_heading = true
+  endif
+  if show_variant_picker_row_numbers == nil
+    assign show_variant_picker_row_numbers = true
+  endif
+
+  assign option_names = product.options_with_values | map: 'name' | join: ' / '
+  if option_names != blank
+    assign option_name = option_names
+  else
+    assign option_name = 'Variant'
+  endif
+
+  assign swatch_option = nil
+  for opt in product.options_with_values
+    assign sc = opt.values | map: 'swatch' | compact | size
+    if sc > 0
+      assign swatch_option = opt
+      break
+    endif
+  endfor
+
+  assign swatch_opt_key = ''
+  assign initial_swatch_bg = ''
+  if swatch_option
+    assign swatch_opt_key = 'option' | append: swatch_option.position
+    assign val_name = variant[swatch_opt_key]
+    for ov in swatch_option.values
+      if ov.name == val_name
+        if ov.swatch.color
+          assign initial_swatch_bg = 'rgb(' | append: ov.swatch.color.rgb | append: ')'
+        elsif ov.swatch.image
+          assign img_url = ov.swatch.image | image_url: width: 80
+          assign initial_swatch_bg = 'url(' | append: img_url | append: ')'
+        elsif settings.show_variant_image and variant.featured_media != blank and variant.featured_media.preview_image != blank
+          assign img_url = variant.featured_media.preview_image | image_url: width: 80
+          assign initial_swatch_bg = 'url(' | append: img_url | append: ')'
+        endif
+        break
+      endif
+    endfor
+  endif
+
+  assign show_swatches = false
+  if show_color_swatches != false and swatch_option
+    assign show_swatches = true
+  endif
+%}
+<div class="quantity-breaks__variant-pickers{% if show_variant_picker_row_numbers == false %} quantity-breaks__variant-pickers--no-row-numbers{% endif %}" data-quantity-breaks-variant-pickers data-option-index="{{ option_index }}" data-quantity="{{ option_quantity }}" data-picker-count="{{ option_quantity }}" data-has-swatches="{% if show_swatches %}true{% else %}false{% endif %}" onclick="event.stopPropagation()">
+  {% if show_variant_pickers_heading %}
+  <div class="quantity-breaks__variant-pickers-heading">{{ option_name }}</div>
+  {% endif %}
+  {% for i in (1..option_quantity) %}
+  <div class="quantity-breaks__variant-picker-row" data-variant-picker-index="{{ i }}">
+    {% if show_variant_picker_row_numbers %}
+    <span class="quantity-breaks__variant-picker-number">#{{ i }}</span>
+    {% endif %}
+    <div class="quantity-breaks__variant-picker-select-wrapper">
+      {% if show_swatches %}
+      <span class="quantity-breaks__variant-swatch" data-variant-swatch aria-hidden="true"{% if initial_swatch_bg != blank %} style="--swatch-background: {{ initial_swatch_bg | escape }}"{% endif %}></span>
+      {% endif %}
+      <select
+        id="qb-variant-{{ i }}-{{ option_index }}-{{ product.id }}"
+        class="quantity-breaks__variant-select{% if show_swatches %} quantity-breaks__variant-select--has-swatch{% endif %}"
+        data-variant-select
+        data-variant-picker-index="{{ i }}"
+        data-option-index="{{ option_index }}"
+        data-quantity="{{ option_quantity }}"
+        aria-label="Select variant {{ i }} for {{ product.title }}"
+      >
+        {% for v in product.variants %}
+          {% liquid
+            assign v_swatch_bg = ''
+            if show_swatches and swatch_option
+              assign val_name = v[swatch_opt_key]
+              for ov in swatch_option.values
+                if ov.name == val_name
+                  if ov.swatch.color
+                    assign v_swatch_bg = 'rgb(' | append: ov.swatch.color.rgb | append: ')'
+                  elsif ov.swatch.image
+                    assign img_url = ov.swatch.image | image_url: width: 80
+                    assign v_swatch_bg = 'url(' | append: img_url | append: ')'
+                  elsif settings.show_variant_image and v.featured_media != blank and v.featured_media.preview_image != blank
+                    assign img_url = v.featured_media.preview_image | image_url: width: 80
+                    assign v_swatch_bg = 'url(' | append: img_url | append: ')'
+                  endif
+                  break
+                endif
+              endfor
+            endif
+          %}
+          <option
+            value="{{ v.id }}"
+            data-price="{{ v.price }}"
+            data-compare-at-price="{{ v.compare_at_price | default: v.price }}"
+            {% if v_swatch_bg != blank %}data-swatch-background="{{ v_swatch_bg | escape }}"{% endif %}
+            {% if v.featured_media.preview_image != blank %}data-image-url="{{ v.featured_media.preview_image | image_url: width: image_url_width }}"{% elsif v.featured_image != blank %}data-image-url="{{ v.featured_image | image_url: width: image_url_width }}"{% endif %}
+            {% if v.id == variant.id %}selected{% endif %}
+            {% unless v.available %}disabled{% endunless %}
+          >
+            {{ v.title }}{% unless v.available %} - {{ 'content.unavailable' | t }}{% endunless %}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endfor %}
+</div>

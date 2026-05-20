@@ -1,0 +1,832 @@
+{% assign block_id = block.id | replace: '_', '' | downcase %}
+{% assign swiper_id = 'slider-swiper-' | append: block_id %}
+{% assign slide_count = block.blocks.size %}
+{% assign dots_position = block.settings.dots_position | default: 'below' %}
+{% assign navigation_position = block.settings.navigation_position | default: 'sides' %}
+
+{% style %}
+  .lumin-slider-swiper-{{ block_id }} {
+    display: block;
+    width: {{ block.settings.mobile_width_percent }}%;
+    max-width: 100%;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    {% if block.settings.background %}
+      background-color: {{ block.settings.background_color | default: '#00000026' }};
+      border-radius: {{ block.settings.corner_radius }}px;
+    {% endif %}
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper {
+    overflow: hidden;
+    min-width: 0;
+    contain: layout;
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-wrapper {
+    display: flex;
+    align-items: {% case block.settings.slide_alignment %}{% when 'top' %}flex-start{% when 'center' %}center{% when 'bottom' %}flex-end{% else %}stretch{% endcase %};
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* 320px - Mobile (base) */
+  .lumin-slider-swiper-{{ block_id }} .swiper-slide {
+    flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }});
+    width: calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }});
+    height: auto;
+    position: relative;
+    box-sizing: border-box;
+    contain: layout;
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-slide-active,
+  .lumin-slider-swiper-{{ block_id }} .swiper-slide-next,
+  .lumin-slider-swiper-{{ block_id }} .swiper-slide-prev {
+    flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }}) !important;
+    width: calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }}) !important;
+    max-width: calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }}) !important;
+  }
+
+  /* 480px - Small tablets */
+  @media screen and (min-width: 480px) {
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-active,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-next,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-prev {
+      flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_small_tablet | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_small_tablet }}) !important;
+      width: calc((100% - ({{ block.settings.slides_per_view_small_tablet | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_small_tablet }}) !important;
+      max-width: calc((100% - ({{ block.settings.slides_per_view_small_tablet | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_small_tablet }}) !important;
+    }
+  }
+
+  /* 750px - Tablets and up: desktop width */
+  @media screen and (min-width: 750px) {
+    .lumin-slider-swiper-{{ block_id }} {
+      width: {{ block.settings.desktop_width_percent }}%;
+    }
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-active,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-next,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-prev {
+      flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_tablet | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_tablet }}) !important;
+      width: calc((100% - ({{ block.settings.slides_per_view_tablet | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_tablet }}) !important;
+      max-width: calc((100% - ({{ block.settings.slides_per_view_tablet | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_tablet }}) !important;
+    }
+  }
+
+  /* 1200px - Laptops */
+  @media screen and (min-width: 1200px) {
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-active,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-next,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-prev {
+      flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_laptop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_laptop }}) !important;
+      width: calc((100% - ({{ block.settings.slides_per_view_laptop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_laptop }}) !important;
+      max-width: calc((100% - ({{ block.settings.slides_per_view_laptop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_laptop }}) !important;
+    }
+  }
+
+  /* 1400px - Desktop */
+  @media screen and (min-width: 1400px) {
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-active,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-next,
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide-prev {
+      flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }}) !important;
+      width: calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }}) !important;
+      max-width: calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }}) !important;
+    }
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-slide > * {
+    width: 100%;
+    min-height: 0;
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-button-next,
+  .lumin-slider-swiper-{{ block_id }} .swiper-button-prev {
+    background-color: {{ block.settings.nav_button_color }};
+    color: {{ block.settings.nav_button_icon_color }};
+    width: {{ block.settings.nav_button_size }}px;
+    height: {{ block.settings.nav_button_size }}px;
+    border-radius: 50%;
+    opacity: {{ block.settings.nav_button_opacity | divided_by: 100.0 }};
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-button-next:hover,
+  .lumin-slider-swiper-{{ block_id }} .swiper-button-prev:hover {
+    background-color: {{ block.settings.nav_button_hover_color }};
+    color: {{ block.settings.nav_button_icon_hover_color }};
+    opacity: 1;
+    transform: none;
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-button-next::after,
+  .lumin-slider-swiper-{{ block_id }} .swiper-button-prev::after {
+    content: none !important;
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-button-next svg,
+  .lumin-slider-swiper-{{ block_id }} .swiper-button-prev svg {
+    width: calc({{ block.settings.nav_button_size }}px * 0.6);
+    height: calc({{ block.settings.nav_button_size }}px * 0.6);
+    flex-shrink: 0;
+  }
+
+  .lumin-slider-swiper-{{ block_id }}:not(.swiper-slider-block--nav-top-right) .swiper-button-prev {
+    left: {{ block.settings.nav_button_offset }}px;
+  }
+
+  .lumin-slider-swiper-{{ block_id }}:not(.swiper-slider-block--nav-top-right) .swiper-button-next {
+    right: {{ block.settings.nav_button_offset }}px;
+  }
+
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--nav-top-right .lumin-slider-swiper-inner-{{ block_id }} {
+    padding-top: calc({{ block.settings.nav_button_size }}px + 12px + 10px);
+  }
+
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--nav-top-right .lumin-slider-swiper-nav-cluster-{{ block_id }} {
+    position: absolute;
+    top: 0;
+    right: {{ block.settings.nav_button_offset }}px;
+    z-index: 10;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--nav-top-right .lumin-slider-swiper-nav-cluster-{{ block_id }} .swiper-button-prev,
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--nav-top-right .lumin-slider-swiper-nav-cluster-{{ block_id }} .swiper-button-next {
+    position: relative;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    margin-top: 0 !important;
+    pointer-events: auto;
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-pagination {
+    margin-top: {{ block.settings.dots_margin_top }}px;
+  }
+
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--dots-below .swiper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--dots-below .swiper-wrapper {
+    flex: 1;
+  }
+
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--dots-below .swiper-pagination--below {
+    position: relative;
+    bottom: auto;
+    top: auto;
+    left: auto;
+    margin-top: {{ block.settings.dots_margin_top }}px;
+    flex-shrink: 0;
+  }
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--dots-below:not(.swiper-slider-block--nav-top-right) .swiper-button-prev,
+  .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--dots-below:not(.swiper-slider-block--nav-top-right) .swiper-button-next {
+    top: calc(50% - ({{ block.settings.dots_margin_top }}px + {{ block.settings.dot_size }}px));
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-pagination-bullet {
+    width: {{ block.settings.dot_size }}px;
+    height: {{ block.settings.dot_size }}px;
+    background-color: {{ block.settings.dot_color }};
+    cursor: pointer;
+    opacity: 1; 
+  }
+
+  .lumin-slider-swiper-{{ block_id }} .swiper-pagination-bullet-active {
+    width: {{ block.settings.dot_size }}px !important;
+    height: {{ block.settings.dot_size }}px !important;
+    background-color: {{ block.settings.dot_active_color }};
+    transform: none;
+  }
+
+  /* Mobile (320-479px) - collection card natural sizing */
+  @media screen and (max-width: 479px) {
+    .lumin-slider-swiper-{{ block_id }} .swiper-wrapper {
+      align-items: {% case block.settings.slide_alignment %}{% when 'top' %}flex-start{% when 'center' %}center{% when 'bottom' %}flex-end{% else %}stretch{% endcase %};
+    }
+
+    .lumin-slider-swiper-{{ block_id }} .swiper-slide > * {
+      min-height: min-content;
+    }
+
+    .lumin-slider-swiper-{{ block_id }} .swiper-button-next,
+    .lumin-slider-swiper-{{ block_id }} .swiper-button-prev {
+      width: calc({{ block.settings.nav_button_size }}px * 0.8);
+      height: calc({{ block.settings.nav_button_size }}px * 0.8);
+    }
+
+    .lumin-slider-swiper-{{ block_id }} .swiper-button-next svg,
+    .lumin-slider-swiper-{{ block_id }} .swiper-button-prev svg {
+      width: calc({{ block.settings.nav_button_size }}px * 0.8 * 0.6);
+      height: calc({{ block.settings.nav_button_size }}px * 0.8 * 0.6);
+    }
+
+    .lumin-slider-swiper-{{ block_id }}:not(.swiper-slider-block--nav-top-right) .swiper-button-prev {
+      left: calc({{ block.settings.nav_button_offset }}px * 0.5);
+    }
+
+    .lumin-slider-swiper-{{ block_id }}:not(.swiper-slider-block--nav-top-right) .swiper-button-next {
+      right: calc({{ block.settings.nav_button_offset }}px * 0.5);
+    }
+
+    .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--nav-top-right .lumin-slider-swiper-inner-{{ block_id }} {
+      padding-top: calc({{ block.settings.nav_button_size }}px * 0.8 + 12px + 10px);
+    }
+
+    .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--nav-top-right .lumin-slider-swiper-nav-cluster-{{ block_id }} {
+      right: calc({{ block.settings.nav_button_offset }}px * 0.5);
+    }
+  }
+
+  /* Small tablets and up (480px+) - smaller nav buttons */
+  @media screen and (min-width: 480px) and (max-width: 749px) {
+    .lumin-slider-swiper-{{ block_id }} .swiper-button-next,
+    .lumin-slider-swiper-{{ block_id }} .swiper-button-prev {
+      width: calc({{ block.settings.nav_button_size }}px * 0.8);
+      height: calc({{ block.settings.nav_button_size }}px * 0.8);
+    }
+
+    .lumin-slider-swiper-{{ block_id }} .swiper-button-next svg,
+    .lumin-slider-swiper-{{ block_id }} .swiper-button-prev svg {
+      width: calc({{ block.settings.nav_button_size }}px * 0.8 * 0.4);
+      height: calc({{ block.settings.nav_button_size }}px * 0.8 * 0.4);
+    }
+
+    .lumin-slider-swiper-{{ block_id }}:not(.swiper-slider-block--nav-top-right) .swiper-button-prev {
+      left: calc({{ block.settings.nav_button_offset }}px * 0.5);
+    }
+
+    .lumin-slider-swiper-{{ block_id }}:not(.swiper-slider-block--nav-top-right) .swiper-button-next {
+      right: calc({{ block.settings.nav_button_offset }}px * 0.5);
+    }
+
+    .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--nav-top-right .lumin-slider-swiper-inner-{{ block_id }} {
+      padding-top: calc({{ block.settings.nav_button_size }}px * 0.8 + 12px + 10px);
+    }
+
+    .lumin-slider-swiper-{{ block_id }}.swiper-slider-block--nav-top-right .lumin-slider-swiper-nav-cluster-{{ block_id }} {
+      right: calc({{ block.settings.nav_button_offset }}px * 0.5);
+    }
+  }
+{% endstyle %}
+
+<div
+  class="lumin-slider-swiper-{{ block_id }} spacing-style border-style swiper-slider-block{% if block.settings.show_dots and dots_position == 'below' %} swiper-slider-block--dots-below{% endif %}{% if navigation_position == 'top_right' %} swiper-slider-block--nav-top-right{% endif %}"
+  id="{{ swiper_id }}-wrapper"
+  style="{% render 'border-override', settings: block.settings %} {% render 'spacing-style', settings: block.settings %}"
+  {{ block.shopify_attributes }}
+  data-slides-mobile="{{ block.settings.slides_per_view_mobile }}"
+  data-slides-small-tablet="{{ block.settings.slides_per_view_small_tablet }}"
+  data-slides-tablet="{{ block.settings.slides_per_view_tablet }}"
+  data-slides-laptop="{{ block.settings.slides_per_view_laptop }}"
+  data-slides-desktop="{{ block.settings.slides_per_view_desktop }}"
+  data-autoplay="{{ block.settings.autoplay }}"
+  data-autoplay-delay="{{ block.settings.autoplay_delay }}"
+  data-loop="true"display: block;
+  data-autoplay-reverse="{{ block.settings.autoplay_reverse }}"
+  data-gap="{{ block.settings.gap }}"
+  data-show-navigation="{{ block.settings.show_navigation }}"
+  data-show-dots="{{ block.settings.show_dots }}"
+>
+  <div
+    class="swiper lumin-slider-swiper-inner-{{ block_id }}"
+    id="{{ swiper_id }}"
+  >
+    <div class="swiper-wrapper">
+      {% content_for 'blocks' %}
+    </div>
+
+    {% if block.settings.show_navigation and slide_count > 1 %}
+      {% if navigation_position == 'top_right' %}
+        <div class="lumin-slider-swiper-nav-cluster-{{ block_id }}">
+          <div class="swiper-button-prev" aria-label="Previous slide">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </div>
+          <div class="swiper-button-next" aria-label="Next slide">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+        </div>
+      {% else %}
+        <div class="swiper-button-prev" aria-label="Previous slide">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </div>
+        <div class="swiper-button-next" aria-label="Next slide">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      {% endif %}
+    {% endif %}
+
+    {% if block.settings.show_dots and slide_count > 1 %}
+      <div class="swiper-pagination{% if dots_position == 'below' %} swiper-pagination--below{% endif %}"></div>
+    {% endif %}
+  </div>
+</div>
+
+{% if slide_count > 0 %}
+<script>
+  (function() {
+    const blockId = '{{ block_id }}';
+    const swiperId = '{{ swiper_id }}';
+
+    function initSliderSwiper(container) {
+      if (typeof Swiper === 'undefined') {
+        setTimeout(() => initSliderSwiper(container), 100);
+        return;
+      }
+
+      const swiperEl = container.querySelector('.lumin-slider-swiper-inner-' + blockId);
+      if (!swiperEl) return;
+      if (swiperEl.swiper) {
+        swiperEl.swiper.destroy(true, true);
+        swiperEl.swiper = null;
+      }
+
+      const slidesMobile = parseInt(container.dataset.slidesMobile) || 1;
+      const slidesSmallTablet = parseInt(container.dataset.slidesSmallTablet) || 2;
+      const slidesTablet = parseInt(container.dataset.slidesTablet) || 2;
+      const slidesLaptop = parseInt(container.dataset.slidesLaptop) || 3;
+      const slidesDesktop = parseInt(container.dataset.slidesDesktop) || 3;
+      const maxSlidesPerView = Math.max(slidesMobile, slidesSmallTablet, slidesTablet, slidesLaptop, slidesDesktop);
+      const slideCount = swiperEl.querySelectorAll('.swiper-slide').length;
+      const minSlidesForLoop = maxSlidesPerView + 6;
+      const loop = slideCount >= minSlidesForLoop;
+
+      const autoplayEnabled = container.dataset.autoplay === 'true';
+      const autoplayDelay = (parseInt(container.dataset.autoplayDelay) || 3) * 1000;
+      const gapParsed = parseInt(container.dataset.gap, 10);
+      const gap = isNaN(gapParsed) ? 12 : gapParsed;
+
+      const config = {
+        loop: loop,
+        slidesPerGroup: 1,
+        speed: 500,
+        slidesPerView: slidesMobile,
+        spaceBetween: gap,
+        breakpoints: {
+          320: { slidesPerView: slidesMobile, spaceBetween: gap },
+          480: { slidesPerView: slidesSmallTablet, spaceBetween: gap },
+          750: { slidesPerView: slidesTablet, spaceBetween: gap },
+          1200: { slidesPerView: slidesLaptop, spaceBetween: gap },
+          1400: { slidesPerView: slidesDesktop, spaceBetween: gap }
+        },
+        navigation: container.dataset.showNavigation === 'true' ? {
+          nextEl: swiperEl.querySelector('.swiper-button-next'),
+          prevEl: swiperEl.querySelector('.swiper-button-prev')
+        } : false,
+        pagination: container.dataset.showDots === 'true' ? {
+          el: swiperEl.querySelector('.swiper-pagination'),
+          clickable: true
+        } : false
+      };
+
+      if (autoplayEnabled) {
+        config.autoplay = {
+          delay: autoplayDelay,
+          disableOnInteraction: true,
+          pauseOnMouseEnter: true,
+          reverseDirection: container.dataset.autoplayReverse === 'true',
+          waitForTransition: true
+        };
+      }
+
+      new Swiper(swiperEl, config);
+    }
+
+    function init() {
+      const container = document.getElementById(swiperId + '-wrapper');
+      if (container && !container.dataset.initialized) {
+        container.dataset.initialized = 'true';
+        requestAnimationFrame(() => initSliderSwiper(container));
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    document.addEventListener('shopify:section:load', (e) => {
+      const container = e.target.querySelector('#' + swiperId + '-wrapper');
+      if (container) {
+        delete container.dataset.initialized;
+        initSliderSwiper(container);
+      }
+    });
+  })();
+</script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Lumin Slider",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_slider-swiper-slide"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_mobile",
+      "label": "Slides per view (Mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_small_tablet",
+      "label": "Slides per view (480px small tablets)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_tablet",
+      "label": "Slides per view (750px tablets)",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_laptop",
+      "label": "Slides per view (1200px laptops)",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_desktop",
+      "label": "Slides per view (1400px desktop)",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between slides",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "mobile_width_percent",
+      "label": "Mobile width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "slide_alignment",
+      "label": "Slide alignment",
+      "options": [
+        { "value": "top", "label": "Top" },
+        { "value": "center", "label": "Center" },
+        { "value": "bottom", "label": "Bottom" },
+        { "value": "stretch", "label": "Full (stretch)" }
+      ],
+      "default": "stretch"
+    },
+    {
+      "type": "header",
+      "content": "Slider behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_delay",
+      "label": "Autoplay delay",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 3,
+      "visible_if": "{{ block.settings.autoplay }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_reverse",
+      "label": "Reverse autoplay direction",
+      "default": false,
+      "visible_if": "{{ block.settings.autoplay }}"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show prev/next buttons",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "navigation_position",
+      "label": "Button position",
+      "options": [
+        { "value": "sides", "label": "Left and right (centered)" },
+        { "value": "top_right", "label": "Top right" }
+      ],
+      "default": "sides",
+      "visible_if": "{{ block.settings.show_navigation }}"
+    },
+    {
+      "type": "range",
+      "id": "nav_button_size",
+      "label": "Button size",
+      "min": 24,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "nav_button_offset",
+      "label": "Offset from corner",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "nav_button_opacity",
+      "label": "Button opacity",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "color",
+      "id": "nav_button_color",
+      "label": "Button background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_icon_color",
+      "label": "Button icon color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_hover_color",
+      "label": "Button hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_icon_hover_color",
+      "label": "Button icon hover color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Pagination dots"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show pagination dots",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "dots_position",
+      "label": "Dots position",
+      "options": [
+        { "value": "inside", "label": "Inside slider" },
+        { "value": "below", "label": "Below slider" }
+      ],
+      "default": "below",
+      "visible_if": "{{ block.settings.show_dots }}"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "dots_margin_top",
+      "label": "Dots margin top",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "Active dot color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "checkbox",
+      "id": "background",
+      "label": "Show background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "alpha": true,
+      "default": "#00000026",
+      "visible_if": "{{ block.settings.background }}"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "Corner radius",
+      "default": 0,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "visible_if": "{{ block.settings.background }}"
+    },
+    {
+      "type": "select",
+      "id": "border",
+      "label": "t:settings.borders",
+      "options": [
+        { "value": "none", "label": "t:options.none" },
+        { "value": "solid", "label": "t:options.solid" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "px",
+      "label": "t:settings.border_width",
+      "default": 1,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:settings.border_opacity",
+      "default": 100,
+      "visible_if": "{{ block.settings.border != 'none' }}"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lumin Slider",
+      "blocks": {
+        "slide_1": {
+          "type": "_slider-swiper-slide",
+          "blocks": {
+          }
+        },
+        "slide_2": {
+          "type": "_slider-swiper-slide",
+          "blocks": {
+          }
+        },
+        "slide_3": {
+          "type": "_slider-swiper-slide",
+          "blocks": {
+          }
+        },
+        "slide_4": {
+          "type": "_slider-swiper-slide",
+          "blocks": {
+          }
+        }
+      },
+      "block_order": ["slide_1", "slide_2", "slide_3", "slide_4"]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1176 @@
+
+{% assign block_id = block.id | replace: '_', '' | downcase %}
+{% liquid
+  assign _show_card_shadow = block.settings.show_card_shadow
+  if _show_card_shadow == blank and block.settings.card_shadow != 'none' and block.settings.card_shadow != blank
+    assign _show_card_shadow = true
+  elsif _show_card_shadow == blank
+    assign _show_card_shadow = false
+  endif
+  assign testimonial_card_box_shadow = 'none'
+  if _show_card_shadow and block.settings.card_shadow != 'none'
+    assign _shadow_c = block.settings.card_shadow_color | default: '#000000'
+    assign _shadow_alpha = block.settings.card_shadow_opacity | default: 20 | times: 0.01
+    assign _shadow_layer = _shadow_c | color_modify: 'alpha', _shadow_alpha
+    assign testimonial_card_box_shadow = '2px 2px 6px 1px ' | append: _shadow_layer
+  endif
+%}
+{% liquid
+  case block.settings.text_alignment
+    when 'right'
+      assign testimonial_flex_justify = 'flex-end'
+    when 'center'
+      assign testimonial_flex_justify = 'center'
+    else
+      assign testimonial_flex_justify = 'flex-start'
+  endcase
+%}
+
+{% style %}
+  .lumin-testimonial-slider-{{ block_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.section_padding }}px 0;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .lumin-testimonial-slider__container-{{ block_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    {% if block.settings.arrow_position == 'sides' %}
+      position: relative;
+    {% endif %}
+  }
+
+  .lumin-testimonial-slider__heading-{{ block_id }} {
+    text-align: {{ block.settings.heading_alignment }};
+    margin-bottom: {{ block.settings.heading_spacing }}px;
+    color: {{ block.settings.heading_color }};
+    font-size: {{ block.settings.heading_size }}px;
+  }
+
+  .lumin-testimonial-slider__wrapper-{{ block_id }} {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lumin-testimonial-slider__track-{{ block_id }} {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .lumin-testimonial-slider__slide-{{ block_id }} {
+    min-width: 100%;
+    padding: {{ block.settings.slide_padding }}px;
+    box-sizing: border-box;
+  }
+
+  .lumin-testimonial-slider__card-{{ block_id }} {
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    text-align: {{ block.settings.text_alignment }};
+    box-shadow: {{ testimonial_card_box_shadow }};
+  }
+
+  .lumin-testimonial-slider__quote-{{ block_id }} {
+    color: {{ block.settings.quote_color }};
+    font-size: {{ block.settings.quote_size }}px;
+    line-height: 1.6;
+    margin-bottom: {{ block.settings.quote_spacing }}px;
+  }
+
+  .lumin-testimonial-slider__author-{{ block_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: {{ testimonial_flex_justify }};
+    gap: 15px;
+    margin-top: {{ block.settings.author_spacing }}px;
+  }
+
+  {% if block.settings.show_author_image %}
+    .lumin-testimonial-slider__image-{{ block_id }} {
+      width: {{ block.settings.image_size }}px;
+      height: {{ block.settings.image_size }}px;
+      border-radius: {{ block.settings.image_border_radius }}px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .lumin-testimonial-slider__image-placeholder-{{ block_id }} {
+      width: {{ block.settings.image_size }}px;
+      height: {{ block.settings.image_size }}px;
+      border-radius: {{ block.settings.image_border_radius }}px;
+      background-color: #f4f4f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .lumin-testimonial-slider__image-placeholder-{{ block_id }} svg {
+      width: 60%;
+      height: 60%;
+      opacity: 0.3;
+    }
+  {% else %}
+    .lumin-testimonial-slider__image-{{ block_id }},
+    .lumin-testimonial-slider__image-placeholder-{{ block_id }} {
+      display: none;
+    }
+  {% endif %}
+
+  .lumin-testimonial-slider__author-info-{{ block_id }} {
+    text-align: left;
+  }
+
+  .lumin-testimonial-slider__name-{{ block_id }} {
+    color: {{ block.settings.name_color }};
+    font-size: {{ block.settings.name_size }}px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .lumin-testimonial-slider__title-{{ block_id }} {
+    color: {{ block.settings.title_color }};
+    font-size: {{ block.settings.title_size }}px;
+    margin: 2px 0 0;
+    line-height: 1;
+  }
+
+  .lumin-testimonial-slider__rating-{{ block_id }} {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: {{ block.settings.rating_spacing }}px;
+    justify-content: {{ testimonial_flex_justify }};
+    width: 100%;
+  }
+
+  .lumin-testimonial-slider__star-{{ block_id }} {
+    flex-shrink: 0;
+    display: block;
+    width: {{ block.settings.star_size }}px;
+    height: {{ block.settings.star_size }}px;
+    vertical-align: middle;
+    fill: {{ block.settings.star_color }};
+  }
+
+  .lumin-testimonial-slider__star-{{ block_id }} path {
+    fill: {{ block.settings.star_color }};
+  }
+
+  .lumin-testimonial-slider__controls-{{ block_id }} {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: {{ block.settings.controls_spacing }}px;
+  }
+
+  {% if block.settings.show_arrows %}
+    .lumin-testimonial-slider__button-{{ block_id }} {
+      background-color: {{ block.settings.button_background }};
+      color: {{ block.settings.button_color }};
+      border: none;
+      width: {{ block.settings.button_size }}px;
+      height: {{ block.settings.button_size }}px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+      z-index: 10;
+    }
+
+    .lumin-testimonial-slider__button-{{ block_id }}:hover {
+      background-color: {{ block.settings.button_hover_background }};
+    }
+
+    .lumin-testimonial-slider__button-{{ block_id }}:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .lumin-testimonial-slider__button-{{ block_id }} svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    {% if block.settings.arrow_position == 'sides' %}
+      .lumin-testimonial-slider__side-button-{{ block_id }} {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .lumin-testimonial-slider__side-button-{{ block_id }}.lumin-testimonial-slider__prev-{{ block_id }} {
+        left: 0;
+      }
+
+      .lumin-testimonial-slider__side-button-{{ block_id }}.lumin-testimonial-slider__next-{{ block_id }} {
+        right: 0;
+      }
+    {% endif %}
+  {% else %}
+    .lumin-testimonial-slider__button-{{ block_id }} {
+      display: none;
+    }
+  {% endif %}
+
+  {% if block.settings.show_dots %}
+    .lumin-testimonial-slider__dots-{{ block_id }} {
+      display: flex;
+      gap: 8px;
+    }
+
+    .lumin-testimonial-slider__dot-{{ block_id }} {
+      width: {{ block.settings.dot_size }}px;
+      height: {{ block.settings.dot_size }}px;
+      border-radius: 50%;
+      background-color: {{ block.settings.dot_color }};
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background-color 0.3s ease;
+    }
+
+    .lumin-testimonial-slider__dot-{{ block_id }}.active {
+      background-color: {{ block.settings.dot_active_color }};
+    }
+  {% else %}
+    .lumin-testimonial-slider__dots-{{ block_id }} {
+      display: none;
+    }
+  {% endif %}
+
+  @media screen and (max-width: 749px) {
+    .lumin-testimonial-slider__heading-{{ block_id }} {
+      font-size: calc({{ block.settings.heading_size }}px * 0.8);
+    }
+
+    .lumin-testimonial-slider__quote-{{ block_id }} {
+      font-size: calc({{ block.settings.quote_size }}px * 0.9);
+    }
+
+    {% if block.settings.arrow_position == 'sides' and block.settings.show_arrows %}
+      
+      .lumin-testimonial-slider__button-{{ block_id }} {
+        width: calc({{ block.settings.button_size }}px * 0.8);
+        height: calc({{ block.settings.button_size }}px * 0.8);
+      }
+    {% endif %}
+  }
+{% endstyle %}
+
+<div
+  class="lumin-testimonial-slider-{{ block_id }}"
+  data-lumin-ts-root="{{ block.id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="lumin-testimonial-slider__container-{{ block_id }}">
+    {% if block.settings.heading != blank %}
+      <h2 class="lumin-testimonial-slider__heading-{{ block_id }}">{{ block.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="lumin-testimonial-slider__wrapper-{{ block_id }}">
+      {% if block.settings.arrow_position == 'sides' and block.settings.show_arrows %}
+        <button
+          class="lumin-testimonial-slider__button-{{ block_id }} lumin-testimonial-slider__side-button-{{ block_id }} lumin-testimonial-slider__prev-{{ block_id }}"
+          aria-label="Previous testimonial"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+      {% endif %}
+
+      <div class="lumin-testimonial-slider__track-{{ block_id }}">
+        {% for i in (1..5) %}
+          {% liquid
+            assign testimonial_enabled_key = 'testimonial_' | append: i | append: '_enabled'
+            assign quote_key = 'testimonial_' | append: i | append: '_quote'
+            assign name_key = 'testimonial_' | append: i | append: '_name'
+            assign title_key = 'testimonial_' | append: i | append: '_title'
+            assign image_key = 'testimonial_' | append: i | append: '_image'
+            assign rating_key = 'testimonial_' | append: i | append: '_rating'
+
+            assign testimonial_enabled = block.settings[testimonial_enabled_key]
+            assign quote = block.settings[quote_key]
+            assign name = block.settings[name_key]
+            assign title = block.settings[title_key]
+            assign image = block.settings[image_key]
+            assign rating = block.settings[rating_key]
+          %}
+
+          {% if testimonial_enabled %}
+            <div class="lumin-testimonial-slider__slide-{{ block_id }}">
+              <div class="lumin-testimonial-slider__card-{{ block_id }}">
+                {% if block.settings.show_rating and rating > 0 %}
+                  <div
+                    class="lumin-testimonial-slider__rating-{{ block_id }}"
+                    style="display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 4px; justify-content: {{ testimonial_flex_justify }};"
+                  >
+                    {% for star in (1..rating) %}
+                      <svg class="lumin-testimonial-slider__star-{{ block_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="{{ block.settings.star_size }}" height="{{ block.settings.star_size }}" aria-hidden="true">
+                        <path fill="{{ block.settings.star_color }}" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                {% if quote != blank %}
+                  <div class="lumin-testimonial-slider__quote-{{ block_id }}">{{ quote }}</div>
+                {% endif %}
+
+                <div class="lumin-testimonial-slider__author-{{ block_id }}">
+                  {% if block.settings.show_author_image %}
+                    {% if image %}
+                      <img
+                        src="{{ image | image_url: width: 200 }}"
+                        alt="{{ name | escape }}"
+                        class="lumin-testimonial-slider__image-{{ block_id }}"
+                        loading="lazy"
+                        width="200"
+                        height="200"
+                      >
+                    {% else %}
+                      <div class="lumin-testimonial-slider__image-placeholder-{{ block_id }}">
+                        {{ 'image' | placeholder_svg_tag }}
+                      </div>
+                    {% endif %}
+                  {% endif %}
+
+                  <div class="lumin-testimonial-slider__author-info-{{ block_id }}">
+                    {% if name != blank %}
+                      <div class="lumin-testimonial-slider__name-{{ block_id }}">{{ name }}</div>
+                    {% endif %}
+                    {% if title != blank %}
+                      <div class="lumin-testimonial-slider__title-{{ block_id }}">{{ title }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if block.settings.arrow_position == 'sides' and block.settings.show_arrows %}
+        <button
+          class="lumin-testimonial-slider__button-{{ block_id }} lumin-testimonial-slider__side-button-{{ block_id }} lumin-testimonial-slider__next-{{ block_id }}"
+          aria-label="Next testimonial"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      {% endif %}
+    </div>
+
+    <div class="lumin-testimonial-slider__controls-{{ block_id }}">
+      {% if block.settings.arrow_position == 'bottom' and block.settings.show_arrows %}
+        <button
+          class="lumin-testimonial-slider__button-{{ block_id }} lumin-testimonial-slider__prev-{{ block_id }}"
+          aria-label="Previous testimonial"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+      {% endif %}
+
+      {% if block.settings.show_dots %}
+        <div class="lumin-testimonial-slider__dots-{{ block_id }}"></div>
+      {% endif %}
+
+      {% if block.settings.arrow_position == 'bottom' and block.settings.show_arrows %}
+        <button
+          class="lumin-testimonial-slider__button-{{ block_id }} lumin-testimonial-slider__next-{{ block_id }}"
+          aria-label="Next testimonial"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var root = document.querySelector('[data-lumin-ts-root="{{ block.id }}"]');
+    if (!root || root.getAttribute('data-lumin-ts-init') === '1') {
+      return;
+    }
+    root.setAttribute('data-lumin-ts-init', '1');
+
+    var track = root.querySelector('.lumin-testimonial-slider__track-{{ block_id }}');
+    var slides = root.querySelectorAll('.lumin-testimonial-slider__slide-{{ block_id }}');
+    var prevButton = root.querySelector('.lumin-testimonial-slider__prev-{{ block_id }}');
+    var nextButton = root.querySelector('.lumin-testimonial-slider__next-{{ block_id }}');
+    var dotsContainer = root.querySelector('.lumin-testimonial-slider__dots-{{ block_id }}');
+    var currentSlide = 0;
+    var autoplayInterval = null;
+    var dots = [];
+
+    function createDots() {
+      {% if block.settings.show_dots %}
+        if (!dotsContainer || slides.length === 0) {
+          return;
+        }
+        dotsContainer.innerHTML = '';
+        Array.prototype.forEach.call(slides, function (_slide, index) {
+          var dot = document.createElement('button');
+          dot.type = 'button';
+          dot.classList.add('lumin-testimonial-slider__dot-{{ block_id }}');
+          dot.setAttribute('aria-label', 'Go to testimonial ' + (index + 1));
+          dot.addEventListener('click', function () {
+            goToSlide(index);
+          });
+          dotsContainer.appendChild(dot);
+        });
+        dots = root.querySelectorAll('.lumin-testimonial-slider__dot-{{ block_id }}');
+      {% endif %}
+    }
+
+    function updateSlider() {
+      if (!track) return;
+      track.style.transform = 'translateX(-' + currentSlide * 100 + '%)';
+
+      {% if block.settings.show_dots %}
+        if (dots && dots.length) {
+          Array.prototype.forEach.call(dots, function (dot, index) {
+            if (index === currentSlide) {
+              dot.classList.add('active');
+            } else {
+              dot.classList.remove('active');
+            }
+          });
+        }
+      {% endif %}
+
+      {% if block.settings.show_arrows %}
+        if (prevButton && nextButton) {
+          prevButton.disabled = currentSlide === 0;
+          nextButton.disabled = currentSlide >= slides.length - 1;
+        }
+      {% endif %}
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateSlider();
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlider();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlider();
+      }
+    }
+
+    function startAutoplay() {
+      {% if block.settings.autoplay %}
+        stopAutoplay();
+        autoplayInterval = setInterval(function () {
+          if (currentSlide < slides.length - 1) {
+            nextSlide();
+          } else {
+            currentSlide = 0;
+            updateSlider();
+          }
+        }, {{ block.settings.autoplay_speed }} * 1000);
+      {% endif %}
+    }
+
+    function stopAutoplay() {
+      if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+      }
+    }
+
+    if (slides.length === 0) return;
+
+    createDots();
+
+    {% if block.settings.show_arrows %}
+      if (prevButton) prevButton.addEventListener('click', prevSlide);
+      if (nextButton) nextButton.addEventListener('click', nextSlide);
+    {% endif %}
+
+    {% if block.settings.autoplay %}
+      root.addEventListener('mouseenter', stopAutoplay);
+      root.addEventListener('mouseleave', startAutoplay);
+      startAutoplay();
+    {% endif %}
+
+    updateSlider();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.testimonial-slider.name",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:names.heading"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "t:sections.testimonial-slider.desktop_width_percent",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "t:sections.testimonial-slider.max_width",
+      "min": 600,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "default": 900
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "t:sections.testimonial-slider.section_padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.heading_style"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "t:settings.alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "t:settings.size",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "t:sections.testimonial-slider.heading_spacing",
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "t:settings.color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.card_style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:sections.testimonial-slider.section_background",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "t:sections.testimonial-slider.card_background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "t:sections.testimonial-slider.card_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "t:sections.testimonial-slider.card_padding",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "slide_padding",
+      "label": "t:sections.testimonial-slider.slide_padding",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "checkbox",
+      "id": "show_card_shadow",
+      "label": "t:sections.testimonial-slider.enable_card_shadow",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "card_shadow_color",
+      "label": "t:sections.testimonial-slider.card_shadow_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.show_card_shadow }}"
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_opacity",
+      "label": "t:settings.shadow_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 20,
+      "visible_if": "{{ block.settings.show_card_shadow }}"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "t:settings.alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.quote"
+    },
+    {
+      "type": "range",
+      "id": "quote_size",
+      "label": "t:settings.size",
+      "min": 10,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "quote_spacing",
+      "label": "t:sections.testimonial-slider.quote_spacing",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 5
+    },
+    {
+      "type": "color",
+      "id": "quote_color",
+      "label": "t:settings.color",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.author"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author_image",
+      "label": "t:sections.testimonial-slider.show_author_image",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "author_spacing",
+      "label": "t:settings.top_spacing",
+      "min": 5,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "t:settings.size",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 35
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "name_size",
+      "label": "t:settings.size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    { 
+      "type": "color",
+      "id": "name_color",
+      "label": "t:settings.color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "t:settings.size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "t:settings.color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.rating"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "t:sections.testimonial-slider.show_rating",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "t:sections.testimonial-slider.star_size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "rating_spacing",
+      "label": "t:settings.bottom_spacing",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "t:sections.testimonial-slider.star_color",
+      "default": "#FFB800"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.controls"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "t:sections.testimonial-slider.show_arrows",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "arrow_position",
+      "label": "t:sections.testimonial-slider.arrow_position",
+      "options": [
+        {
+          "value": "bottom",
+          "label": "t:options.bottom"
+        },
+        {
+          "value": "sides",
+          "label": "t:sections.testimonial-slider.left_and_right"
+        }
+      ],
+      "default": "sides"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "t:sections.testimonial-slider.show_dots",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "controls_spacing",
+      "label": "t:settings.top_spacing",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "t:sections.testimonial-slider.button_size",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 25
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "t:sections.testimonial-slider.button_background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "t:sections.testimonial-slider.button_hover_background",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "t:sections.testimonial-slider.button_icon_color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "t:sections.testimonial-slider.dot_size",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "t:sections.testimonial-slider.dot_color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "t:sections.testimonial-slider.active_dot_color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "t:sections.testimonial-slider.enable_autoplay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "t:sections.testimonial-slider.autoplay_speed",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.testimonial_1"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_1_enabled",
+      "label": "t:sections.testimonial-slider.enable_testimonial_1",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_1_quote",
+      "label": "t:sections.testimonial-slider.quote",
+      "default": "This product exceeded my expectations! The quality is outstanding and it arrived faster than expected."
+    },
+    {
+      "type": "text",
+      "id": "testimonial_1_name",
+      "label": "t:sections.testimonial-slider.name",
+      "default": "Sarah Johnson"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_1_title",
+      "label": "t:settings.title",
+      "default": "Verified Customer"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_1_image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_1_rating",
+      "label": "t:sections.testimonial-slider.rating",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.testimonial_2"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_2_enabled",
+      "label": "t:sections.testimonial-slider.enable_testimonial_2",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_2_quote",
+      "label": "t:sections.testimonial-slider.quote",
+      "default": "Absolutely love it! Great customer service and the product is exactly as described. Highly recommend!"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_2_name",
+      "label": "t:sections.testimonial-slider.name",
+      "default": "Michael Chen"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_2_title",
+      "label": "t:settings.title",
+      "default": "Verified Customer"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_2_image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_2_rating",
+      "label": "t:sections.testimonial-slider.rating",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.testimonial_3"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_3_enabled",
+      "label": "t:sections.testimonial-slider.enable_testimonial_3",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_3_quote",
+      "label": "t:sections.testimonial-slider.quote",
+      "default": "Best purchase I've made this year. The attention to detail is impressive and it works perfectly."
+    },
+    {
+      "type": "text",
+      "id": "testimonial_3_name",
+      "label": "t:sections.testimonial-slider.name",
+      "default": "Emma Williams"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_3_title",
+      "label": "t:settings.title",
+      "default": "Verified Customer"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_3_image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_3_rating",
+      "label": "t:sections.testimonial-slider.rating",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.testimonial_4"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_4_enabled",
+      "label": "t:sections.testimonial-slider.enable_testimonial_4",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_4_quote",
+      "label": "t:sections.testimonial-slider.quote",
+      "default": "Outstanding quality and service. Will definitely be ordering again!"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_4_name",
+      "label": "t:sections.testimonial-slider.name",
+      "default": "David Martinez"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_4_title",
+      "label": "t:settings.title",
+      "default": "Verified Customer"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_4_image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_4_rating",
+      "label": "t:sections.testimonial-slider.rating",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "t:sections.testimonial-slider.testimonial_5"
+    },
+    {
+      "type": "checkbox",
+      "id": "testimonial_5_enabled",
+      "label": "t:sections.testimonial-slider.enable_testimonial_5",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_5_quote",
+      "label": "t:sections.testimonial-slider.quote",
+      "default": "Fantastic experience from start to finish. Couldn't be happier!"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_5_name",
+      "label": "t:sections.testimonial-slider.name",
+      "default": "Lisa Anderson"
+    },
+    {
+      "type": "text",
+      "id": "testimonial_5_title",
+      "label": "t:settings.title",
+      "default": "Verified Customer"
+    },
+    {
+      "type": "image_picker",
+      "id": "testimonial_5_image",
+      "label": "t:settings.image"
+    },
+    {
+      "type": "range",
+      "id": "testimonial_5_rating",
+      "label": "t:sections.testimonial-slider.rating",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonial slider"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,955 @@
+{% liquid
+  assign block_settings = block.settings
+
+  assign show_col1 = false
+  if block_settings.column1_header != blank or block_settings.column1_header_image != blank
+    assign show_col1 = true
+  endif
+
+  assign show_col2 = false
+  if block_settings.column2_header != blank
+    assign show_col2 = true
+  endif
+
+  assign show_col3 = false
+  if block_settings.column3_header != blank
+    assign show_col3 = true
+  endif
+
+  if show_col3
+    assign last_col = 'col3'
+  elsif show_col2
+    assign last_col = 'col2'
+  else
+    assign last_col = 'col1'
+  endif
+
+  case block_settings.box_shadow
+    when 'soft'
+      assign shadow_value = '0 2px 8px rgba(0,0,0,0.08)'
+    when 'medium'
+      assign shadow_value = '0 4px 16px rgba(0,0,0,0.12)'
+    when 'strong'
+      assign shadow_value = '0 8px 32px rgba(0,0,0,0.18)'
+    else
+      assign shadow_value = 'none'
+  endcase
+
+  assign border_style = block_settings.table_border_style | default: 'none'
+  if border_style != 'none'
+    assign border_value = block_settings.table_border_width | append: 'px ' | append: border_style | append: ' ' | append: block_settings.table_border_color
+  else
+    assign border_value = 'none'
+  endif
+%}
+
+<div
+  class="comparison-table-3col comparison-table-3col--{{ block.id }} spacing-style"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  <div
+    class="comparison-table-3col__wrapper"
+    style="
+      border-radius: {{ block_settings.border_radius }}px;
+      border: {{ border_value }};
+      box-shadow: {{ shadow_value }};
+    "
+  >
+    <table class="comparison-table-3col__table" role="table">
+      <thead>
+        <tr class="comparison-table-3col__header-row">
+          <th
+            class="comparison-table-3col__header-cell comparison-table-3col__header-cell--empty"
+            style="background-color: {{ block_settings.feature_cell_background }}; border-radius: {{ block_settings.border_radius }}px 0 0 0;"
+          ></th>
+          {% if show_col1 %}
+            <th
+              class="comparison-table-3col__header-cell comparison-table-3col__header-cell--col1"
+              style="
+                color: {{ block_settings.column1_header_color }};
+                font-size: {{ block_settings.column1_header_size }}px;
+                background-color: {{ block_settings.table_background }};
+                {% if last_col == 'col1' %}border-radius: 0 {{ block_settings.border_radius }}px 0 0;{% endif %}
+              "
+            >
+              {% if block_settings.column1_header_image != blank %}
+                {% assign header_img_width = block_settings.column1_header_image_width | times: 2 %}
+                <img
+                  src="{{ block_settings.column1_header_image | image_url: width: header_img_width }}"
+                  alt="{{ block_settings.column1_header | default: 'Column 1' | escape }}"
+                  class="comparison-table-3col__header-image"
+                  style="max-width: {{ block_settings.column1_header_image_width }}px; height: auto; display: block; margin: 0 auto; object-fit: contain;"
+                  loading="lazy"
+                  width="{{ block_settings.column1_header_image_width }}"
+                  height="{{ block_settings.column1_header_image_width }}"
+                >
+              {% else %}
+                {{ block_settings.column1_header }}
+              {% endif %}
+            </th>
+          {% endif %}
+          {% if show_col2 %}
+            <th
+              class="comparison-table-3col__header-cell comparison-table-3col__header-cell--col2"
+              style="
+                color: {{ block_settings.column2_header_color }};
+                font-size: {{ block_settings.column2_header_size }}px;
+                background-color: {{ block_settings.table_background }};
+                {% if last_col == 'col2' %}border-radius: 0 {{ block_settings.border_radius }}px 0 0;{% endif %}
+              "
+            >
+              {{ block_settings.column2_header }}
+            </th>
+          {% endif %}
+          {% if show_col3 %}
+            <th
+              class="comparison-table-3col__header-cell comparison-table-3col__header-cell--col3"
+              style="
+                color: {{ block_settings.column3_header_color }};
+                font-size: {{ block_settings.column3_header_size }}px;
+                background-color: {{ block_settings.table_background }};
+                border-radius: 0 {{ block_settings.border_radius }}px 0 0;
+              "
+            >
+              {{ block_settings.column3_header }}
+            </th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in (1..8) %}
+          {% assign feature_key = 'feature_' | append: i %}
+          {% assign feature_text = block_settings[feature_key] %}
+          {% assign col1_icon_key = 'col1_icon_' | append: i %}
+          {% assign col2_icon_key = 'col2_icon_' | append: i %}
+          {% assign col3_icon_key = 'col3_icon_' | append: i %}
+          {% assign is_last = false %}
+
+          {% if feature_text != blank %}
+            {% assign next = i | plus: 1 %}
+            {% assign next_key = 'feature_' | append: next %}
+            {% assign next_text = block_settings[next_key] %}
+            {% if next_text == blank or i == 8 %}{% assign is_last = true %}{% endif %}
+
+            <tr
+              class="comparison-table-3col__row"
+              style="border-color: {{ block_settings.row_border_color }};"
+            >
+              <td
+                class="comparison-table-3col__cell comparison-table-3col__cell--feature"
+                style="
+                  background-color: {{ block_settings.feature_cell_background }};
+                  color: {{ block_settings.feature_text_color }};
+                  font-size: {{ block_settings.feature_text_size }}px;
+                  {% if is_last %}border-radius: 0 0 0 {{ block_settings.border_radius }}px;{% endif %}
+                "
+              >
+                {{ feature_text }}
+              </td>
+              {% if show_col1 %}
+                <td
+                  class="comparison-table-3col__cell comparison-table-3col__cell--col1"
+                  style="
+                    background-color: {{ block_settings.table_background }};
+                    border-color: {{ block_settings.row_border_color }};
+                    {% if is_last and last_col == 'col1' %}border-radius: 0 0 {{ block_settings.border_radius }}px 0;{% endif %}
+                  "
+                >
+                  {% assign col1_icon = block_settings[col1_icon_key] | default: 'check' %}
+                  {% if col1_icon == 'check' %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--check" style="color: {{ block_settings.check_color }};">✓</span>
+                  {% elsif col1_icon == 'dash' %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--dash" style="color: {{ block_settings.dash_color }};">—</span>
+                  {% else %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--cross" style="color: {{ block_settings.cross_color }};">✗</span>
+                  {% endif %}
+                </td>
+              {% endif %}
+              {% if show_col2 %}
+                <td
+                  class="comparison-table-3col__cell comparison-table-3col__cell--col2"
+                  style="
+                    background-color: {{ block_settings.table_background }};
+                    border-color: {{ block_settings.row_border_color }};
+                    {% if is_last and last_col == 'col2' %}border-radius: 0 0 {{ block_settings.border_radius }}px 0;{% endif %}
+                  "
+                >
+                  {% assign col2_icon = block_settings[col2_icon_key] | default: 'cross' %}
+                  {% if col2_icon == 'check' %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--check" style="color: {{ block_settings.check_color }};">✓</span>
+                  {% elsif col2_icon == 'dash' %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--dash" style="color: {{ block_settings.dash_color }};">—</span>
+                  {% else %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--cross" style="color: {{ block_settings.cross_color }};">✗</span>
+                  {% endif %}
+                </td>
+              {% endif %}
+              {% if show_col3 %}
+                <td
+                  class="comparison-table-3col__cell comparison-table-3col__cell--col3"
+                  style="
+                    background-color: {{ block_settings.table_background }};
+                    border-color: {{ block_settings.row_border_color }};
+                    {% if is_last %}border-radius: 0 0 {{ block_settings.border_radius }}px 0;{% endif %}
+                  "
+                >
+                  {% assign col3_icon = block_settings[col3_icon_key] | default: 'cross' %}
+                  {% if col3_icon == 'check' %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--check" style="color: {{ block_settings.check_color }};">✓</span>
+                  {% elsif col3_icon == 'dash' %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--dash" style="color: {{ block_settings.dash_color }};">—</span>
+                  {% else %}
+                    <span class="comparison-table-3col__icon comparison-table-3col__icon--cross" style="color: {{ block_settings.cross_color }};">✗</span>
+                  {% endif %}
+                </td>
+              {% endif %}
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  @media screen and (max-width: 749px) {
+    .comparison-table-3col--{{ block.id }} .comparison-table-3col__header-cell {
+      font-size: {{ block_settings.mobile_header_size }}px !important;
+    }
+    .comparison-table-3col--{{ block.id }} .comparison-table-3col__cell--feature {
+      font-size: {{ block_settings.mobile_feature_size }}px !important;
+    }
+    .comparison-table-3col--{{ block.id }} .comparison-table-3col__icon {
+      font-size: {{ block_settings.mobile_icon_size }}px !important;
+    }
+  }
+</style>
+
+{% stylesheet %}
+  .comparison-table-3col {
+    width: 100%;
+  }
+
+  .comparison-table-3col__wrapper {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .comparison-table-3col__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .comparison-table-3col__header-row {
+    border: none;
+  }
+
+  .comparison-table-3col__header-cell {
+    padding: 1rem 1.25rem;
+    text-align: center;
+    border: none;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  .comparison-table-3col__header-cell--empty {
+    width: 40%;
+  }
+
+  .comparison-table-3col__header-cell--col1,
+  .comparison-table-3col__header-cell--col2,
+  .comparison-table-3col__header-cell--col3 {
+    width: 20%;
+  }
+
+  .comparison-table-3col__header-image {
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle;
+  }
+
+  .comparison-table-3col__row {
+    border-top: 1px solid;
+  }
+
+  .comparison-table-3col__cell {
+    padding: 0.875rem 1rem;
+    text-align: center;
+    vertical-align: middle;
+    border-left: 1px solid;
+  }
+
+  .comparison-table-3col__cell--feature {
+    text-align: center;
+    width: 40%;
+    border-left: none;
+    font-weight: 600;
+  }
+
+  .comparison-table-3col__cell--col1,
+  .comparison-table-3col__cell--col2,
+  .comparison-table-3col__cell--col3 {
+    width: 20%;
+  }
+
+  .comparison-table-3col__icon {
+    font-size: 1.25rem;
+    font-weight: bold;
+    display: inline-block;
+    line-height: 1;
+  }
+
+  @media screen and (max-width: 749px) {
+    .comparison-table-3col__header-cell,
+    .comparison-table-3col__cell {
+      padding: 0.625rem 0.5rem;
+      font-size: 0.8125rem;
+    }
+
+    .comparison-table-3col__icon {
+      font-size: 1rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Comparison Table (3 Col)",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Column Headers"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "column1_header",
+      "label": "Column 1 header",
+      "default": "LOGO"
+    },
+    {
+      "type": "color",
+      "id": "column1_header_color",
+      "label": "Column 1 header color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "column1_header_size",
+      "label": "Column 1 header size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "image_picker",
+      "id": "column1_header_image",
+      "label": "Column 1 logo image"
+    },
+    {
+      "type": "range",
+      "id": "column1_header_image_width",
+      "label": "Logo image width",
+      "min": 40,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 80,
+      "visible_if": "{{ block.settings.column1_header_image != blank }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "column2_header",
+      "label": "Column 2 header (leave blank to hide)",
+      "default": "Other Serums"
+    },
+    {
+      "type": "color",
+      "id": "column2_header_color",
+      "label": "Column 2 header color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "column2_header_size",
+      "label": "Column 2 header size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "inline_richtext",
+      "id": "column3_header",
+      "label": "Column 3 header (leave blank to hide)",
+      "default": "Extensions"
+    },
+    {
+      "type": "color",
+      "id": "column3_header_color",
+      "label": "Column 3 header color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "column3_header_size",
+      "label": "Column 3 header size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Features"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_1",
+      "label": "Feature 1",
+      "default": "Without Hormones"
+    },
+    {
+      "type": "select",
+      "id": "col1_icon_1",
+      "label": "Column 1 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col2_icon_1",
+      "label": "Column 2 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col3_icon_1",
+      "label": "Column 3 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_2",
+      "label": "Feature 2",
+      "default": "Painless"
+    },
+    {
+      "type": "select",
+      "id": "col1_icon_2",
+      "label": "Column 1 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col2_icon_2",
+      "label": "Column 2 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col3_icon_2",
+      "label": "Column 3 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_3",
+      "label": "Feature 3",
+      "default": "Affordable"
+    },
+    {
+      "type": "select",
+      "id": "col1_icon_3",
+      "label": "Column 1 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col2_icon_3",
+      "label": "Column 2 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col3_icon_3",
+      "label": "Column 3 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_4",
+      "label": "Feature 4",
+      "default": "Strengthens Follicles"
+    },
+    {
+      "type": "select",
+      "id": "col1_icon_4",
+      "label": "Column 1 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col2_icon_4",
+      "label": "Column 2 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col3_icon_4",
+      "label": "Column 3 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_5",
+      "label": "Feature 5",
+      "default": "Safe To Use Daily"
+    },
+    {
+      "type": "select",
+      "id": "col1_icon_5",
+      "label": "Column 1 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col2_icon_5",
+      "label": "Column 2 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col3_icon_5",
+      "label": "Column 3 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_6",
+      "label": "Feature 6",
+      "default": "Growth Guarantee"
+    },
+    {
+      "type": "select",
+      "id": "col1_icon_6",
+      "label": "Column 1 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col2_icon_6",
+      "label": "Column 2 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col3_icon_6",
+      "label": "Column 3 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_7",
+      "label": "Feature 7"
+    },
+    {
+      "type": "select",
+      "id": "col1_icon_7",
+      "label": "Column 1 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col2_icon_7",
+      "label": "Column 2 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col3_icon_7",
+      "label": "Column 3 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_8",
+      "label": "Feature 8"
+    },
+    {
+      "type": "select",
+      "id": "col1_icon_8",
+      "label": "Column 1 icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col2_icon_8",
+      "label": "Column 2 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "col3_icon_8",
+      "label": "Column 3 icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "Checkmark" },
+        { "value": "cross", "label": "Cross" },
+        { "value": "dash", "label": "Dash" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "range",
+      "id": "feature_text_size",
+      "label": "Feature text size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Mobile Font Sizes"
+    },
+    {
+      "type": "range",
+      "id": "mobile_header_size",
+      "label": "Header size (mobile)",
+      "min": 9,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "mobile_feature_size",
+      "label": "Feature text size (mobile)",
+      "min": 9,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "mobile_icon_size",
+      "label": "Icon size (mobile)",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "feature_cell_background",
+      "label": "Feature column background",
+      "default": "#E8707A"
+    },
+    {
+      "type": "color",
+      "id": "feature_text_color",
+      "label": "Feature text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "table_background",
+      "label": "Comparison columns background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "check_color",
+      "label": "Checkmark color",
+      "default": "#52B35B"
+    },
+    {
+      "type": "color",
+      "id": "cross_color",
+      "label": "Cross color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "dash_color",
+      "label": "Dash color",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "row_border_color",
+      "label": "Row border color",
+      "default": "#E1E1E1"
+    },
+    {
+      "type": "header",
+      "content": "Table Border"
+    },
+    {
+      "type": "select",
+      "id": "table_border_style",
+      "label": "Border style",
+      "default": "none",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "solid", "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "table_border_width",
+      "label": "Border width",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "visible_if": "{{ block.settings.table_border_style != 'none' }}"
+    },
+    {
+      "type": "color",
+      "id": "table_border_color",
+      "label": "Border color",
+      "default": "#E1E1E1",
+      "visible_if": "{{ block.settings.table_border_style != 'none' }}"
+    },
+    {
+      "type": "header",
+      "content": "Box Shadow"
+    },
+    {
+      "type": "select",
+      "id": "box_shadow",
+      "label": "Shadow",
+      "default": "none",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "soft", "label": "Soft" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "strong", "label": "Strong" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Padding left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Padding right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Comparison Table (3 Col)",
+      "category": "Basic",
+      "settings": {
+        "column1_header": "LOGO",
+        "column2_header": "OTHER SERUMS",
+        "column3_header": "EXTENSIONS",
+        "feature_1": "Without Hormones",
+        "col1_icon_1": "check",
+        "col2_icon_1": "cross",
+        "col3_icon_1": "check",
+        "feature_2": "Painless",
+        "col1_icon_2": "check",
+        "col2_icon_2": "cross",
+        "col3_icon_2": "cross",
+        "feature_3": "Affordable",
+        "col1_icon_3": "check",
+        "col2_icon_3": "cross",
+        "col3_icon_3": "cross",
+        "feature_4": "Strengthens Follicles",
+        "col1_icon_4": "check",
+        "col2_icon_4": "cross",
+        "col3_icon_4": "cross",
+        "feature_5": "Safe To Use Daily",
+        "col1_icon_5": "check",
+        "col2_icon_5": "cross",
+        "col3_icon_5": "check",
+        "feature_6": "Growth Guarantee",
+        "col1_icon_6": "check",
+        "col2_icon_6": "cross",
+        "col3_icon_6": "cross"
+      }
+    }
+  ]
+}
+{% endschema %}

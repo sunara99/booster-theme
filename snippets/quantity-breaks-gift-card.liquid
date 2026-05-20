@@ -1,0 +1,137 @@
+{% comment %}
+  Renders a gift product card for quantity breaks free gifts.
+  @param {product} product - The gift product
+  @param {string} unlock_at - Which option unlocks this gift (option_1, option_2, etc.)
+  @param {number} gift_index - Index for data attributes
+  @param {boolean} discount_enabled - Whether gift discount is enabled
+  @param {string} discount_type - 'percentage' or 'fixed'
+  @param {number} discount_value - Percentage (0-100) or fixed amount in cents
+  @param {number} discount_amount - Fixed amount in cents (when discount_type is 'fixed')
+  @param {number} order - Optional CSS order for grid positioning (when custom gift reorders)
+  @param {string} badge_display - 'free' (show FREE only when 100% discount) or 'price' (always show price)
+{% endcomment %}
+
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign has_variants = false
+  if product.has_only_default_variant == false
+    assign has_variants = true
+  endif
+  assign unlock_index = 1
+  case unlock_at
+    when 'option_1'
+      assign unlock_index = 1
+    when 'option_2'
+      assign unlock_index = 2
+    when 'option_3'
+      assign unlock_index = 3
+    when 'option_4'
+      assign unlock_index = 4
+    when 'option_5'
+      assign unlock_index = 5
+    when 'option_6'
+      assign unlock_index = 6
+    else
+      assign unlock_index = 2
+  endcase
+
+  assign original_price = selected_variant.price
+  assign discounted_price = original_price
+  if discount_enabled
+    if discount_type == 'percentage'
+      assign discount_cents = original_price | times: discount_value | divided_by: 100
+      assign discounted_price = original_price | minus: discount_cents
+    else
+      assign discount_cents = discount_amount | default: 0
+      assign discounted_price = original_price | minus: discount_cents
+      if discounted_price < 0
+        assign discounted_price = 0
+      endif
+    endif
+  endif
+  assign show_discount = false
+  if discount_enabled and discounted_price < original_price
+    assign show_discount = true
+  endif
+  assign is_100_percent_free = false
+  if discounted_price == 0
+    assign is_100_percent_free = true
+  endif
+  assign badge_display = badge_display | default: 'free'
+  assign show_free_label = false
+  if badge_display == 'free' and is_100_percent_free
+    assign show_free_label = true
+  endif
+-%}
+
+<div
+  class="quantity-breaks-gift-card quantity-breaks-gift-card--locked"
+  {% if order != blank %}style="order: {{ order }}"{% endif %}
+  data-gift-card
+  data-gift-index="{{ gift_index }}"
+  data-unlock-at-option="{{ unlock_at }}"
+  data-unlock-index="{{ unlock_index }}"
+  data-variant-id="{{ selected_variant.id }}"
+  data-product-id="{{ product.id }}"
+  {% if discount_enabled %}data-gift-discount-enabled="true" data-gift-discount-type="{{ discount_type }}" data-gift-discount-value="{{ discount_value }}" data-gift-discount-amount="{{ discount_amount | default: 0 }}"{% endif %}
+>
+  <span class="quantity-breaks-gift-card__price-badge">
+    {% if show_free_label %}
+      <span class="quantity-breaks-gift-card__free-label">FREE</span>
+      <span class="quantity-breaks-gift-card__original-price">{% render 'price-split', context: 'quantity_breaks', cents: original_price %}</span>
+    {% else %}
+      {% if show_discount %}
+        <span class="quantity-breaks-gift-card__original-price">{% render 'price-split', context: 'quantity_breaks', cents: original_price %}</span>
+        <span class="quantity-breaks-gift-card__discounted-price">{% render 'price-split', context: 'quantity_breaks', cents: discounted_price %}</span>
+      {% else %}
+        {% render 'price-split', context: 'quantity_breaks', cents: original_price %}
+      {% endif %}
+    {% endif %}
+  </span>
+  <div class="quantity-breaks-gift-card__image-wrapper">
+    {% if product.featured_image != blank %}
+      <img
+        src="{{ product.featured_image | image_url: width: 200 }}"
+        alt="{{ product.featured_image.alt | default: product.title | escape }}"
+        loading="lazy"
+        width="200"
+        height="200"
+        class="quantity-breaks-gift-card__image"
+      >
+    {% else %}
+      <div class="quantity-breaks-gift-card__placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+        </svg>
+      </div>
+    {% endif %}
+    <div class="quantity-breaks-gift-card__locked-overlay" data-locked-overlay>
+      <svg class="quantity-breaks-gift-card__lock-icon" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+      </svg>
+      <span class="quantity-breaks-gift-card__locked-text">Locked</span>
+    </div>
+  </div>
+  <div class="quantity-breaks-gift-card__content">
+    <h5 class="quantity-breaks-gift-card__title">{{ product.title }}</h5>
+    {% if has_variants %}
+      <select
+        class="quantity-breaks-gift-card__variant-select"
+        data-variant-select
+        aria-label="Select variant for {{ product.title }}"
+        disabled
+      >
+        {% for v in product.variants %}
+          <option
+            value="{{ v.id }}"
+            data-price="{{ v.price }}"
+            {% if v.id == selected_variant.id %}selected{% endif %}
+            {% unless v.available %}disabled{% endunless %}
+          >
+            {{ v.title }}
+          </option>
+        {% endfor %}
+      </select>
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,1448 @@
+  {{ 'section-bundle-deals.css' | asset_url | stylesheet_tag }}
+
+  {%- liquid
+    assign bundle_collection = section.settings.collection
+    assign bundle_products_setting = section.settings.products
+    assign max_products_to_show = section.settings.max_products_to_show | default: 7
+
+    if bundle_products_setting != blank
+      assign bundle_products = bundle_products_setting
+    elsif bundle_collection != blank
+      assign bundle_products = bundle_collection.products
+    else
+      assign bundle_products = null
+    endif
+
+
+    assign heading_font = section.settings.summary_heading_font_size | default: 'medium'
+    if heading_font == 'small'
+      assign summary_heading_size = '26px'
+    elsif heading_font == 'large'
+      assign summary_heading_size = '45px'
+    else
+      assign summary_heading_size = '38px'
+    endif
+
+    assign text_font = section.settings.summary_text_font_size | default: 'medium'
+    if text_font == 'small'
+      assign summary_text_size = '12px'
+    elsif text_font == 'large'
+      assign summary_text_size = '20px'
+    else
+      assign summary_text_size = '14px'
+    endif
+
+    assign item_font = section.settings.summary_item_font_size | default: 'medium'
+    if item_font == 'small'
+      assign summary_item_size = '12px'
+    elsif item_font == 'large'
+      assign summary_item_size = '22px'
+    else
+      assign summary_item_size = '18px'
+    endif
+
+    assign price_font = section.settings.summary_price_font_size | default: 'medium'
+    if price_font == 'small'
+      assign summary_price_size = '12px'
+    elsif price_font == 'large'
+      assign summary_price_size = '22px'
+    else
+      assign summary_price_size = '18px'
+    endif
+
+    assign total_font = section.settings.summary_total_font_size | default: 'medium'
+    if total_font == 'small'
+      assign summary_total_size = '24px'
+    elsif total_font == 'large'
+      assign summary_total_size = '32px'
+    else
+      assign summary_total_size = '29px'
+    endif
+
+    assign disclaimer_font = section.settings.summary_disclaimer_font_size | default: 'medium'
+    if disclaimer_font == 'small'
+      assign summary_disclaimer_size = '10px'
+    elsif disclaimer_font == 'large'
+      assign summary_disclaimer_size = '18px'
+    else
+      assign summary_disclaimer_size = '14px'
+    endif
+
+    assign discount_mode = section.settings.discount_mode | default: 'flat'
+    assign show_tier_progress_ui = false
+    if discount_mode == 'tiered'
+      for block in section.blocks
+        if block.type == 'bundle_tier'
+          assign show_tier_progress_ui = true
+        endif
+      endfor
+    endif
+
+    assign show_bundle_discount_rows = false
+    if discount_mode == 'tiered'
+      for block in section.blocks
+        if block.type == 'bundle_tier' and block.settings.discount_percent > 0
+          assign show_bundle_discount_rows = true
+        endif
+      endfor
+    elsif section.settings.discount_percent > 0
+      assign show_bundle_discount_rows = true
+    endif
+
+    assign min_prods_instruction = section.settings.min_products | default: 3
+    assign max_prods_instruction = section.settings.max_products | default: 12
+    if discount_mode == 'tiered'
+      assign tiers_summary_instruction = ''
+      for block in section.blocks
+        if block.type == 'bundle_tier'
+          assign tier_pct = block.settings.discount_percent
+          assign tier_min = block.settings.min_items
+          if tiers_summary_instruction != blank
+            assign tiers_summary_instruction = tiers_summary_instruction | append: ' · '
+          endif
+          assign tiers_summary_instruction = tiers_summary_instruction | append: tier_min | append: '+ items: ' | append: tier_pct | append: '% off'
+        endif
+      endfor
+      assign summary_instruction_rendered = section.settings.summary_instruction | default: 'Add [min] to [max] products. [tiers]'
+      assign summary_instruction_rendered = summary_instruction_rendered | replace: '[min]', min_prods_instruction | replace: '[max]', max_prods_instruction | replace: '[tiers]', tiers_summary_instruction
+    else
+      assign discount_pct_instruction = section.settings.discount_percent | default: 0
+      assign summary_instruction_rendered = section.settings.summary_instruction | default: 'Add [min] to [max] products to proceed and Save [%]'
+      assign summary_instruction_rendered = summary_instruction_rendered | replace: '[min]', min_prods_instruction | replace: '[max]', max_prods_instruction | replace: '[%]', discount_pct_instruction | append: '%'
+    endif
+
+    comment
+      Defaults for JS placeholders: literal {count}/{reward} must be built with append — bare braces break Liquid inside {{ }}.
+    endcomment
+    assign bundle_js_default_tier_msg = 'You are ' | append: '{' | append: 'count' | append: '} items away from {' | append: 'reward' | append: '}!'
+    assign bundle_js_default_flat_msg = 'Add ' | append: '{' | append: 'count' | append: '} more product(s) to complete your bundle.'
+    assign bundle_tier_default_label_tpl = '{' | append: 'quantity' | append: '}+ · {' | append: 'discount' | append: '}%'
+    assign summary_color_scheme = section.settings.summary_color_scheme | default: section.settings.card_color_scheme | default: 'scheme-2'
+  -%}
+  {% capture bundle_price_zero %}{% render 'price-split', cents: 0, context: 'bundles' %}{% endcapture %}
+  {%- style -%}
+    .bundle-deals-{{ section.id }} .bundle-deals__summary {
+      --summary-heading-size: {{ summary_heading_size }};
+      --summary-text-size: {{ summary_text_size }};
+      --summary-item-size: {{ summary_item_size }};
+      --summary-price-size: {{ summary_price_size }};
+      --summary-total-size: {{ summary_total_size }};
+      --summary-disclaimer-size: {{ summary_disclaimer_size }};
+    }
+    .bundle-deals__summary {
+      padding: {{ section.settings.bundle_deals_padding }}px;
+    }
+    {% if section.settings.bundle_deals_customisation %}
+    .bundle-deals-{{ section.id }} .bundle-product-card__price--no-compare .bundle-product-card__current-price,
+    .bundle-deals-{{ section.id }} .bundle-deals__item-price--no-compare {
+      color: {{ section.settings.bundle_deals_regular_price_no_compare_color }};
+    }
+    .bundle-deals-{{ section.id }} .bundle-product-card__price:not(.bundle-product-card__price--no-compare) .bundle-product-card__current-price,
+    .bundle-deals-{{ section.id }} .bundle-deals__item-current-price {
+      color: {{ section.settings.bundle_deals_regular_price_color }};
+    }
+    .bundle-deals-{{ section.id }} .bundle-deals__subtotal-value,
+    .bundle-deals-{{ section.id }} .bundle-deals__discount-value,
+    .bundle-deals-{{ section.id }} .bundle-deals__total-value,
+    .bundle-deals-{{ section.id }} .bundle-deals__checkout-total {
+      color: {{ section.settings.bundle_deals_summary_price_color }};
+    }
+    .bundle-deals-{{ section.id }} .bundle-deals__compare-price,
+    .bundle-deals-{{ section.id }} .bundle-deals__total-compare-price,
+    .bundle-deals-{{ section.id }} .bundle-deals__item-compare-price,
+    .bundle-deals-{{ section.id }} .bundle-product-card__compare-price {
+      color: {{ section.settings.bundle_deals_compare_price_color }};
+    }
+    .bundle-deals-{{ section.id }} .bundle-product-card__compare-price .price-split::after,
+    .bundle-deals-{{ section.id }} .bundle-deals__item-compare-price .price-split::after {
+      background: {{ section.settings.bundle_deals_compare_strike_color }};
+    }
+    {% endif %}
+    @media screen and (max-width: 989px) {
+      .bundle-deals-{{ section.id }} .bundle-deals__checkout-total {
+        color: var(--button-color);
+      }
+    }
+    #shopify-section-{{ section.id }} .bundle-deals__accent {
+      {% if section.settings.highlight_style == 'solid' %}
+        color: {{ section.settings.highlight_color | default: '#e85d04' }};
+        background: none;
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: unset;
+        background-clip: unset;
+      {% else %}
+        background: linear-gradient(90deg, {{ section.settings.highlight_gradient_start | default: '#e85d04' }} 0%, {{ section.settings.highlight_gradient_end | default: '#f4c430' }} 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      {% endif %}
+    }
+    .bundle-deals-{{ section.id }} {
+      --bundle-tier-bar-height: {{ section.settings.tier_bar_height | default: 6 }}px;
+      {% if section.settings.tier_bar_customize_colors %}
+        --bundle-tier-bar-track: {{ section.settings.tier_bar_track_color }};
+        --bundle-tier-bar-fill: {{ section.settings.tier_bar_fill_color }};
+        --bundle-tier-bar-fill-qualified: {{ section.settings.tier_bar_fill_qualified_color }};
+      {% endif %}
+    }
+  {%- endstyle -%}
+
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div
+    class="section section--{{ section.settings.section_width }} bundle-deals-section color-{{ section.settings.color_scheme }} spacing-style"
+    style="
+      {%- render 'spacing-style', settings: section.settings %}
+      {% render 'border-override', settings: section.settings %}
+    "
+  >
+    <div class="bundle-deals-section__inner">
+      {%- unless section.settings.heading == blank and section.settings.text == blank -%}
+        {% if section.settings.heading != blank %}
+        <div class="bundle-deals__header" style="margin-bottom: {% if section.settings.text == blank %}2rem{% else %}0.5rem{% endif %};{% if section.settings.container_alignment == 'center' %}text-align: center;{% endif %}">
+          <{{ section.settings.heading_tag | default: 'h2' }} class="title {{ section.settings.heading_size }}">
+            {{ section.settings.heading | replace: '[', '<span class="bundle-deals__accent bundle-deals__accent--gradient">' | replace: ']', '</span>' }}
+          </{{ section.settings.heading_tag | default: 'h2' }}>
+        </div>
+        {% endif %}
+        {% if section.settings.text != blank %}
+          <div class="bundle-deals__subtitle" {% if section.settings.container_alignment == 'center' %}style="text-align: center;"{% endif %}>{{ section.settings.text }}</div>
+        {% endif %}
+      {%- endunless -%}
+
+      <div class="bundle-deals bundle-deals-{{ section.id }}" style="--border-radius-bundle-deals: {{ section.settings.border_radius }}px;">
+        <div class="bundle-deals__products bundle-deals__products--mobile-{{ section.settings.mobile_columns | default: '1' }}-col">
+          {% if bundle_products != blank %}
+            {% for product in bundle_products limit: max_products_to_show %}
+              {% capture catalog_product_exclude_marker %}
+                {% render 'catalog-product-excluded', product: product %}
+              {% endcapture %}
+              {% if catalog_product_exclude_marker != blank %}
+                {% continue %}
+              {% endif %}
+              <div class="bundle-deals__product-wrapper color-{{ section.settings.card_color_scheme | default: 'scheme-2' }}" style="display: flex;border-radius: var(--border-radius-bundle-deals);">
+                {% render 'bundle-product-card',
+                  product: product,
+                  block_index: forloop.index0,
+                  show_badge: section.settings.show_badge,
+                  badge_color: section.settings.badge_color,
+                  badge_background: section.settings.badge_background,
+                  show_variant_selector: section.settings.show_variant_selector,
+                  show_vendor: section.settings.show_vendor
+                %}
+              </div>
+            {% endfor %}
+          {% else %}
+            {% for i in (1..max_products_to_show) %}
+              {%- liquid
+                assign placeholder_idx = forloop.index0 | modulo: 4 | plus: 1
+                assign empty_placeholder_name = 'product-apparel-' | append: placeholder_idx
+              -%}
+              <div class="bundle-product-card bundle-product-card--placeholder color-{{ section.settings.card_color_scheme | default: 'scheme-2' }}" style="border: 1px solid var(--color-border);">
+                <div class="bundle-product-card__media">
+                  {{ empty_placeholder_name | placeholder_svg_tag: 'bundle-product-card__placeholder' }}
+                </div>
+                <div class="bundle-product-card__content">
+                  {% if section.settings.show_vendor != false %}
+                    <p class="bundle-product-card__vendor">Select a collection or products</p>
+                  {% endif %}
+                  <p class="bundle-product-card__title">Add a collection or products in the theme editor</p>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <div
+          class="bundle-deals__summary color-{{ summary_color_scheme }}{% if section.settings.bundle_deals_customisation %} border-style{% endif %}"
+          {% if section.settings.bundle_deals_customisation %}
+            style="
+              border: {{ section.settings.border_width }}px {{ section.settings.border }} var(--color-border);
+              {% if section.settings.border_color_mode == 'custom' and section.settings.border_color != blank %}--color-border: {{ section.settings.border_color }};{% endif %}
+            "
+          {% endif %}
+        >
+          <div class="bundle-deals__summary-inner">
+            {% if section.settings.bundle_label != blank %} 
+            <h3 class="bundle-deals__summary-heading">
+              {{ section.settings.bundle_label | replace: '[', '<span class="bundle-deals__accent bundle-deals__accent--gradient">' | replace: ']', '</span>' }}
+            </h3>
+            {% endif %}
+            <div class="bundle-deals__summary-instruction">
+              <p>{{ summary_instruction_rendered }}</p>
+            </div>
+            {% if show_tier_progress_ui %}
+              <template id="bundle-deals-tier-check-template-{{ section.id }}">
+                <span class="bundle-deals__tier-progress__tier-check-svg">{{ 'icon-checkmark.svg' | inline_asset_content }}</span>
+              </template>
+              <div class="bundle-deals__tier-progress" id="bundle-deals-tier-progress-{{ section.id }}">
+                <div class="bundle-deals__tier-progress__confetti" aria-hidden="true">
+                  {% for i in (1..20) %}
+                    <span
+                      class="bundle-deals__tier-progress__confetti-piece bundle-deals__tier-progress__confetti-piece--{{ i | modulo: 6 }}"
+                      style="--confetti-delay: {{ i | times: 0.04 }}s; --confetti-x: {{ i | modulo: 7 | times: 14 }}%; --confetti-rotation: {{ i | times: 60 }}deg;"
+                    ></span>
+                  {% endfor %}
+                </div>
+                <div class="bundle-deals__tier-progress__content">
+                  <div class="bundle-deals__tier-progress__message" id="bundle-deals-tier-progress-message-{{ section.id }}">
+                    <span class="bundle-deals__tier-progress__text" id="bundle-deals-tier-progress-text-{{ section.id }}"></span>
+                  </div>
+                </div>
+                <div class="bundle-deals__tier-progress__tiers" id="bundle-deals-tier-progress-tiers-{{ section.id }}"></div>
+              </div>
+            {% else %}
+              <div class="bundle-deals__flat-progress" id="bundle-deals-flat-progress-wrap-{{ section.id }}">
+                <div class="bundle-deals__tier-progress__confetti" aria-hidden="true">
+                  {% for i in (1..20) %}
+                    <span
+                      class="bundle-deals__tier-progress__confetti-piece bundle-deals__tier-progress__confetti-piece--{{ i | modulo: 6 }}"
+                      style="--confetti-delay: {{ i | times: 0.04 }}s; --confetti-x: {{ i | modulo: 7 | times: 14 }}%; --confetti-rotation: {{ i | times: 60 }}deg;"
+                    ></span>
+                  {% endfor %}
+                </div>
+                <div class="bundle-deals__flat-progress__content">
+                  <div class="bundle-deals__flat-progress__message" id="bundle-deals-flat-progress-message-{{ section.id }}"></div>
+                  <div class="bundle-deals__progress" aria-hidden="true">
+                    <div class="bundle-deals__progress-track" id="bundle-deals-progress-{{ section.id }}" style="--progress: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            <hr class="bundle-deals__separator">
+            <div class="bundle-deals__items-wrapper">
+              <div class="bundle-deals__items" id="bundle-deals-items-{{ section.id }}">
+                {%- comment -%} Slots: products + placeholders. JS renders products first, then placeholder rows for empty slots. {%- endcomment -%}
+              </div>
+            </div>
+            <template id="bundle-deals-placeholder-template-{{ section.id }}">
+              <div class="bundle-deals__placeholder-item horizontal-product" data-product-bundle-variant="" available="">
+                <figure class="horizontal-product__media bundle-deals__placeholder-media" data-product-bundle-variant-media=""></figure>
+                <div class="horizontal-product__details bundle-deals__placeholder-content" data-product-bundle-variant-content="">
+                  <span class="horizontal-product__skeleton"></span>
+                  <span class="horizontal-product__skeleton"></span>
+                </div>
+              </div>
+            </template>
+            <div class="bundle-deals__summary-footer">
+              {% if show_bundle_discount_rows %}
+                <div class="bundle-deals__subtotal" data-bundle-subtotal>
+                  <span class="bundle-deals__subtotal-label">Subtotal</span>
+                  <span class="bundle-deals__subtotal-value" id="bundle-deals-subtotal-{{ section.id }}">{{ bundle_price_zero }}</span>
+                </div>
+                <div class="bundle-deals__discount" data-bundle-discount>
+                  <span class="bundle-deals__discount-label" id="bundle-deals-discount-label-{{ section.id }}">{%- if discount_mode == 'tiered' -%}Discount (0%){%- else -%}Discount ({{ section.settings.discount_percent }}%){%- endif -%}</span>
+                  <span class="bundle-deals__discount-value" id="bundle-deals-discount-{{ section.id }}">{{ bundle_price_zero }}</span>
+                </div>
+              {% endif %}
+              <div class="bundle-deals__total">
+                <span class="bundle-deals__total-label">Total</span>
+                <span class="bundle-deals__total-value" id="bundle-deals-total-{{ section.id }}">{{ bundle_price_zero }}</span>
+              </div>
+              <button
+                type="button"
+                class="bundle-deals__checkout-button button add-to-cart-button button--full-width"
+                id="bundle-deals-checkout-{{ section.id }}"
+                disabled
+              >
+                <span class="add-to-cart-text">
+                  <span class="bundle-deals__checkout-total" data-bundle-total>{{ bundle_price_zero }}</span>
+                  <span class="bundle-deals__checkout-separator" aria-hidden="true">|</span>
+                  <span class="add-to-cart-text__content">{{ 'actions.add_to_cart' | t }}</span>
+                </span>
+                <span class="add-to-cart__added">
+                  <span class="svg-wrapper add-to-cart__added-icon">
+                    {{- 'icon-checkmark-burst.svg' | inline_asset_content -}}
+                  </span>
+                </span>
+                <span class="bundle-deals__loading-dots" aria-hidden="true">
+                  <span class="bundle-deals__dot"></span>
+                  <span class="bundle-deals__dot"></span>
+                  <span class="bundle-deals__dot"></span>
+                </span>
+              </button>
+              {% if section.settings.checkout_disclaimer != blank %}
+                <p class="bundle-deals__disclaimer">{{ section.settings.checkout_disclaimer }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    const sectionId = '{{ section.id }}';
+    const minProducts = {{ section.settings.min_products | default: 3 }};
+    const maxProducts = {{ section.settings.max_products | default: 12 }};
+    const discountMode = {{ section.settings.discount_mode | default: 'flat' | json }};
+    const discountPercentFlat = {{ section.settings.discount_percent | default: 0 }};
+    const discountCodeFallback = {{ section.settings.discount_code | json }};
+    const bundleTiers = [
+  {%- assign first_tier_js = true -%}
+  {%- for block in section.blocks -%}
+  {%- if block.type == 'bundle_tier' -%}
+  {%- unless first_tier_js -%},{%- endunless -%}
+  { "minItems": {{ block.settings.min_items }}, "discount": {{ block.settings.discount_percent }}, "code": {{ block.settings.discount_code | json }}, "labelTpl": {{ block.settings.tier_label | default: bundle_tier_default_label_tpl | json }} }
+  {%- assign first_tier_js = false -%}
+  {%- endif -%}
+  {%- endfor -%}
+    ];
+
+    function getActiveDiscount(totalQuantity) {
+      if (discountMode !== 'tiered') {
+        return { percent: discountPercentFlat, code: discountCodeFallback };
+      }
+      if (!bundleTiers.length) {
+        return { percent: 0, code: discountCodeFallback };
+      }
+      const sorted = bundleTiers.slice().sort(function(a, b) { return a.minItems - b.minItems; });
+      let percent = 0;
+      let code = discountCodeFallback;
+      for (let i = 0; i < sorted.length; i++) {
+        if (totalQuantity >= sorted[i].minItems) {
+          percent = sorted[i].discount;
+          const c = sorted[i].code;
+          code = (c && String(c).trim()) ? String(c).trim() : discountCodeFallback;
+        }
+      }
+      return { percent: percent, code: code };
+    }
+
+    const locale = '{{ request.locale.iso_code }}';
+    const currency = '{{ cart.currency.iso_code }}';
+    const cartType = {{ settings.cart_type | default: 'drawer' | json }};
+    const autoOpenCartPage = {{ settings.auto_open_cart_page | default: false | json }};
+    const autoOpenCartDrawer = {{ settings.auto_open_cart_drawer | default: false | json }};
+    const cartUrl = (typeof Theme !== 'undefined' && Theme.routes && Theme.routes.cart_url)
+      ? Theme.routes.cart_url
+      : (window.Shopify && window.Shopify.routes && window.Shopify.routes.root
+          ? window.Shopify.routes.root + 'cart'
+          : '/cart');
+
+    const showTierProgressUi = {% if show_tier_progress_ui %}true{% else %}false{% endif %};
+    const tierProgressMessageTpl = {{ section.settings.bundle_tier_progress_message | default: bundle_js_default_tier_msg | json }};
+    const tierProgressSuccess = {{ section.settings.bundle_tier_progress_success | default: "You've unlocked every tier — best discount applied!" | json }};
+    const flatProgressTpl = {{ section.settings.bundle_flat_progress_message | default: bundle_js_default_flat_msg | json }};
+    const flatProgressComplete = {{ section.settings.bundle_flat_progress_complete | default: 'Minimum bundle size met. Add to cart when ready.' | json }};
+
+    function getSortedTiers() {
+      return bundleTiers.slice().sort(function(a, b) { return a.minItems - b.minItems; });
+    }
+
+    function formatTierLabelHtml(t) {
+      var tpl = t.labelTpl;
+      var raw;
+      if (tpl == null || String(tpl).trim() === '') {
+        raw = String(t.minItems) + '+ · ' + String(t.discount) + '%';
+      } else {
+        raw = String(tpl).split('{quantity}').join(String(t.minItems)).split('{discount}').join(String(t.discount));
+      }
+      return raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function buildTierProgressRows() {
+      const tiersEl = document.getElementById('bundle-deals-tier-progress-tiers-' + sectionId);
+      if (!tiersEl || !showTierProgressUi || !bundleTiers.length) return;
+      const sorted = getSortedTiers();
+      const checkTpl = document.getElementById('bundle-deals-tier-check-template-' + sectionId);
+      var checkHtml = checkTpl ? checkTpl.innerHTML.trim() : '';
+      var html = '';
+      for (var i = 0; i < sorted.length; i++) {
+        var t = sorted[i];
+        html += '<div class="bundle-deals__tier-progress__tier" data-tier-index="' + i + '">';
+        html += '<div class="bundle-deals__tier-progress__tier-bar"><div class="bundle-deals__tier-progress__tier-fill" style="width:0%"></div></div>';
+        html += '<div class="bundle-deals__tier-progress__tier-label">';
+        html += '<span class="bundle-deals__tier-progress__tier-check" hidden>' + checkHtml + '</span>';
+        html += '<span class="bundle-deals__tier-progress__tier-label-text">' + formatTierLabelHtml(t) + '</span>';
+        html += '</div></div>';
+      }
+      tiersEl.innerHTML = html;
+    }
+
+    function updateBundleProgressUI(bundleUnits, lineCount) {
+      if (showTierProgressUi && bundleTiers.length) {
+        var root = document.getElementById('bundle-deals-tier-progress-' + sectionId);
+        var msgRow = document.getElementById('bundle-deals-tier-progress-message-' + sectionId);
+        var msgText = document.getElementById('bundle-deals-tier-progress-text-' + sectionId);
+        if (!root || !msgText) return;
+        var sorted = getSortedTiers();
+        var maxMin = sorted.length ? sorted[sorted.length - 1].minItems : 0;
+        var allQualified = maxMin > 0 && bundleUnits >= maxMin;
+        var nextTier = null;
+        for (var j = 0; j < sorted.length; j++) {
+          if (bundleUnits < sorted[j].minItems) {
+            nextTier = sorted[j];
+            break;
+          }
+        }
+        root.classList.toggle('bundle-deals__tier-progress--all-qualified', allQualified);
+        if (msgRow) msgRow.classList.toggle('bundle-deals__tier-progress__message--qualified', allQualified);
+        if (allQualified) {
+          msgText.textContent = tierProgressSuccess;
+        } else if (nextTier) {
+          var count = nextTier.minItems - bundleUnits;
+          msgText.textContent = tierProgressMessageTpl.split('{count}').join(String(count)).split('{reward}').join(nextTier.discount + '% off');
+        } else {
+          msgText.textContent = tierProgressSuccess;
+        }
+        var prev = 0;
+        var tierEls = root.querySelectorAll('.bundle-deals__tier-progress__tier');
+        for (var i = 0; i < sorted.length; i++) {
+          var t = sorted[i];
+          var row = tierEls[i];
+          if (!row) continue;
+          var fill = row.querySelector('.bundle-deals__tier-progress__tier-fill');
+          var tCheck = row.querySelector('.bundle-deals__tier-progress__tier-check');
+          var qualified = bundleUnits >= t.minItems;
+          var pct = 0;
+          var range = t.minItems - prev;
+          if (range <= 0) {
+            pct = qualified ? 100 : 0;
+          } else if (qualified) {
+            pct = 100;
+          } else if (bundleUnits > prev) {
+            pct = ((bundleUnits - prev) / range) * 100;
+          }
+          if (fill) fill.style.width = Math.min(100, Math.max(0, pct)) + '%';
+          row.classList.toggle('bundle-deals__tier-progress__tier--qualified', qualified);
+          if (tCheck) tCheck.hidden = !qualified;
+          prev = t.minItems;
+        }
+        return;
+      }
+      var flatWrap = document.getElementById('bundle-deals-flat-progress-wrap-' + sectionId);
+      var flatMsg = document.getElementById('bundle-deals-flat-progress-message-' + sectionId);
+      var progressEl = document.getElementById('bundle-deals-progress-' + sectionId);
+      if (progressEl) {
+        var progress = Math.min(100, (lineCount / minProducts) * 100);
+        progressEl.style.setProperty('--progress', progress + '%');
+      }
+      if (flatMsg) {
+        var need = Math.max(0, minProducts - lineCount);
+        var flatComplete = need <= 0;
+        if (flatWrap) flatWrap.classList.toggle('bundle-deals__flat-progress--all-qualified', flatComplete);
+        if (need > 0) {
+          flatMsg.textContent = flatProgressTpl.split('{count}').join(String(need));
+          flatMsg.classList.remove('bundle-deals__flat-progress__message--qualified');
+        } else {
+          flatMsg.textContent = flatProgressComplete;
+          flatMsg.classList.add('bundle-deals__flat-progress__message--qualified');
+        }
+      } else if (flatWrap) {
+        flatWrap.classList.remove('bundle-deals__flat-progress--all-qualified');
+      }
+    }
+
+    function formatPrice(cents) {
+      if (typeof Theme !== 'undefined' && Theme.formatPriceSplitHTML) {
+        return Theme.formatPriceSplitHTML(cents, false, 'bundles');
+      }
+      return new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(cents / 100);
+    }
+
+    let bundleItems = [];
+
+    function bundleMeetsMinimumForCheckout() {
+      const units = bundleItems.reduce(function(sum, i) { return sum + i.quantity; }, 0);
+      if (discountMode === 'tiered') {
+        return units >= minProducts;
+      }
+      return bundleItems.length >= minProducts;
+    }
+
+    function renderBundleItems() {
+      const container = document.getElementById(`bundle-deals-items-${sectionId}`);
+      const placeholderTemplate = document.getElementById(`bundle-deals-placeholder-template-${sectionId}`);
+      const totalEl = document.getElementById(`bundle-deals-total-${sectionId}`);
+      const checkoutBtn = document.getElementById(`bundle-deals-checkout-${sectionId}`);
+
+      if (!container) return;
+
+      const bundleUnits = bundleItems.reduce(function(sum, i) { return sum + i.quantity; }, 0);
+      const activeDiscount = getActiveDiscount(bundleUnits);
+      const activeDiscountPercent = activeDiscount.percent;
+
+      let total = 0;
+      let discountAmount = 0;
+      let html = '';
+
+      bundleItems.forEach((item, index) => {
+        const lineSubtotal = item.price * item.quantity;
+        total += lineSubtotal;
+        const discountPerUnit =
+          activeDiscountPercent > 0
+            ? Math.floor((item.price * activeDiscountPercent) / 100)
+            : 0;
+        const lineDiscount = discountPerUnit * item.quantity;
+        discountAmount += lineDiscount;
+        const hasCompare = item.comparePrice > 0 && item.comparePrice > item.price;
+        const itemDiscountedPrice =
+          activeDiscountPercent > 0 ? item.price - discountPerUnit : item.price;
+        const showCrossOut = hasCompare || (activeDiscountPercent > 0 && itemDiscountedPrice < item.price);
+        const crossOutPrice = hasCompare ? item.comparePrice : item.price;
+        const displayPrice = activeDiscountPercent > 0 ? itemDiscountedPrice : item.price;
+        const priceHtml = showCrossOut
+          ? `<p class="bundle-deals__item-price"><span class="bundle-deals__item-compare-price">${formatPrice(crossOutPrice)}</span> <span class="bundle-deals__item-current-price">${formatPrice(displayPrice)}</span></p>`
+          : `<p class="bundle-deals__item-price bundle-deals__item-price--no-compare">${formatPrice(displayPrice)}</p>`;
+        html += `
+          <div class="bundle-deals__item" data-index="${index}">
+            <div class="bundle-deals__item-media">
+              <img src="${item.image}" alt="" width="60" height="60" loading="lazy">
+            </div>
+            <div class="bundle-deals__item-details">
+              <p class="bundle-deals__item-title">${item.title}</p>
+              ${item.variantTitle ? `<p class="bundle-deals__item-variant">${item.variantTitle}</p>` : ''}
+              ${priceHtml}
+              <div class="bundle-deals__item-actions">
+                <div class="bundle-deals__quantity">
+                  <button type="button" class="bundle-deals__qty-btn" data-action="decrease" data-index="${index}" aria-label="Decrease">−</button>
+                  <input type="number" value="${item.quantity}" min="1" data-index="${index}" aria-label="Quantity">
+                  <button type="button" class="bundle-deals__qty-btn" data-action="increase" data-index="${index}" aria-label="Increase">+</button>
+                </div>
+                <button type="button" class="bundle-deals__remove" data-index="${index}">Remove</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+
+      const placeholderCount = Math.max(0, minProducts - bundleItems.length);
+      if (placeholderTemplate && placeholderCount > 0) {
+        for (let i = 0; i < placeholderCount; i++) {
+          const clone = placeholderTemplate.content.cloneNode(true);
+          container.appendChild(clone);
+        }
+      }
+
+      const subtotal = total;
+      const totalAfterDiscount = subtotal - discountAmount;
+
+      if (totalEl) totalEl.innerHTML = formatPrice(totalAfterDiscount);
+      document.querySelectorAll(`.bundle-deals-${sectionId} .bundle-deals__checkout-total`).forEach(el => { el.innerHTML = formatPrice(totalAfterDiscount); });
+
+      const subtotalEl = document.getElementById(`bundle-deals-subtotal-${sectionId}`);
+      const discountEl = document.getElementById(`bundle-deals-discount-${sectionId}`);
+      const discountLabelEl = document.getElementById(`bundle-deals-discount-label-${sectionId}`);
+      if (subtotalEl) subtotalEl.innerHTML = formatPrice(subtotal);
+      if (discountEl) discountEl.innerHTML = '−' + formatPrice(discountAmount);
+      if (discountLabelEl) discountLabelEl.textContent = 'Discount (' + activeDiscountPercent + '%)';
+      if (checkoutBtn && checkoutBtn.dataset.added !== 'true') checkoutBtn.disabled = !bundleMeetsMinimumForCheckout();
+
+      const sectionEl = document.querySelector('.bundle-deals-' + sectionId);
+      if (sectionEl) {
+        sectionEl.querySelectorAll('.bundle-product-card__add-button').forEach(btn => {
+          const productAvailable = btn.dataset.productAvailable !== 'false';
+          btn.disabled = bundleItems.length >= maxProducts || !productAvailable;
+        });
+      }
+
+      updateBundleProgressUI(bundleUnits, bundleItems.length);
+
+      container.querySelectorAll('.bundle-deals__qty-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const idx = parseInt(this.dataset.index);
+          const item = bundleItems[idx];
+          if (this.dataset.action === 'increase') {
+            item.quantity++;
+          } else if (item.quantity > 1) {
+            item.quantity--;
+          }
+          renderBundleItems();
+        });
+      });
+      container.querySelectorAll('.bundle-deals__quantity input').forEach(input => {
+        input.addEventListener('change', function() {
+          const idx = parseInt(this.dataset.index);
+          const qty = parseInt(this.value) || 1;
+          bundleItems[idx].quantity = Math.max(1, qty);
+          renderBundleItems();
+        });
+      });
+      container.querySelectorAll('.bundle-deals__remove').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const idx = parseInt(this.dataset.index);
+          bundleItems.splice(idx, 1);
+          renderBundleItems();
+        });
+      });
+    }
+
+    function addToBundle(variantId, title, price, image, variantTitle, comparePrice) {
+      if (bundleItems.length >= maxProducts) return;
+      bundleItems.push({ variantId, title, price, image, variantTitle: variantTitle || '', comparePrice: comparePrice || 0, quantity: 1 });
+      renderBundleItems();
+    }
+
+    function initBundleDeals() {
+      const section = document.querySelector('.bundle-deals-' + sectionId);
+      if (!section) return;
+
+      section.querySelectorAll('.bundle-product-card__add-button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const card = this.closest('.bundle-product-card');
+          if (!card) return;
+          const variantSelect = card.querySelector('.bundle-product-card__variant-select');
+          const variantId = variantSelect ? variantSelect.value : card.dataset.variantId;
+          const opt = variantSelect ? variantSelect.options[variantSelect.selectedIndex] : null;
+          const price = variantSelect ? parseInt(opt.dataset.price) : parseInt(card.dataset.price);
+          const comparePrice = variantSelect ? parseInt(opt.dataset.comparePrice || 0) : parseInt(card.dataset.comparePrice || 0);
+          const title = card.querySelector('.bundle-product-card__title a')?.textContent?.trim() || '';
+          const img = card.querySelector('.bundle-product-card__image');
+          const image = img ? img.src : (opt?.dataset?.image || '');
+          const variantTitle = variantSelect ? opt.textContent.split(' - ')[0] : '';
+
+          addToBundle(variantId, title, price, image, variantTitle, comparePrice);
+        });
+      });
+
+      section.querySelectorAll('.bundle-product-card__variant-select').forEach(select => {
+        select.addEventListener('change', function() {
+          const card = this.closest('.bundle-product-card');
+          const img = card?.querySelector('.bundle-product-card__image');
+          const opt = this.options[this.selectedIndex];
+          const newImageUrl = (opt?.dataset?.image || '').trim();
+          if (img && newImageUrl) img.src = newImageUrl;
+          card.dataset.variantId = opt?.value;
+          card.dataset.price = opt?.dataset?.price || '0';
+        });
+      });
+
+      buildTierProgressRows();
+
+      const checkoutBtn = document.getElementById(`bundle-deals-checkout-${sectionId}`);
+      if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', async function() {
+          if (!bundleMeetsMinimumForCheckout()) return;
+          this.disabled = true;
+          this.classList.add('loading');
+
+          const bundleUnitsCheckout = bundleItems.reduce(function(sum, i) { return sum + i.quantity; }, 0);
+          const activeCheckoutDiscount = getActiveDiscount(bundleUnitsCheckout);
+
+          const items = bundleItems.map(i => ({ id: Number(i.variantId), quantity: i.quantity }));
+          const sectionIds = [];
+          document.querySelectorAll('cart-items-component').forEach(c => {
+            if (c.dataset.sectionId) sectionIds.push(c.dataset.sectionId);
+          });
+
+          try {
+            const res = await fetch((window.Theme?.routes?.cart_add_url) || '/cart/add.js', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items, sections: sectionIds.join(','), sections_url: window.location.pathname })
+            });
+            const data = await res.json();
+            if (data.status) throw new Error(data.description || data.message);
+
+            let cartPayload = data;
+            const discountCodeToApply = activeCheckoutDiscount.code;
+            if (discountCodeToApply && String(discountCodeToApply).trim()) {
+              const codeToApply = String(discountCodeToApply).trim();
+              const applyDiscount = async (retryCount) => {
+                await new Promise(r => setTimeout(r, retryCount === 0 ? 100 : 200));
+                let existingCodes = [];
+                try {
+                  const cartRes = await fetch(((window.Theme?.routes?.cart_url) || '/cart').replace(/\/?$/, '') + '.js');
+                  const cartData = await cartRes.json();
+                  existingCodes = (cartData.discount_codes || []).map(d => d.code);
+                } catch (_) {}
+                const codesToApply = existingCodes.some(c => c.toLowerCase() === codeToApply.toLowerCase())
+                  ? existingCodes
+                  : [...existingCodes, codeToApply];
+                const updateRes = await fetch((window.Theme?.routes?.cart_update_url) || '/cart/update.js', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ discount: codesToApply.join(','), sections: sectionIds.join(','), sections_url: window.location.pathname })
+                });
+                const updateData = await updateRes.json();
+                const applied = updateData.discount_codes?.find(d => d.code.toLowerCase() === codeToApply.toLowerCase() && d.applicable);
+                return { applied, updateData };
+              };
+              let result = await applyDiscount(0);
+              if (!result.applied && result.updateData.discount_codes) {
+                result = await applyDiscount(1);
+              }
+              if (result.applied && result.updateData) {
+                cartPayload = result.updateData;
+              } else if (!result.applied) {
+                console.warn('Discount code could not be applied');
+              }
+            }
+
+            const firstImg = bundleItems.length > 0 ? (bundleItems[0].image || '') : '';
+            const firstItemImage = firstImg ? (firstImg.includes('?') ? firstImg + '&width=100' : firstImg + '?width=100') : '';
+
+            this.classList.remove('loading');
+            this.dataset.added = 'true';
+            bundleItems = [];
+            renderBundleItems();
+
+            if (firstItemImage) {
+              const cartIcon = document.querySelector('.header-actions__cart-icon');
+              if (cartIcon && customElements.get('fly-to-cart')) {
+                const flyToCartEl = document.createElement('fly-to-cart');
+                flyToCartEl.classList.add('fly-to-cart--main');
+                flyToCartEl.style.setProperty('background-image', `url(${firstItemImage})`);
+                flyToCartEl.style.setProperty('--start-opacity', '0');
+                flyToCartEl.source = this;
+                flyToCartEl.destination = cartIcon;
+                document.body.appendChild(flyToCartEl);
+              }
+            }
+
+            setTimeout(async () => {
+              this.removeAttribute('data-added');
+              let payload = cartPayload;
+              let itemCount = payload?.item_count;
+              if (itemCount == null) {
+                try {
+                  const cartRes = await fetch(((window.Theme?.routes?.cart_url) || '/cart').replace(/\/?$/, '') + '.js');
+                  payload = await cartRes.json();
+                  itemCount = payload?.item_count ?? 0;
+                } catch (_) {
+                  itemCount = 0;
+                }
+              }
+              document.dispatchEvent(new CustomEvent('cart:update', {
+                bubbles: true,
+                detail: {
+                  resource: payload,
+                  sourceId: 'bundle-deals',
+                  data: { source: 'bundle-deals', sections: payload?.sections || {}, itemCount: itemCount ?? 0 }
+                }
+              }));
+              if (cartType === 'drawer' && autoOpenCartDrawer) {
+                const drawer = document.querySelector('cart-drawer-component');
+                if (drawer?.open) drawer.open();
+              } else if (cartType === 'page' && autoOpenCartPage) {
+                window.location.href = cartUrl;
+              }
+            }, 1000);
+          } catch (e) {
+            console.error(e);
+          } finally {
+            this.disabled = false;
+          }
+        });
+      }
+
+      renderBundleItems();
+    }
+
+    function runInit() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBundleDeals);
+      } else {
+        initBundleDeals();
+      }
+    }
+
+    runInit();
+
+    function isOurSection(target) {
+      if (!target || !(target instanceof HTMLElement)) return false;
+      return target.id === 'shopify-section-' + sectionId ||
+        target.querySelector?.('.bundle-deals-' + sectionId) ||
+        target.classList?.contains('bundle-deals-section') ||
+        target.closest?.('.bundle-deals-' + sectionId);
+    }
+
+    document.addEventListener('shopify:section:load', function(event) {
+      if (isOurSection(event.target)) initBundleDeals();
+    });
+    document.addEventListener('shopify:section:reorder', function(event) {
+      if (isOurSection(event.target)) initBundleDeals();
+    });
+  })();
+  </script>
+
+  {% schema %}
+  {
+    "name": "Bundle deals",
+    "settings": [
+      {
+        "type": "collection",
+        "id": "collection",
+        "label": "Collection"
+      },
+      {
+        "type": "product_list",
+        "id": "products",
+        "label": "Products",
+        "limit": 20,
+        "info": "Replaces collection when selected"
+      },
+      {
+        "type": "range",
+        "id": "max_products_to_show",
+        "label": "Maximum products to show",
+        "min": 1,
+        "max": 100,
+        "step": 1,
+        "default": 6
+      },
+      {
+        "type": "select",
+        "id": "mobile_columns",
+        "label": "Number of columns on mobile",
+        "options": [
+          { "value": "1", "label": "1 column" },
+          { "value": "2", "label": "2 columns" }
+        ],
+        "default": "2"
+      },
+      {
+        "type": "select",
+        "id": "section_width",
+        "options": [
+          { "value": "page-width", "label": "Page width" },
+          { "value": "full-width", "label": "Full width" }
+        ],
+        "default": "page-width",
+        "label": "Section width"
+      },
+      {
+        "type": "color_scheme",
+        "id": "color_scheme",
+        "label": "Color scheme",
+        "default": "scheme-1"
+      },
+      {
+        "type": "color_scheme",
+        "id": "card_color_scheme",
+        "label": "Secondary color scheme",
+        "info": "Used for product cards. The bundle summary can use a separate scheme in Bundle summary settings.",
+        "default": "scheme-2"
+      },
+      {
+        "type": "header",
+        "content": "Bundle settings"
+      },
+      {
+        "type": "range",
+        "id": "min_products",
+        "label": "Minimum items to require",
+        "min": 1,
+        "max": 10,
+        "step": 1,
+        "default": 3
+      },
+      {
+        "type": "range",
+        "id": "max_products",
+        "label": "Maximum items",
+        "min": 1,
+        "max": 20,
+        "step": 1,
+        "default": 12
+      },
+      {
+        "type": "select",
+        "id": "discount_mode",
+        "label": "Discount style",
+        "options": [
+          { "value": "flat", "label": "Single percentage" },
+          { "value": "tiered", "label": "Tiered by item count" }
+        ],
+        "default": "flat",
+        "info": "Tiered mode uses discount blocks below. Item count is total quantity (all lines)."
+      },
+      {
+        "type": "range",
+        "id": "discount_percent",
+        "label": "Bundle discount (%)",
+        "min": 0,
+        "max": 50,
+        "step": 5,
+        "default": 0,
+        "visible_if": "{{ section.settings.discount_mode == 'flat' }}",
+        "info": "Discount shown in summary. Create a matching [discount](https:\/\/shopify.com\/admin\/discounts) code in Shopify Admin to apply at checkout. Learn how to create discount codes [here](https://help.shopify.com/en/manual/discounts/discount-codes)"
+      },
+      {
+        "type": "text",
+        "id": "discount_code",
+        "label": "Discount code (fallback)",
+        "info": "Applied at checkout when adding the bundle. In tiered mode, each tier can set its own code; this value is used when a tier leaves its code blank."
+      },
+      {
+        "type": "header",
+        "content": "Heading"
+      },
+      {
+        "type": "inline_richtext",
+        "id": "heading",
+        "default": "Build your [bundle]",
+        "label": "Heading"
+      },
+      {
+        "type": "select",
+        "id": "heading_tag",
+        "options": [
+          { "value": "h1", "label": "h1" },
+          { "value": "h2", "label": "h2" },
+          { "value": "h3", "label": "h3" },
+          { "value": "h4", "label": "h4" },
+          { "value": "h5", "label": "h5" },
+          { "value": "h6", "label": "h6" },
+          { "value": "p", "label": "p" }
+        ],
+        "default": "h2",
+        "label": "Heading tag"
+      },
+      {
+        "type": "select",
+        "id": "heading_size",
+        "options": [
+          { "value": "h3", "label": "Small" },
+          { "value": "h2", "label": "Medium" },
+          { "value": "h1", "label": "Large" }
+        ],
+        "default": "h2",
+        "label": "Heading size"
+      },
+      {
+        "type": "richtext",
+        "id": "text",
+        "label": "Subtitle",
+        "default": "<p><strong>The choice is yours.</strong> With our bundle builder, you can select any combination from our range of products. The easiest way to keep everyone happy.</p>"
+      },
+      {
+        "type": "select",
+        "id": "container_alignment",
+        "options": [
+          { "value": "left", "label": "Left" },
+          { "value": "center", "label": "Center" }
+        ],
+        "default": "left",
+        "label": "Heading alignment"
+      },
+      {
+        "type": "select",
+        "id": "highlight_style",
+        "label": "Highlight style",
+        "options": [
+          { "value": "gradient", "label": "Gradient" },
+          { "value": "solid", "label": "Solid" }
+        ],
+        "default": "gradient",
+        "info": "Applies to text wrapped in brackets [like this] in the heading and bundle label"
+      },
+      {
+        "type": "color",
+        "id": "highlight_color",
+        "label": "Highlight color (solid)",
+        "default": "#e85d04",
+        "visible_if": "{{ section.settings.highlight_style == 'solid' }}"
+      },
+      {
+        "type": "color",
+        "id": "highlight_gradient_start",
+        "label": "Gradient start color",
+        "default": "#e85d04",
+        "visible_if": "{{ section.settings.highlight_style == 'gradient' }}"
+      },
+      {
+        "type": "color",
+        "id": "highlight_gradient_end",
+        "label": "Gradient end color",
+        "default": "#f4c430",
+        "visible_if": "{{ section.settings.highlight_style == 'gradient' }}"
+      },
+      {
+        "type": "header",
+        "content": "Product cards"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_badge",
+        "label": "Show savings badge",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_vendor",
+        "label": "Show vendor",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_variant_selector",
+        "label": "Show variant selector",
+        "default": true,
+        "info": "When off, the first available variant is added to the bundle."
+      },
+      {
+        "type": "color",
+        "id": "badge_color",
+        "label": "Badge text color",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "badge_background",
+        "label": "Badge background",
+        "default": "#d24645"
+      },
+      {
+        "type": "color",
+        "id": "bundle_deals_regular_price_no_compare_color",
+        "label": "Regular price color (no compare)",
+        "default": "#000000",
+        "info": "Product cards and bundle list when the variant has no compare-at price and no strikethrough line."
+      },
+      {
+        "type": "color",
+        "id": "bundle_deals_regular_price_color",
+        "label": "Sale / current price color (with compare)",
+        "default": "#000000",
+        "info": "Current price next to a compare-at price on product cards and bundle list rows."
+      },
+      {
+        "type": "color",
+        "id": "bundle_deals_summary_price_color",
+        "label": "Summary price color",
+        "default": "#000000",
+        "info": "Subtotal, discount, total, and the price on the checkout button in the bundle summary."
+      },
+      {
+        "type": "color",
+        "id": "bundle_deals_compare_price_color",
+        "label": "Compare price color",
+        "default": "#d24645"
+      },
+      {
+        "type": "color",
+        "id": "bundle_deals_compare_strike_color",
+        "label": "Compare price strikethrough",
+        "default": "#d24645",
+        "info": "Diagonal line through compare-at prices when superscript pricing is enabled."
+      },
+      {
+        "type": "header",
+        "content": "Bundle summary"
+      },
+      {
+        "type": "color_scheme",
+        "id": "summary_color_scheme",
+        "label": "Summary color scheme",
+        "info": "Background and text for the bundle summary panel. Existing sections default to the secondary (product cards) scheme until you choose one here."
+      },
+      {
+        "type": "inline_richtext",
+        "id": "bundle_label",
+        "label": "Bundle label",
+        "default": "Your [bundle]"
+      },
+      {
+        "type": "inline_richtext",
+        "id": "summary_instruction",
+        "label": "Summary instruction",
+        "default": "Add [min] to [max] products to proceed and Save [%]",
+        "info": "Flat mode: [min], [max], [%]. Tiered mode: [min], [max], [tiers] (expands to each tier, e.g. 3+ items: 10% off)."
+      },
+      {
+        "type": "text",
+        "id": "checkout_disclaimer", 
+        "label": "Checkout disclaimer",
+        "default": "Discounts will be applied at checkout."
+      },
+      {
+        "type": "paragraph",
+        "content": "Tiered mode shows multi-tier bars (like cart free-shipping progress). Use {count} and {reward} in the tiered message."
+      },
+      {
+        "type": "text",
+        "id": "bundle_tier_progress_message",
+        "label": "Tiered — next reward message",
+        "default": "You are {count} items away from {reward}!",
+        "info": "{reward} is e.g. 20% off. Based on total item quantity in the bundle."
+      },
+      {
+        "type": "text",
+        "id": "bundle_tier_progress_success",
+        "label": "Tiered — all tiers unlocked",
+        "default": "You've unlocked every tier — best discount applied!"
+      },
+      {
+        "type": "text",
+        "id": "bundle_flat_progress_message",
+        "label": "Flat — need more products",
+        "default": "Add {count} more product(s) to complete your bundle.",
+        "info": "Shown under single progress bar (flat discount or tiered without tier blocks)."
+      },
+      {
+        "type": "text",
+        "id": "bundle_flat_progress_complete",
+        "label": "Flat — minimum met",
+        "default": "Minimum bundle size met. Add to cart when ready."
+      },
+      {
+        "type": "header",
+        "content": "Progress bars"
+      },
+      {
+        "type": "range",
+        "id": "tier_bar_height",
+        "label": "Bar height",
+        "min": 4,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "default": 6,
+        "info": "Applies to the single progress bar (flat discount) and to each tier segment (tiered mode)."
+      },
+      {
+        "type": "checkbox",
+        "id": "tier_bar_customize_colors",
+        "label": "Custom bar colors",
+        "default": false,
+        "info": "When off, track and fill follow the summary card text colors. Green when the bar is complete (flat minimum met or tier unlocked). Turn on to set your own colors."
+      },
+      {
+        "type": "color",
+        "id": "tier_bar_track_color",
+        "label": "Bar track (background)",
+        "alpha": true,
+        "default": "#0000001f",
+        "visible_if": "{{ section.settings.tier_bar_customize_colors }}"
+      },
+      {
+        "type": "color",
+        "id": "tier_bar_fill_color",
+        "label": "Bar fill (in progress)",
+        "default": "#1a1a1a",
+        "visible_if": "{{ section.settings.tier_bar_customize_colors }}"
+      },
+      {
+        "type": "color",
+        "id": "tier_bar_fill_qualified_color",
+        "label": "Bar fill (complete)",
+        "default": "#00a650",
+        "info": "Flat mode: when minimum bundle size is met. Tiered: when that tier’s threshold is reached.",
+        "visible_if": "{{ section.settings.tier_bar_customize_colors }}"
+      },
+      {
+        "type": "header",
+        "content": "Summary card styling"
+      },
+      {
+        "type": "select",
+        "id": "summary_heading_font_size",
+        "label": "Heading font size",
+        "options": [
+          { "value": "small", "label": "Small" },
+          { "value": "medium", "label": "Medium" },
+          { "value": "large", "label": "Large" }
+        ],
+        "default": "medium"
+      },
+      {
+        "type": "select",
+        "id": "summary_text_font_size",
+        "label": "Instruction text font size",
+        "options": [
+          { "value": "small", "label": "Small" },
+          { "value": "medium", "label": "Medium" },
+          { "value": "large", "label": "Large" }
+        ],
+        "default": "medium"
+      },
+      {
+        "type": "select",
+        "id": "summary_item_font_size",
+        "label": "Product item font size",
+        "options": [
+          { "value": "small", "label": "Small" },
+          { "value": "medium", "label": "Medium" },
+          { "value": "large", "label": "Large" }
+        ],
+        "default": "small"
+      },
+      {
+        "type": "select",
+        "id": "summary_price_font_size",
+        "label": "Item price font size",
+        "options": [
+          { "value": "small", "label": "Small" },
+          { "value": "medium", "label": "Medium" },
+          { "value": "large", "label": "Large" }
+        ],
+        "default": "small"
+      },
+      {
+        "type": "select",
+        "id": "summary_total_font_size",
+        "label": "Total font size",
+        "options": [
+          { "value": "small", "label": "Small" },
+          { "value": "medium", "label": "Medium" },
+          { "value": "large", "label": "Large" }
+        ],
+        "default": "medium"
+      },
+      {
+        "type": "select",
+        "id": "summary_disclaimer_font_size",
+        "label": "Disclaimer font size",
+        "options": [
+          { "value": "small", "label": "Small" },
+          { "value": "medium", "label": "Medium" },
+          { "value": "large", "label": "Large" }
+        ],
+        "default": "small"
+      },
+      
+      {
+        "type": "checkbox",
+        "id": "bundle_deals_customisation",
+        "label": "Enable summary card styling",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "bundle_deals_padding",
+        "label": "Summary card padding",
+        "default": 20,
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "border",
+        "options": [
+          { "value": "none", "label": "None" },
+          { "value": "solid", "label": "Solid" }
+        ],
+        "default": "solid",
+        "label": "Summary border"
+      },
+      {
+        "type": "range",
+        "id": "border_width",
+        "label": "Border width",
+        "default": 2,
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "border_radius",
+        "label": "Border radius",
+        "default": 12,
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "border_color_mode",
+        "options": [
+          { "value": "default", "label": "Default" },
+          { "value": "custom", "label": "Custom" }
+        ],
+        "default": "default",
+        "label": "Border color"
+      },
+      {
+        "type": "color",
+        "id": "border_color",
+        "label": "Custom border color",
+        "default": "#000000",
+        "visible_if": "{{ section.settings.border_color_mode == 'custom' }}"
+      },
+      {
+        "type": "header",
+        "content": "Section padding"
+      },
+      {
+        "type": "range",
+        "id": "padding-block-start",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Top",
+        "default": 36
+      },
+      {
+        "type": "range",
+        "id": "padding-block-end",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "Bottom",
+        "default": 36
+      }
+    ],
+    "blocks": [
+      {
+        "type": "bundle_tier",
+        "name": "Discount tier",
+        "settings": [
+          {
+            "type": "range",
+            "id": "min_items",
+            "label": "Minimum total items",
+            "min": 1,
+            "max": 100,
+            "step": 1,
+            "default": 3,
+            "info": "When bundle quantity reaches this total, this tier applies (and any higher tiers the customer also qualifies for)."
+          },
+          {
+            "type": "range",
+            "id": "discount_percent",
+            "label": "Discount (%)",
+            "min": 0,
+            "max": 90,
+            "step": 1,
+            "default": 10
+          },
+          {
+            "type": "text",
+            "id": "tier_label",
+            "label": "Tier label",
+            "default": "{quantity}+ · {discount}%",
+            "info": "Shown under the tier progress bar. Placeholders: {quantity} minimum items for this tier, {discount} discount percent."
+          },
+          {
+            "type": "text",
+            "id": "discount_code",
+            "label": "Discount code",
+            "info": "Optional. Uses section fallback code if empty. Create matching codes in Shopify Admin for each tier."
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Bundle deals",
+        "category": "Fomo & Upsell",
+        "settings": {
+          "discount_mode": "tiered",
+          "summary_instruction": "Add [min] to [max] products. [tiers]"
+        },
+        "blocks": [
+          {
+            "type": "bundle_tier",
+            "settings": { "min_items": 3, "discount_percent": 10 }
+          },
+          {
+            "type": "bundle_tier",
+            "settings": { "min_items": 5, "discount_percent": 20 }
+          }
+        ]
+      }
+    ],
+    "disabled_on": { "groups":["header", "footer"] }
+  }
+  {% endschema %}

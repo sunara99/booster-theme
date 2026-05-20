@@ -1,0 +1,74 @@
+{%- doc -%}
+  Outputs 1 only when collection is excluded (echo for capture). Picker, GID strings, textarea handles (comma-separated).
+{%- enddoc -%}
+{%- liquid
+  assign hidden = false
+
+  unless collection == blank
+    assign cid = collection.id | times: 1
+    assign ch = collection.handle | strip | downcase
+
+    assign raw_handles = settings.catalog_excluded_collection_handles_raw | default: '' | strip
+    if raw_handles != blank
+      assign handle_segments = raw_handles | split: ','
+      for seg in handle_segments
+        assign candidate = seg | strip | downcase
+        if candidate != blank and candidate == ch
+          assign hidden = true
+          break
+        endif
+      endfor
+    endif
+
+    if hidden == false and settings.catalog_excluded_collections != blank
+      assign excluded_by_id = settings.catalog_excluded_collections | where: 'id', collection.id
+      assign excluded_by_handle = settings.catalog_excluded_collections | where: 'handle', collection.handle
+      if excluded_by_id.size > 0 or excluded_by_handle.size > 0
+        assign hidden = true
+      else
+        for ec in settings.catalog_excluded_collections
+          if ec == blank
+            continue
+          endif
+
+          if ec.handle != blank
+            assign ech = ec.handle | strip | downcase
+            if ch != blank and ech == ch
+              assign hidden = true
+              break
+            endif
+            assign eid = ec.id | times: 1
+            if eid == cid and cid != 0
+              assign hidden = true
+              break
+            endif
+          else
+            assign raw_ref = ec | append: '' | strip
+            if raw_ref contains 'gid://shopify/Collection/'
+              assign tail = raw_ref | split: '/' | last | split: '?' | first | times: 1
+              if tail == cid and cid != 0
+                assign hidden = true
+                break
+              endif
+            else
+              assign maybe_num = raw_ref | times: 1
+              if maybe_num == cid and cid != 0 and raw_ref != blank
+                assign hidden = true
+                break
+              endif
+              assign maybe_h = raw_ref | downcase
+              if ch != blank and maybe_h == ch
+                assign hidden = true
+                break
+              endif
+            endif
+          endif
+        endfor
+      endif
+    endif
+  endunless
+
+  if hidden
+    echo '1'
+  endif
+%}

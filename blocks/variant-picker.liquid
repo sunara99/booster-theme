@@ -1,0 +1,660 @@
+
+
+{% liquid
+  assign product_resource = closest.product
+  if request.visual_preview_mode and product_resource == blank
+    assign product_resource = collections.all.products.first
+  endif
+-%}
+
+{% unless product_resource == blank %}
+  {% render 'variant-main-picker', product_resource: product_resource, block: block %}
+{% endunless %}
+
+{% schema %}
+{
+  "name": "t:names.product_variant_picker",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.resource_reference_product_variant_picker"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:content.edit_variants_in_theme_settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "option_style_per_option",
+      "label": "t:sections.lumin-variant-picker.per_option_style",
+      "info": "t:sections.lumin-variant-picker.per_option_style_info",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "variant_style",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "dropdowns",
+          "label": "t:options.dropdowns"
+        },
+        {
+          "value": "buttons",
+          "label": "t:options.buttons"
+        },
+        {
+          "value": "lumin",
+          "label": "t:sections.lumin-variant-picker.lumin_cards"
+        }
+      ],
+      "default": "buttons",
+      "visible_if": "{{ block.settings.option_style_per_option == false }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.per_option_style_header",
+      "visible_if": "{{ block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "select",
+      "id": "option_1_style",
+      "label": "t:sections.lumin-variant-picker.option_1_style",
+      "options": [
+        { "value": "dropdowns", "label": "t:options.dropdowns" },
+        { "value": "buttons", "label": "t:options.buttons" },
+        { "value": "lumin", "label": "t:sections.lumin-variant-picker.lumin_cards" }
+      ],
+      "default": "buttons",
+      "visible_if": "{{ block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "select",
+      "id": "option_2_style",
+      "label": "t:sections.lumin-variant-picker.option_2_style",
+      "options": [
+        { "value": "dropdowns", "label": "t:options.dropdowns" },
+        { "value": "buttons", "label": "t:options.buttons" },
+        { "value": "lumin", "label": "t:sections.lumin-variant-picker.lumin_cards" }
+      ],
+      "default": "buttons",
+      "visible_if": "{{ block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "select",
+      "id": "option_3_style",
+      "label": "t:sections.lumin-variant-picker.option_3_style",
+      "options": [
+        { "value": "dropdowns", "label": "t:options.dropdowns" },
+        { "value": "buttons", "label": "t:options.buttons" },
+        { "value": "lumin", "label": "t:sections.lumin-variant-picker.lumin_cards" }
+      ],
+      "default": "buttons",
+      "visible_if": "{{ block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_swatches",
+      "label": "t:settings.swatches",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant_name_with_swatches",
+      "label": "t:settings.show_variant_name_with_swatches",
+      "default": false,
+      "visible_if": "{{ block.settings.show_swatches and block.settings.variant_style == 'lumin' or block.settings.show_swatches and block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_card_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_option_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_label_padding_top",
+      "label": "t:sections.lumin-variant-picker.label_padding_top",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 26,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_label_padding_right",
+      "label": "t:sections.lumin-variant-picker.label_padding_right",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_label_padding_bottom",
+      "label": "t:sections.lumin-variant-picker.label_padding_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_label_padding_left",
+      "label": "t:sections.lumin-variant-picker.label_padding_left",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_title_text_size",
+      "label": "t:content.text",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 18,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "select",
+      "id": "lumin_variant_name_font_weight",
+      "label": "t:sections.lumin-variant-picker.variant_name_font_weight",
+      "options": [
+        { "value": "bold", "label": "t:sections.lumin-variant-picker.variant_name_font_weight_bold" },
+        { "value": "normal", "label": "t:sections.lumin-variant-picker.variant_name_font_weight_normal" }
+      ],
+      "default": "bold",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "lumin_show_prices",
+      "label": "t:sections.lumin-variant-picker.show_prices",
+      "default": true,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_price_text_size",  
+      "label": "t:sections.lumin-variant-picker.price_text_size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 14,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+   },
+    {
+      "type": "range",
+      "id": "lumin_compare_price_text_size",
+      "label": "t:sections.lumin-variant-picker.compare_price_text_size",
+      "min": 8,
+      "max": 25,
+      "step": 1,
+      "unit": "px",
+      "default": 14,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+   },
+    {
+      "type": "color",
+      "id": "lumin_price_color",
+      "label": "t:sections.lumin-variant-picker.price_color",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+   },
+    {
+      "type": "color",
+      "id": "lumin_compare_price_color",
+      "label": "t:sections.lumin-variant-picker.compare_price_color",
+      "default": "#e74c3c",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "select",
+      "id": "lumin_price_font_weight",
+      "label": "t:sections.lumin-variant-picker.price_font_weight",
+      "options": [
+        { "value": "bold", "label": "t:sections.lumin-variant-picker.variant_name_font_weight_bold" },
+        { "value": "normal", "label": "t:sections.lumin-variant-picker.variant_name_font_weight_normal" }
+      ],
+      "default": "bold",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_mobile_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_title_text_size_mobile",
+      "label": "t:sections.lumin-variant-picker.title_text_size_mobile",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_layout_settings"
+    },
+    {
+      "type": "range",
+      "id": "lumin_columns_per_row",
+      "label": "t:sections.lumin-variant-picker.columns_per_row_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_columns_per_row_mobile",
+      "label": "t:sections.lumin-variant-picker.columns_per_row_mobile",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.badge_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_badge_text",
+      "label": "t:sections.lumin-variant-picker.badge_text",
+      "info": "t:sections.lumin-variant-picker.badge_text_info",
+      "default": "Starter, Best Value, Popular",
+      "placeholder": "Starter, Best Value, Popular",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "color",
+      "id": "lumin_badge_color",
+      "label": "t:sections.lumin-variant-picker.badge_background_color",
+      "default": "#8B4513",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_badge_text_size",
+      "label": "t:sections.lumin-variant-picker.badge_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_radio_button_option_1",
+      "label": "t:sections.lumin-variant-picker.hide_radio_button",
+      "default": false,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_bottom_bar_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_bottom_bar_text",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_text",
+      "default": "Text 1, Text 2, Text 3",
+      "placeholder": "Text 1, Text 2, Text 3",
+      "info": "t:sections.lumin-variant-picker.bottom_bar_text_info",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "color",
+      "id": "lumin_bottom_bar_color",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_background_color",
+      "default": "#556B2F",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_bottom_bar_text_size",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 13,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_list_text_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_list_text",
+      "label": "t:sections.lumin-variant-picker.list_text",
+      "info": "t:sections.lumin-variant-picker.list_text_info",
+      "default": "• Feature 1\\n• Feature 2; • Feature A\\n• Feature B; • Feature X\\n• Feature Y",
+      "placeholder": "• Feature 1\\n• Feature 2; • Feature A\\n• Feature B; • Feature X\\n• Feature Y",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_1_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_badges_for_option_2",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_radio_button_option_2",
+      "label": "t:sections.lumin-variant-picker.hide_radio_button",
+      "default": false,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "lumin_option_2_custom_text",
+      "label": "t:sections.lumin-variant-picker.enable_custom_badges_for_option_2",
+      "default": false,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_badge_text_option_2",
+      "label": "t:sections.lumin-variant-picker.badge_text",
+      "info": "t:sections.lumin-variant-picker.badge_text_info",
+      "default": "New, Best, Popular",
+      "placeholder": "Starter, Best Value, Popular",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+      },
+    {
+      "type": "color",
+      "id": "lumin_badge_color_option_2",
+      "label": "t:sections.lumin-variant-picker.badge_background_color",
+      "default": "#8B4513",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_badge_text_size_option_2",
+      "label": "t:sections.lumin-variant-picker.badge_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_bottom_bar_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_bottom_bar_text_option_2",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_text",
+      "default": "Text 1, Text 2, Text 3",
+      "placeholder": "Text 1, Text 2, Text 3",
+      "info": "t:sections.lumin-variant-picker.bottom_bar_text_info",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "color",
+      "id": "lumin_bottom_bar_color_option_2",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_background_color",
+      "default": "#556B2F",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_bottom_bar_text_size_option_2",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 13,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_list_text_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_list_text_option_2",
+      "label": "t:sections.lumin-variant-picker.list_text",
+      "info": "t:sections.lumin-variant-picker.list_text_info",
+      "default": "• Feature 1\\n• Feature 2; • Feature A\\n• Feature B",
+      "placeholder": "• Feature 1\\n• Feature 2; • Feature A\\n• Feature B",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_2_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_badges_for_option_3",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_radio_button_option_3",
+      "label": "t:sections.lumin-variant-picker.hide_radio_button",
+      "default": false,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "lumin_option_3_custom_text",
+      "label": "t:sections.lumin-variant-picker.enable_custom_badges_for_option_3",
+      "default": false,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_badge_text_option_3",
+      "label": "t:sections.lumin-variant-picker.badge_text",
+      "info": "t:sections.lumin-variant-picker.badge_text_info",
+      "default": "Starter, Best Value, Popular",
+      "placeholder": "Starter, Best Value, Popular",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "color",
+      "id": "lumin_badge_color_option_3",
+      "label": "t:sections.lumin-variant-picker.badge_background_color",
+      "default": "#8B4513",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_badge_text_size_option_3",
+      "label": "t:sections.lumin-variant-picker.badge_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_bottom_bar_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_bottom_bar_text_option_3",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_text",
+      "default": "Text 1, Text 2, Text 3",
+      "placeholder": "Text 1, Text 2, Text 3",
+      "info": "t:sections.lumin-variant-picker.bottom_bar_text_info",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "color",
+      "id": "lumin_bottom_bar_color_option_3",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_background_color",
+      "default": "#556B2F",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_bottom_bar_text_size_option_3",
+      "label": "t:sections.lumin-variant-picker.bottom_bar_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 13,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_list_text_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "textarea",
+      "id": "lumin_list_text_option_3",
+      "label": "t:sections.lumin-variant-picker.list_text",
+      "info": "t:sections.lumin-variant-picker.list_text_info",
+      "default": "• Feature 1\\n• Feature 2; • Feature A\\n• Feature B",
+      "placeholder": "• Feature 1\\n• Feature 2; • Feature A\\n• Feature B",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option and block.settings.option_3_style == 'lumin' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.lumin-variant-picker.lumin_list_text_settings",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "text_alignment",
+      "id": "text_alignment_list_text",
+      "label": "t:sections.lumin-variant-picker.list_text_alignment",
+      "default": "left",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "range",
+      "id": "lumin_list_text_size",
+      "label": "t:sections.lumin-variant-picker.list_text_size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}" 
+    },
+    {
+      "type": "range",
+      "id": "lumin_list_text_size_mobile",
+      "label": "t:sections.lumin-variant-picker.list_text_size_mobile",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 10,
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "color",
+      "id": "lumin_list_text_color",
+      "label": "t:sections.lumin-variant-picker.list_text_color",
+      "default": "#666666",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "color",
+      "id": "lumin_list_text_color_checked",
+      "label": "t:sections.lumin-variant-picker.list_text_color_checked",
+      "default": "#666666",
+      "visible_if": "{{ block.settings.variant_style == 'lumin' or block.settings.option_style_per_option }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_variant_picker",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

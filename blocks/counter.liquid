@@ -1,0 +1,384 @@
+
+{% assign block_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .counter-block-{{ block_id }} {
+    display: block;
+    {%- if block.settings.width_mode == 'fit-content' -%}
+    width: fit-content;
+    {%- elsif block.settings.width_mode == 'fill' -%}
+    width: 100%;
+    {%- else -%}
+    width: {{ block.settings.desktop_width_percent }}%;
+    {%- endif -%}
+    max-width: 100%;
+    padding: {{ block.settings.padding }}px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .counter-block__label-{{ block_id }} {
+    font-size: {{ block.settings.label_size }}px;
+    color: {{ block.settings.label_color }};
+    margin-bottom: {{ block.settings.spacing }}px;
+    display: block;
+  }
+
+  .counter-block__number-{{ block_id }} {
+    font-size: {{ block.settings.number_size }}px;
+    color: {{ block.settings.number_color }};
+    font-weight: {{ block.settings.number_weight }};
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .counter-block__suffix-{{ block_id }} {
+    font-size: {{ block.settings.suffix_size }}px;
+    color: {{ block.settings.suffix_color }};
+    margin-left: 4px;
+    display: block;
+  }
+
+  @media screen and (max-width: 749px) {
+    .counter-block-{{ block_id }} {
+      {%- if block.settings.width_mode == 'fit-content' -%}
+      width: fit-content;
+      {%- elsif block.settings.width_mode == 'fill' -%}
+      width: 100%;
+      {%- else -%}
+      width: {{ block.settings.mobile_width_percent }}%;
+      {%- endif -%}
+    }
+
+    .counter-block__number-{{ block_id }} {
+      font-size: calc({{ block.settings.number_size }}px * 0.7);
+    }
+
+    .counter-block__label-{{ block_id }} {
+      font-size: calc({{ block.settings.label_size }}px * 0.9);
+    }
+  }
+{% endstyle %}
+
+<animated-counter-{{ block_id }}
+  class="counter-block-{{ block_id }}"
+  data-target="{{ block.settings.target_number }}"
+  data-duration="{{ block.settings.animation_duration }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.label != blank %}
+    <span class="counter-block__label-{{ block_id }}">{{ block.settings.label }}</span>
+  {% endif %}
+  <div class="counter-block__number-{{ block_id }}">
+    <span class="counter-value-{{ block_id }}">0</span>
+    {% if block.settings.suffix != blank %}
+      <span class="counter-block__suffix-{{ block_id }}">{{ block.settings.suffix }}</span>
+    {% endif %}
+  </div>
+</animated-counter-{{ block_id }}>
+
+<script>
+  (function() {
+    class AnimatedCounter{{ block_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.hasAnimated = false;
+        this.observer = null;
+      }
+
+      connectedCallback() {
+        this.targetNumber = parseFloat(this.dataset.target) || 0;
+        this.duration = parseFloat(this.dataset.duration) || 2000;
+        this.counterElement = this.querySelector('.counter-value-{{ block_id }}');
+
+        this.setupIntersectionObserver();
+      }
+
+      getFinalNumberText() {
+        const n = this.targetNumber;
+        if (n % 1 !== 0) {
+          return n.toFixed(1);
+        }
+        return String(Math.floor(n));
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0.3
+        };
+
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && !this.hasAnimated) {
+              this.hasAnimated = true;
+              this.animateCounter();
+            }
+          });
+        }, options);
+
+        this.observer.observe(this);
+      }
+
+      animateCounter() {
+        const startTime = performance.now();
+        const startValue = 0;
+        const endValue = this.targetNumber;
+        const hasDecimal = endValue % 1 !== 0;
+
+        const animate = (currentTime) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / this.duration, 1);
+
+          const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+          const currentValue = startValue + (endValue - startValue) * easeOutQuart;
+
+          if (hasDecimal) {
+            this.counterElement.textContent = currentValue.toFixed(1);
+          } else {
+            this.counterElement.textContent = String(Math.floor(currentValue));
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            this.counterElement.textContent = this.getFinalNumberText();
+          }
+        };
+
+        requestAnimationFrame(animate);
+      }
+
+      disconnectedCallback() {
+        if (this.observer) {
+          this.observer.disconnect();
+        }
+      }
+    }
+
+    customElements.define('animated-counter-{{ block_id }}', AnimatedCounter{{ block_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Animated counter",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Counter"
+    },
+    {
+      "type": "text",
+      "id": "target_number",
+      "label": "Target number",
+      "default": "89"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "suffix",
+      "label": "Suffix"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Animation duration",
+      "min": 500,
+      "max": 5000,
+      "step": 100,
+      "unit": "ms",
+      "default": 2000
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },  {
+      "type": "select",
+      "id": "width_mode",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "t:options.fit_content"
+        },
+        {
+          "value": "fill",
+          "label": "t:options.fill"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "fill"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 20,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.width_mode == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "mobile_width_percent", 
+      "label": "Mobile width",
+      "min": 20,
+      "max": 100,
+      "step": 2,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.width_mode == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "spacing",
+      "label": "Spacing between label and number",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Number"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label"
+    },
+    {
+      "type": "color",
+      "id": "suffix_color",
+      "label": "Suffix"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "number_size",
+      "label": "Number size",
+      "min": 20,
+      "max": 120,
+      "step": 1,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "select",
+      "id": "number_weight",
+      "label": "Number weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Label size",
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "suffix_size",
+      "label": "Suffix size",
+      "min": 10,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Animated counter"
+    }
+  ]
+}
+{% endschema %}

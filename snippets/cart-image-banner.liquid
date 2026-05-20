@@ -1,0 +1,155 @@
+{%- doc -%}
+  Renders an optional image banner in the cart drawer and/or cart page.
+  @param {string} [context] - `'drawer'` or `'page'` (required from callers).
+  Theme setting `cart_image_banner_stack_order` (`1`–`4`) controls this banner's position relative to the cart countdown,
+  promo banner, and free shipping bar (see Cart image banner → “Position among cart messages”).
+{%- enddoc -%}
+
+{%- liquid
+  assign banner_context = context | default: 'drawer'
+  assign show_drawer = true
+  if settings.cart_image_banner_show_in_drawer == false
+    assign show_drawer = false
+  endif
+  assign show_page = true
+  if settings.cart_image_banner_show_on_cart_page == false
+    assign show_page = false
+  endif
+  assign use_page_image = false
+  if settings.cart_image_banner_use_cart_page_image
+    assign use_page_image = true
+  endif
+
+  assign skip_banner = true
+  if settings.show_cart_image_banner
+    if banner_context == 'drawer' and show_drawer
+      assign skip_banner = false
+    endif
+    if banner_context == 'page' and show_page
+      assign skip_banner = false
+    endif
+  endif
+
+  assign banner_image = settings.cart_image_banner_image
+  if banner_context == 'page' and use_page_image and settings.cart_image_banner_image_cart_page != blank
+    assign banner_image = settings.cart_image_banner_image_cart_page
+  endif
+
+  if banner_image == blank
+    assign skip_banner = true
+  endif
+
+  assign content_justify = 'center'
+  case settings.cart_image_banner_alignment
+    when 'left'
+      assign content_justify = 'flex-start'
+    when 'right'
+      assign content_justify = 'flex-end'
+    else
+      assign content_justify = 'center'
+  endcase
+
+  assign banner_max_width = settings.cart_image_banner_image_max_width | default: 100
+  assign border_radius = settings.cart_image_banner_border_radius | default: 0
+  assign pad_block = settings.cart_image_banner_padding_block | default: 8
+  assign pad_inline = settings.cart_image_banner_padding_inline | default: 20
+  assign top_margin = settings.cart_image_banner_top_margin | default: 0
+  assign bottom_margin = settings.cart_image_banner_bottom_margin | default: 0
+
+  assign margin_styles = ''
+  assign top_margin_num = top_margin | plus: 0
+  assign bottom_margin_num = bottom_margin | plus: 0
+  if top_margin_num > 0
+    assign margin_styles = margin_styles | append: 'margin-top: ' | append: top_margin_num | append: 'px;'
+  endif
+  if bottom_margin_num > 0
+    assign margin_styles = margin_styles | append: 'margin-bottom: ' | append: bottom_margin_num | append: 'px;'
+  endif
+
+  assign padding_style = 'padding: ' | append: pad_block | append: 'px ' | append: pad_inline | append: 'px ' | append: pad_block | append: 'px ' | append: pad_inline | append: 'px;'
+-%}
+
+{% unless skip_banner %}
+  <div
+    class="cart-image-banner"
+    style="--cart-image-banner-justify: {{ content_justify }}; --cart-image-banner-max-width: {{ banner_max_width }}%; --cart-image-banner-radius: {{ border_radius }}px; {{ padding_style }} {{ margin_styles }}"
+  >
+    <div class="cart-image-banner__inner">
+      {% if settings.cart_image_banner_link != blank %}
+        <a
+          href="{{ settings.cart_image_banner_link }}"
+          class="cart-image-banner__link"
+        >
+          {{
+            banner_image
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              class: 'cart-image-banner__img',
+              sizes: '(min-width: 750px) min(560px, 90vw), 100vw',
+              widths: '360, 540, 720, 960, 1200',
+              alt: banner_image.alt
+          }}
+        </a>
+      {% else %}
+        {{
+          banner_image
+          | image_url: width: 1200
+          | image_tag:
+            loading: 'lazy',
+            class: 'cart-image-banner__img',
+            sizes: '(min-width: 750px) min(560px, 90vw), 100vw',
+            widths: '360, 540, 720, 960, 1200',
+            alt: banner_image.alt
+        }}
+      {% endif %}
+    </div>
+  </div>
+{% endunless %}
+
+{% stylesheet %}
+  .cart-image-banner {
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .cart-image-banner__inner {
+    display: flex;
+    justify-content: var(--cart-image-banner-justify, center);
+    width: 100%;
+  }
+
+  .cart-image-banner__link {
+    display: block;
+    width: min(100%, var(--cart-image-banner-max-width, 100%));
+    max-width: 100%;
+    line-height: 0;
+  }
+
+  .cart-image-banner__img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--cart-image-banner-radius, 0);
+  }
+
+  .cart-image-banner__inner > .cart-image-banner__img {
+    width: min(100%, var(--cart-image-banner-max-width, 100%));
+    max-width: 100%;
+  }
+
+  .cart-image-banner {
+    animation: cart-image-banner-in 0.3s ease-out;
+  }
+
+  @keyframes cart-image-banner-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+{% endstylesheet %}

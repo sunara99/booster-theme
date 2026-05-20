@@ -1,0 +1,212 @@
+{%- doc -%}
+  Renders a promotional banner for the cart drawer.
+  
+  @param {string} [text] - The banner text to display
+  @param {string} [highlight_text] - Text within the banner to highlight in bold (comma-separated for multiple highlights)
+  @param {string} [bg_color] - Background color of the banner
+  @param {string} [text_color] - Text color of the banner
+  @param {string} [highlight_color] - Color of the highlighted text
+  @param {boolean} [show_top_border] - Whether to show top border
+  @param {boolean} [show_bottom_border] - Whether to show bottom border
+  @param {string} [border_color] - Color of the borders
+  @param {number} [top_margin] - Top margin in pixels
+  @param {number} [bottom_margin] - Bottom margin in pixels
+  @param {number} [font_size] - Font size in pixels
+{%- enddoc -%}
+
+{%- liquid
+  assign input_type = settings.cart_promo_banner_input_type | default: 'richtext'
+  unless input_type == 'richtext' or input_type == 'liquid'
+    assign input_type = 'richtext'
+  endunless
+  assign banner_text = text | default: settings.cart_promo_banner_text
+  assign banner_liquid = settings.cart_promo_banner_liquid
+  assign highlight_text = highlight_text | default: settings.cart_promo_banner_highlight_text
+  assign bg_color = bg_color | default: settings.cart_promo_banner_bg_color
+  assign use_gradient = settings.cart_promo_banner_use_gradient | default: false
+  assign gradient_color = settings.cart_promo_banner_gradient_color | default: '#ffffff'
+  assign gradient_direction = settings.cart_promo_banner_gradient_direction | default: 'to right'
+  assign text_color = text_color | default: settings.cart_promo_banner_text_color
+  assign highlight_color = highlight_color | default: settings.cart_promo_banner_highlight_color
+  assign show_top_border = show_top_border | default: settings.cart_promo_banner_show_top_border
+  assign show_bottom_border = show_bottom_border | default: settings.cart_promo_banner_show_bottom_border
+  assign border_color = border_color | default: settings.cart_promo_banner_border_color
+  assign top_margin = top_margin | default: settings.cart_promo_banner_top_margin | default: 0
+  assign bottom_margin = bottom_margin | default: settings.cart_promo_banner_bottom_margin | default: 0
+  assign font_size = font_size | default: settings.cart_promo_banner_font_size | default: 14
+
+  # Check if we should use highlighting (only for richtext)
+  assign use_highlighting = false
+  if input_type == 'richtext' and highlight_text != blank and highlight_text != ''
+    assign use_highlighting = true
+  endif
+
+  # If using highlighting, replace all occurrences with highlighted version
+  if use_highlighting
+    # Keep HTML formatting intact, only highlight plain text content
+    assign highlighted_text = banner_text
+
+    # Parse comma-separated highlight texts
+    assign highlight_texts = highlight_text | split: ','
+
+    # Process each highlight text
+    for highlight_item in highlight_texts
+      assign current_highlight = highlight_item | strip
+      if current_highlight != blank
+        # Use regex-style replacement to preserve HTML structure
+        assign search_pattern = current_highlight
+        assign replace_pattern = '<strong class="cart-promo-banner__highlight">' | append: current_highlight | append: '</strong>'
+
+        # Replace all occurrences while preserving HTML tags
+        assign highlighted_text = highlighted_text | replace: search_pattern, replace_pattern
+      endif
+    endfor
+  endif
+
+  # Build border styles
+  assign border_styles = ''
+  if show_top_border
+    assign border_styles = border_styles | append: 'border-top: 1px solid ' | append: border_color | append: ';'
+  endif
+  if show_bottom_border
+    assign border_styles = border_styles | append: 'border-bottom: 1px solid ' | append: border_color | append: ';'
+  endif
+
+  # Build margin styles
+  assign margin_styles = ''
+  assign top_margin_num = top_margin | plus: 0
+  assign bottom_margin_num = bottom_margin | plus: 0
+  if top_margin_num > 0
+    assign margin_styles = margin_styles | append: 'margin-top: ' | append: top_margin_num | append: 'px;'
+  endif
+  if bottom_margin_num > 0
+    assign margin_styles = margin_styles | append: 'margin-bottom: ' | append: bottom_margin_num | append: 'px;'
+  endif
+
+  # Build background style
+  assign background_style = ''
+  if use_gradient
+    assign background_style = 'background: linear-gradient(' | append: gradient_direction | append: ', ' | append: bg_color | append: ', ' | append: gradient_color | append: ');'
+  else
+    assign background_style = 'background-color: ' | append: bg_color | append: ';'
+  endif
+
+  assign pad_top = settings.cart_promo_banner_padding_top | default: 8
+  assign pad_bottom = settings.cart_promo_banner_padding_bottom | default: 8
+  assign pad_left = settings.cart_promo_banner_padding_left | default: 20
+  assign pad_right = settings.cart_promo_banner_padding_right | default: 20
+  assign padding_style = 'padding: ' | append: pad_top | append: 'px ' | append: pad_right | append: 'px ' | append: pad_bottom | append: 'px ' | append: pad_left | append: 'px;'
+-%}
+
+<div class="cart-promo-banner"
+     style="--banner-bg-color: {{ bg_color }}; --banner-text-color: {{ text_color }}; --banner-highlight-color: {{ highlight_color }}; --banner-font-size: {{ font_size }}px; {{ padding_style }} {{ background_style }} {{ border_styles }} {{ margin_styles }}">
+  <div class="cart-promo-banner__content">
+    {% if input_type == 'liquid' and banner_liquid != blank %}
+      <div class="cart-promo-banner__liquid">
+        {{ banner_liquid }}
+      </div>
+    {% else %}
+      <div class="cart-promo-banner__text">
+        {% if use_highlighting %}
+          {{ highlighted_text }}
+        {% else %}
+          {{ banner_text }}
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .cart-promo-banner {
+    /* Padding and background via inline styles */
+    box-sizing: border-box;
+  }
+
+  .cart-promo-banner__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-xs);
+    text-align: {{ settings.cart_promo_banner_text_alignment }};
+    border-radius: 12px;
+    padding: 0;
+    min-height: 30px;
+  }
+
+  .cart-promo-banner__text {
+    color: var(--banner-text-color);
+    font-size: var(--banner-font-size, 14px);
+    font-weight: var(--font-weight-medium, 500);
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .cart-promo-banner__liquid {
+    flex: 1;
+    width: 100%;
+  }
+
+  .cart-promo-banner__text p {
+    margin: 0;
+    display: block;
+  }
+
+  .cart-promo-banner__text br {
+    display: block;
+    margin: 0.25em 0;
+  }
+
+  .cart-promo-banner__text strong,
+  .cart-promo-banner__text b {
+    font-weight: var(--font-weight-bold, 700);
+  }
+
+  .cart-promo-banner__text em,
+  .cart-promo-banner__text i {
+    font-style: italic;
+  }
+
+  .cart-promo-banner__highlight {
+    color: var(--banner-highlight-color);
+    font-weight: var(--font-weight-bold, 700);
+  }
+
+  .cart-promo-banner__star {
+    font-size: 1.2em;
+    line-height: 1;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  /* Responsive adjustments */
+  @media screen and (max-width: 749px) {
+    .cart-promo-banner__content {
+      min-height: 44px;
+    }
+
+    .cart-promo-banner__text {
+      font-size: calc(var(--banner-font-size, 14px) * 0.9);
+    }
+
+    .cart-promo-banner__star {
+      font-size: 1.1em;
+    }
+  }
+
+  /* Animation for subtle entrance */
+  .cart-promo-banner {
+    animation: slideInFromTop 0.3s ease-out;
+  }
+
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

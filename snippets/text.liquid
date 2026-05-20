@@ -1,0 +1,603 @@
+{%- doc -%}
+  Intended for use in a block similar to the text block.
+
+  @param {string} [class] - custom class to define in addition to text-block classes
+  @param {string} [fallback_text] - fallback text if settings.text does not exist
+  @param {object} [block] - The block object
+  @param {string} [width] - width of the text block
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign text_truncation_enabled = false
+  if block != blank and block_settings.enable_text_truncation
+    assign text_truncation_enabled = true
+  endif
+  assign plain_text = block_settings.text | strip_newlines | strip_html | strip
+  assign text_width = width | default: block_settings.width
+
+  if block_settings.font_size contains 'heading-lg' or block_settings.font_size contains 'heading-xl'
+    assign type = 'display'
+  elsif block_settings.font_size contains 'heading'
+    assign type = 'heading'
+  else
+    assign type = 'body'
+  endif
+  if block_settings.type_preset == 'rte' or block_settings.type_preset == 'paragraph'
+    assign is_rte = true
+  endif
+
+  capture text_block_classes
+    if text_width == '100%'
+      echo 'text-block--align-' | append: block_settings.alignment
+      if block_settings.max_width == 'none'
+        echo ' text-block--full-width '
+      endif
+    endif
+    if block_settings.type_preset == 'custom'
+      echo ' custom-typography '
+      if block_settings.font_size != ''
+        echo ' custom-font-size '
+      endif
+      if block_settings.enable_bold_typography_font and block_settings.bold_typography_font != blank
+        echo ' text-block--emphasis-font-bold '
+      endif
+      if block_settings.enable_italic_typography_font and block_settings.italic_typography_font != blank
+        echo ' text-block--emphasis-font-italic '
+      endif
+    endif
+    if block_settings.type_preset != 'rte'
+      if block_settings.color != '' or block_settings.color_mode == 'custom'
+        echo ' custom-color '
+      endif
+      if block_settings.color_mode == 'custom' and block_settings.custom_color_style == 'gradient'
+        echo ' custom-color-gradient '
+      endif
+      if block_settings.color_mode == 'custom' and block_settings.custom_color_background_bold != blank
+        assign emphasis_bg_bold_alpha = block_settings.custom_color_background_bold | color_extract: 'alpha'
+        if emphasis_bg_bold_alpha > 0
+          echo ' text-block--emphasis-bg-bold '
+        endif
+      endif
+      if block_settings.color_mode == 'custom' and block_settings.custom_color_background_italic != blank
+        assign emphasis_bg_italic_alpha = block_settings.custom_color_background_italic | color_extract: 'alpha'
+        if emphasis_bg_italic_alpha > 0
+          echo ' text-block--emphasis-bg-italic '
+        endif
+      endif
+      if block_settings.color_mode == 'custom' and block_settings.custom_color_background_underline != blank
+        assign emphasis_bg_underline_alpha = block_settings.custom_color_background_underline | color_extract: 'alpha'
+        if emphasis_bg_underline_alpha > 0
+          echo ' text-block--emphasis-bg-underline '
+        endif
+      endif
+    endif
+    if block_settings.background
+      echo ' text-block--background '
+    endif
+    if is_rte
+      echo ' rte '
+    endif
+    if text_truncation_enabled
+      echo ' text-block--truncation-enabled '
+    endif
+  endcapture
+%}
+
+{%- if block_settings.type_preset == 'custom' -%}
+  {%- comment -%} Preload non-system font files so the browser fetches them before/while parsing inline @font-face (matches snippets/fonts.liquid for theme fonts). {%- endcomment -%}
+  {%- if block_settings.font == 'custom_font' and block_settings.custom_typography_font != blank -%}
+    {%- unless block_settings.custom_typography_font.system? -%}
+      {{ block_settings.custom_typography_font | font_url | preload_tag: as: 'font' }}
+    {%- endunless -%}
+  {%- endif -%}
+  {%- if block_settings.enable_bold_typography_font and block_settings.bold_typography_font != blank -%}
+    {%- unless block_settings.bold_typography_font.system? -%}
+      {{ block_settings.bold_typography_font | font_url | preload_tag: as: 'font' }}
+    {%- endunless -%}
+  {%- endif -%}
+  {%- if block_settings.enable_italic_typography_font and block_settings.italic_typography_font != blank -%}
+    {%- unless block_settings.italic_typography_font.system? -%}
+      {{ block_settings.italic_typography_font | font_url | preload_tag: as: 'font' }}
+    {%- endunless -%}
+  {%- endif -%}
+
+  {%- capture text_block_font_face_css -%}
+    {%- render 'text-block-font-faces', block_settings: block_settings -%}
+  {%- endcapture -%}
+  {%- if text_block_font_face_css != blank -%}
+    <style>
+      {{ text_block_font_face_css }}
+    </style>
+  {%- endif -%}
+{%- endif -%}
+
+{% capture attributes %}
+  class="{{ class }} spacing-style text-block text-block--{{ block.id }} {{ block_settings.type_preset }}
+    {{ text_block_classes }}
+  "
+
+  style="
+    {% render 'spacing-padding', settings: block_settings %}
+    {% render 'typography-style', settings: block_settings %}
+    --width: {{ text_width }};
+    --max-width: var(--max-width--{{ type }}-{{ block_settings.max_width }});
+    {% if text_width == "100%" %}
+      --text-align: {{ block_settings.alignment }};
+    {% endif %}
+    {% if block_settings.background %}
+      --text-background-color: {{ block_settings.background_color | default: 'rgb(255 255 255 / 1.0)' }};
+      --text-corner-radius: {{ block_settings.corner_radius }}px;
+      --text-padding: max(var(--padding-2xs), calc((var(--text-corner-radius) + var(--padding-xs)) * (1 - cos(45deg))));
+    {% endif %}
+    {% if text_truncation_enabled %}
+      --text-truncate-lines: {{ block_settings.truncate_lines | default: 3 }};
+    {% endif %}
+  "
+
+  {{ block.shopify_attributes }}
+{% endcapture %}
+
+{% liquid
+  # {{ attributes }} must be on the immediate HTML parent of the text to preserve
+  # the click-to-edit connection in the theme editor. Any break between the text,
+  # including if-statements, will break the connection.
+
+  assign element = 'div'
+  if is_rte
+    assign element = 'rte-formatter'
+  endif
+%}
+
+{% if fallback_text != blank and plain_text == blank %}
+  <div {{ attributes | strip_newlines | strip }}>
+    {% if block_settings.ancher_id != blank %}
+      <span class="text-block__ancher-target" id="{{ block_settings.ancher_id | strip | escape }}" aria-hidden="true"></span>
+    {% endif %}
+    {{ fallback_text }}
+  </div>
+{% elsif plain_text != blank %}
+  {% if text_truncation_enabled %}
+    <{{ element }} {{ attributes | strip_newlines | strip }}>
+      {% if block_settings.ancher_id != blank %}
+        <span class="text-block__ancher-target" id="{{ block_settings.ancher_id | strip | escape }}" aria-hidden="true"></span>
+      {% endif %}
+      <div class="text-block__truncate-clip" id="text-truncate-clip-{{ block.id }}">
+        <div
+          class="text-block__truncate-content"
+          id="text-truncate-content-{{ block.id }}"
+        >
+          {{ block.settings.text }}
+        </div>
+      </div>
+      <button
+        type="button"
+        class="text-block__truncate-toggle"
+        aria-expanded="false"
+        aria-controls="text-truncate-content-{{ block.id }}"
+        hidden
+      >
+        <span class="text-block__truncate-more">{{ block_settings.truncate_view_more_label | default: 'View more' }}</span>
+        <span class="text-block__truncate-less">{{ block_settings.truncate_view_less_label | default: 'View less' }}</span>
+      </button>
+    </{{ element }}>
+    <script>
+      (function () {
+        var clip = document.getElementById('text-truncate-clip-{{ block.id }}');
+        if (!clip) return;
+        var root = clip.closest('.text-block');
+        if (!root) return;
+        var content = clip.querySelector('.text-block__truncate-content');
+        var btn = root.querySelector('.text-block__truncate-toggle');
+        if (!content || !btn) return;
+
+        var reduceMotion =
+          window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function afterTransition(el, fn) {
+          if (reduceMotion) {
+            fn();
+            return;
+          }
+          var finished = false;
+          var run = function () {
+            if (finished) return;
+            finished = true;
+            el.removeEventListener('transitionend', onEnd);
+            window.clearTimeout(fallback);
+            fn();
+          };
+          var onEnd = function (e) {
+            if (e.propertyName === 'height') run();
+          };
+          el.addEventListener('transitionend', onEnd);
+          var fallback = window.setTimeout(run, 600);
+        }
+
+        function expand() {
+          if (reduceMotion) {
+            root.classList.add('text-block--truncate-expanded');
+            btn.setAttribute('aria-expanded', 'true');
+            clip.style.height = '';
+            return;
+          }
+          var h0 = clip.offsetHeight;
+          clip.style.height = h0 + 'px';
+          root.classList.add('text-block--truncate-expanded');
+          btn.setAttribute('aria-expanded', 'true');
+          var h1 = content.scrollHeight;
+          void clip.offsetHeight;
+          clip.style.height = h1 + 'px';
+          afterTransition(clip, function () {
+            clip.style.height = '';
+          });
+        }
+
+        function collapse() {
+          btn.setAttribute('aria-expanded', 'false');
+          if (reduceMotion) {
+            root.classList.remove('text-block--truncate-expanded');
+            clip.style.height = '';
+            return;
+          }
+          var h1 = clip.offsetHeight;
+          clip.style.height = h1 + 'px';
+          void clip.offsetHeight;
+          root.classList.remove('text-block--truncate-expanded');
+          var h0 = content.offsetHeight;
+          clip.style.height = h0 + 'px';
+          afterTransition(clip, function () {
+            clip.style.height = '';
+          });
+        }
+
+        requestAnimationFrame(function () {
+          if (content.scrollHeight <= content.clientHeight + 1) {
+            btn.hidden = true;
+            root.classList.add('text-block--truncate-no-overflow');
+            return;
+          }
+          btn.hidden = false;
+          btn.addEventListener('click', function () {
+            if (root.classList.contains('text-block--truncate-expanded')) {
+              collapse();
+            } else {
+              expand();
+            }
+          });
+        });
+      })();
+    </script>
+  {% else %}
+    <{{ element }} {{ attributes | strip_newlines | strip }}>
+      {% if block_settings.ancher_id != blank %}
+        <span class="text-block__ancher-target" id="{{ block_settings.ancher_id | strip | escape }}" aria-hidden="true"></span>
+      {% endif %}
+      {{ block.settings.text }}
+    </{{ element }}>
+  {% endif %}
+{% endif %}
+
+{% stylesheet %}
+  :root {
+    --text-align-default: left;
+  }
+
+  [style*='--horizontal-alignment: center'] .text-block {
+    --text-align-default: center;
+  }
+
+  [style*='--horizontal-alignment: flex-end'] .text-block {
+    --text-align-default: right;
+  }
+
+  [style*='--horizontal-alignment: flex-start'] > .text-block {
+    --text-align-default: left;
+  }
+
+  [style*='--horizontal-alignment: center'] > .text-block {
+    --text-align-default: center;
+  }
+
+  [style*='--horizontal-alignment: flex-end'] > .text-block {
+    --text-align-default: right;
+  }
+
+  .text-block__ancher-target {
+    display: block;
+    height: 0;
+    overflow: hidden;
+    scroll-margin-top: calc(var(--header-group-height, 0px) + var(--scroll-margin, 12px));
+    pointer-events: none;
+  }
+
+  .text-block {
+    width: var(--width);
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: var(--horizontal-alignment);
+  }
+
+  @media screen and (max-width: 749px) {
+    .text-block {
+      align-items: var(--horizontal-alignment-mobile, var(--horizontal-alignment));
+    }
+
+    [style*='--horizontal-alignment-mobile: center'] .text-block,
+    [style*='--horizontal-alignment-mobile: center'] > .text-block {
+      --text-align-default: center;
+    }
+
+    [style*='--horizontal-alignment-mobile: flex-end'] .text-block,
+    [style*='--horizontal-alignment-mobile: flex-end'] > .text-block {
+      --text-align-default: right;
+    }
+
+    [style*='--horizontal-alignment-mobile: flex-start'] .text-block,
+    [style*='--horizontal-alignment-mobile: flex-start'] > .text-block {
+      --text-align-default: left;
+    }
+  }
+
+  .text-block > * {
+    width: var(--width);
+    max-inline-size: min(100%, var(--max-width, 100%));
+    text-align: var(--text-align, var(--text-align-default));
+    text-wrap: var(--text-wrap);
+  }
+
+  .text-block:not(.text-block--full-width).rte,
+  .text-block:not(.text-block--full-width).paragraph {
+    /* Safari doesn't support pretty, so fallback to balance */
+    text-wrap: balance;
+    text-wrap: pretty;
+  }
+
+  .text-block:not(.text-block--full-width):is(.h1, .h2, .h3, .h4, .h5, .h6) {
+    text-wrap: balance;
+  }
+
+  /* Hide link underline in headings unless a custom underline color is set (then theme variables apply). */
+  .text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) a {
+    text-decoration-color: var(--color-underline, transparent);
+  }
+
+  .text-block h1,
+  .text-block.h1 > * {
+    margin-block: var(--font-h1--spacing);
+  }
+
+  .text-block h2,
+  .text-block.h2 > * {
+    margin-block: var(--font-h2--spacing);
+  }
+
+  .text-block h3,
+  .text-block.h3 > * {
+    margin-block: var(--font-h3--spacing);
+  }
+
+  .text-block h4,
+  .text-block.h4 > * {
+    margin-block: var(--font-h4--spacing);
+  }
+
+  .text-block h5,
+  .text-block.h5 > * {
+    margin-block: var(--font-h5--spacing);
+  }
+
+  .text-block h6,
+  .text-block.h6 > * {
+    margin-block: var(--font-h6--spacing);
+  }
+
+  .text-block p,
+  .text-block.p > * {
+    margin-block: var(--font-paragraph--spacing);
+  }
+
+  .text-block > *:first-child {
+    margin-block-start: 0;
+  }
+
+  .text-block > *:last-child {
+    margin-block-end: 0;
+  }
+
+  .text-block--align-center,
+  .text-block--align-center > * {
+    margin-inline: auto;
+  }
+
+  .text-block--align-right,
+  .text-block--align-right > * {
+    margin-inline-start: auto;
+  }
+
+  .text-block--background {
+    background-color: var(--text-background-color);
+    border-radius: var(--text-corner-radius);
+
+    /* To avoid text being cropped when using a border radius we add a minimum padding. */
+    padding-block-start: max(var(--text-padding), var(--padding-block-start, 0));
+    padding-block-end: max(var(--text-padding), var(--padding-block-end, 0));
+    padding-inline-start: max(var(--text-padding), var(--padding-inline-start, 0));
+    padding-inline-end: max(var(--text-padding), var(--padding-inline-end, 0));
+  }
+
+  /*
+    base.css only applies font tokens to .custom-typography > * (direct child). Richtext
+    nests <strong>, <em>, <span> etc.; pasted or editor content may set inline font-family.
+    These rules apply the custom font to all descendants. Optional custom bold/italic
+    font pickers are more specific and still win for strong / em.
+  */
+  .text-block.custom-typography,
+  .text-block.custom-typography * {
+    font-family: var(--font-family) !important;
+  }
+
+  .custom-color:not(.custom-color-gradient),
+  .custom-color:not(.custom-color-gradient) > :is(h1, h2, h3, h4, h5, h6, p, *) {
+    color: var(--color);
+  }
+
+  .custom-color-gradient,
+  .custom-color-gradient > :is(h1, h2, h3, h4, h5, h6, p, *) {
+    background: var(--text-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .custom-color strong,
+  .custom-color b {
+    color: var(--color-bold, inherit);
+  }
+
+  .custom-color em,
+  .custom-color i {
+    color: var(--color-italic, inherit);
+  }
+
+  .text-block.custom-typography.text-block--emphasis-font-bold :is(strong, b) {
+    font-family: var(--font-family-emphasis-bold) !important;
+    font-weight: var(--font-weight-emphasis-bold) !important;
+  }
+
+  .text-block.custom-typography.text-block--emphasis-font-italic :is(em, i) {
+    font-family: var(--font-family-emphasis-italic) !important;
+    font-weight: var(--font-weight-emphasis-italic) !important;
+    font-style: var(--font-style-emphasis-italic) !important;
+  }
+
+  .custom-color :is(u, a) {
+    color: var(--color-underline, inherit);
+  }
+
+  .custom-color.text-block--emphasis-bg-bold :is(strong, b) {
+    background-color: var(--text-bg-bold);
+    padding: 0.08em 0.18em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .custom-color.text-block--emphasis-bg-italic :is(em, i) {
+    background-color: var(--text-bg-italic);
+    padding: 0.08em 0.18em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .custom-color.text-block--emphasis-bg-underline :is(u, a) {
+    background-color: var(--text-bg-underline);
+    padding: 0.08em 0.18em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .custom-color-gradient.text-block--emphasis-bg-bold :is(strong, b) {
+    -webkit-text-fill-color: currentColor;
+    background-clip: border-box;
+  }
+
+  .custom-color-gradient.text-block--emphasis-bg-italic :is(em, i) {
+    -webkit-text-fill-color: currentColor;
+    background-clip: border-box;
+  }
+
+  .custom-color-gradient.text-block--emphasis-bg-underline :is(u, a) {
+    -webkit-text-fill-color: currentColor;
+    background-clip: border-box;
+  }
+
+  .text-block--truncation-enabled .text-block__truncate-clip {
+    overflow: hidden;
+    width: 100%;
+    max-inline-size: min(100%, var(--max-width, 100%));
+    transition: height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .text-block--truncation-enabled .text-block__truncate-content {
+    width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .text-block--truncation-enabled .text-block__truncate-clip {
+      transition: none;
+    }
+  }
+
+  .text-block--truncation-enabled:not(.text-block--truncate-expanded):not(.text-block--truncate-no-overflow)
+    .text-block__truncate-content {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--text-truncate-lines, 3);
+    overflow: hidden;
+    min-height: 0;
+    min-width: 0;
+    word-break: break-word;
+    /* Fade last lines into background so truncation feels softer */
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 calc(100% - var(--text-truncate-fade-size, 2em)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 0%,
+      #000 calc(100% - var(--text-truncate-fade-size, 2em)),
+      transparent 100%
+    );
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+
+  .text-block--truncation-enabled.text-block--truncate-no-overflow .text-block__truncate-content,
+  .text-block--truncation-enabled.text-block--truncate-expanded .text-block__truncate-content {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .text-block--truncation-enabled .text-block__truncate-toggle {
+    cursor: pointer;
+    margin-block-start: 0.35em;
+    margin-block-end: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    font: inherit;
+    text-align: inherit;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .text-block--truncation-enabled .text-block__truncate-toggle:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .text-block--truncation-enabled.text-block--truncate-expanded .text-block__truncate-more {
+    display: none;
+  }
+
+  .text-block--truncation-enabled:not(.text-block--truncate-expanded) .text-block__truncate-less {
+    display: none;
+  }
+
+  .text-block--truncation-enabled.text-block--align-center .text-block__truncate-toggle {
+    margin-inline: auto;
+  }
+
+  .text-block--truncation-enabled.text-block--align-right .text-block__truncate-toggle {
+    margin-inline-start: auto;
+  }
+{% endstylesheet %}

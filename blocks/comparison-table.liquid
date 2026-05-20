@@ -1,0 +1,664 @@
+{% liquid
+  assign block_settings = block.settings
+%}
+
+<div
+  class="comparison-table comparison-table--{{ block.id }} spacing-style"
+  style="
+    {% render 'spacing-style', settings: block_settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  <div
+    class="comparison-table__container"
+    style="
+      background-color: {{ block_settings.table_background }};
+      border-radius: {{ block_settings.border_radius }}px;
+      box-shadow: 0 0 0 1px {{ block_settings.table_background }};
+    "
+  >
+    <table class="comparison-table__table" role="table">
+      <thead>
+        <tr class="comparison-table__header-row">
+          <th class="comparison-table__header-cell comparison-table__header-cell--empty"
+          style="
+          background-color: {{ block_settings.outer_background | default: '#D4D8E2' }};
+        "
+      ></th>
+          <th
+            class="comparison-table__header-cell comparison-table__header-cell--column1"
+            style="
+              color: {{ block_settings.column1_header_color }};
+              font-size: {{ block_settings.column1_header_size }}px;
+              line-height: 1.1;
+              background-color: {{ block_settings.outer_background | default: '#D4D8E2' }};
+            "
+          >
+            {% if block_settings.column1_header_image != blank %}
+              {% assign header_img_width = block_settings.column1_header_image_width | times: 2 %}
+              <img
+                src="{{ block_settings.column1_header_image | image_url: width: header_img_width }}"
+                alt="{{ block_settings.column1_header | default: 'LOGO' | escape }}"
+                class="comparison-table__header-image"
+                style="max-width: {{ block_settings.column1_header_image_width }}px; height: auto; display: block; margin: 0 auto; object-fit: contain;"
+                loading="lazy"
+                width="{{ block_settings.column1_header_image_width }}"
+                height="{{ block_settings.column1_header_image_width }}"
+              >
+            {% else %}
+              {{ block_settings.column1_header | default: 'LOGO' }}
+            {% endif %}
+          </th>
+          <th
+            class="comparison-table__header-cell comparison-table__header-cell--column2"
+            style="
+              color: {{ block_settings.column2_header_color }};
+              font-size: {{ block_settings.column2_header_size }}px;
+              background-color: {{ block_settings.outer_background | default: '#D4D8E2' }};
+            "
+          >
+            {{ block_settings.column2_header | default: 'Others' }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in (1..8) %}
+          {% assign feature_key = 'feature_' | append: i %}
+          {% assign feature_text = block_settings[feature_key] %}
+          {% assign logo_icon_key = 'logo_icon_' | append: i %}
+          {% assign others_icon_key = 'others_icon_' | append: i %}
+
+          {% if feature_text != blank %}
+            <tr
+              class="comparison-table__row"
+              style="
+                border-color: {{ block_settings.row_border_color }};
+              "
+            >
+              <td
+                class="comparison-table__cell comparison-table__cell--feature"
+                style="
+                  background-color: {{ block_settings.feature_cell_background }};
+                  color: {{ block_settings.feature_text_color }};
+                  font-size: {{ block_settings.feature_text_size }}px;
+                "
+              >
+                {{ feature_text }}
+              </td>
+              <td
+                class="comparison-table__cell comparison-table__cell--column1"
+                style="
+                  background-color: {{ block_settings.column_cell_background }};
+                  border-color: {{ block_settings.row_border_color }};
+                "
+              >
+                {% assign logo_icon = block_settings[logo_icon_key] | default: 'check' %}
+                {% if logo_icon == 'check' %}
+                  <span class="comparison-table__icon comparison-table__icon--check" style="color: {{ block_settings.check_color }};">✓</span>
+                {% elsif logo_icon == 'dash' %}
+                  <span class="comparison-table__icon comparison-table__icon--dash" style="color: {{ block_settings.dash_color }};">—</span>
+                {% else %}
+                  <span class="comparison-table__icon comparison-table__icon--cross" style="color: {{ block_settings.cross_color }};">✗</span>
+                {% endif %}
+              </td>
+              <td
+                class="comparison-table__cell comparison-table__cell--column2"
+                style="
+                  background-color: {{ block_settings.column_cell_background }};
+                  border-color: {{ block_settings.row_border_color }};
+                "
+              >
+                {% assign others_icon = block_settings[others_icon_key] | default: 'cross' %}
+                {% if others_icon == 'check' %}
+                  <span class="comparison-table__icon comparison-table__icon--check" style="color: {{ block_settings.check_color }};">✓</span>
+                {% elsif others_icon == 'dash' %}
+                  <span class="comparison-table__icon comparison-table__icon--dash" style="color: {{ block_settings.dash_color }};">—</span>
+                {% else %}
+                  <span class="comparison-table__icon comparison-table__icon--cross" style="color: {{ block_settings.cross_color }};">✗</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% stylesheet %}
+  .comparison-table {
+    width: 100%;
+  }
+
+  .comparison-table__container {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .comparison-table__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .comparison-table__header-row {
+    border: none;
+  }
+
+  .comparison-table__header-cell {
+    padding: 1rem 1.25rem;
+    text-align: center;
+    border: none;
+  }
+
+  .comparison-table__header-cell--empty {
+    width: 45%;
+    background: transparent;
+  }
+
+  .comparison-table__header-cell--column1 {
+    width: 27.5%;
+  }
+
+  .comparison-table__header-cell--column2 {
+    width: 27.5%;
+  }
+
+  .comparison-table__header-image {
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle;
+  }
+
+  .comparison-table__row {
+    border-top: 1px solid;
+  }
+
+  .comparison-table__cell {
+    padding: 0.875rem 1.25rem;
+    text-align: center;
+    vertical-align: middle;
+    border-left: 1px solid;
+  }
+
+  .comparison-table__cell--feature {
+    text-align: center;
+    width: 45%;
+    border-left: none;
+  }
+
+  .comparison-table__cell--column1 {
+    width: 27.5%;
+  }
+
+  .comparison-table__cell--column2 {
+    width: 27.5%;
+  }
+
+  .comparison-table__icon {
+    font-size: 1.25rem;
+    font-weight: bold;
+    display: inline-block;
+    line-height: 1;
+  }
+
+  @media screen and (max-width: 749px) {
+    .comparison-table__header-cell,
+    .comparison-table__cell {
+      padding: 0.75rem 0.875rem;
+      font-size: 0.875rem;
+    }
+
+    .comparison-table__icon {
+      font-size: 1rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.comparison_table",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.comparison_table.header_column_headers"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "column1_header",
+      "label": "t:sections.comparison_table.column1_header",
+      "default": "LOGO"
+    },
+    {
+      "type": "color",
+      "id": "column1_header_color",
+      "label": "t:sections.comparison_table.column1_header_color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "column1_header_size",
+      "label": "t:sections.comparison_table.column1_header_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "image_picker",
+      "id": "column1_header_image",
+      "label": "t:settings.image",
+      "info": "t:sections.comparison_table.column1_header_image_info"
+    },
+    {
+      "type": "range",
+      "id": "column1_header_image_width",
+      "label": "t:sections.comparison_table.image_width",
+      "min": 40,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 80,
+      "info": "t:content.width_is_automatically_optimized",
+      "visible_if": "{{ block.settings.column1_header_image != blank }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "column2_header",
+      "label": "t:sections.comparison_table.column2_header",
+      "default": "Others"
+    },
+    {
+      "type": "color",
+      "id": "column2_header_color",
+      "label": "t:sections.comparison_table.column2_header_color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "column2_header_size",
+      "label": "t:sections.comparison_table.column2_header_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "t:sections.comparison_table.header_features"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_1",
+      "label": "t:sections.comparison_table.feature_1",
+      "default": "Painless"
+    },
+    {
+      "type": "select",
+      "id": "logo_icon_1",
+      "label": "t:sections.comparison_table.column1_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "others_icon_1",
+      "label": "t:sections.comparison_table.column2_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_2",
+      "label": "t:sections.comparison_table.feature_2",
+      "default": "Reusable"
+    },
+    {
+      "type": "select",
+      "id": "logo_icon_2",
+      "label": "t:sections.comparison_table.column1_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "others_icon_2",
+      "label": "t:sections.comparison_table.column2_icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_3",
+      "label": "t:sections.comparison_table.feature_3",
+      "default": "Easy to Use"
+    },
+    {
+      "type": "select",
+      "id": "logo_icon_3",
+      "label": "t:sections.comparison_table.column1_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "others_icon_3",
+      "label": "t:sections.comparison_table.column2_icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_4",
+      "label": "t:sections.comparison_table.feature_4",
+      "default": "Eco-Friendly"
+    },
+    {
+      "type": "select",
+      "id": "logo_icon_4",
+      "label": "t:sections.comparison_table.column1_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "others_icon_4",
+      "label": "t:sections.comparison_table.column2_icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_5",
+      "label": "t:sections.comparison_table.feature_5",
+      "default": "Costs $$$"
+    },
+    {
+      "type": "select",
+      "id": "logo_icon_5",
+      "label": "t:sections.comparison_table.column1_icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "others_icon_5",
+      "label": "t:sections.comparison_table.column2_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_6",
+      "label": "t:sections.comparison_table.feature_6"
+    },
+    {
+      "type": "select",
+      "id": "logo_icon_6",
+      "label": "t:sections.comparison_table.column1_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "others_icon_6",
+      "label": "t:sections.comparison_table.column2_icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_7",
+      "label": "t:sections.comparison_table.feature_7"
+    },
+    {
+      "type": "select",
+      "id": "logo_icon_7",
+      "label": "t:sections.comparison_table.column1_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "others_icon_7",
+      "label": "t:sections.comparison_table.column2_icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_8",
+      "label": "t:sections.comparison_table.feature_8"
+    },
+    {
+      "type": "select",
+      "id": "logo_icon_8",
+      "label": "t:sections.comparison_table.column1_icon",
+      "default": "check",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "others_icon_8",
+      "label": "t:sections.comparison_table.column2_icon",
+      "default": "cross",
+      "options": [
+        { "value": "check", "label": "t:sections.comparison_table.icon_check" },
+        { "value": "cross", "label": "t:sections.comparison_table.icon_cross" },
+        { "value": "dash", "label": "t:sections.comparison_table.icon_dash" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:content.appearance"
+    },
+    {
+      "type": "range",
+      "id": "feature_text_size",
+      "label": "t:sections.comparison_table.feature_text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:sections.comparison_table.table_border_radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "outer_background",
+      "label": "t:sections.comparison_table.header_background",
+      "default": "#F6F6F6"
+    },
+    {
+      "type": "color",
+      "id": "feature_cell_background",
+      "label": "t:sections.comparison_table.feature_column",
+      "default": "#F6F6F6"
+    },
+    {
+      "type": "color",
+      "id": "column_cell_background",
+      "label": "t:sections.comparison_table.comparison_columns",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "feature_text_color",
+      "label": "t:sections.comparison_table.feature_text_color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "check_color",
+      "label": "t:sections.comparison_table.checkmark_color",
+      "default": "#52B35B"
+    },
+    {
+      "type": "color",
+      "id": "cross_color",
+      "label": "t:sections.comparison_table.cross_color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "dash_color",
+      "label": "t:sections.comparison_table.dash_color",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "table_background",
+      "label": "t:sections.comparison_table.outer_border",
+      "default": "#E1E1E1"
+    },
+    {
+      "type": "color",
+      "id": "row_border_color",
+      "label": "t:sections.comparison_table.row_border_color",
+      "default": "#E1E1E1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.comparison_table",
+      "category": "t:categories.basic",
+      "settings": {
+        "column1_header": "LOGO",
+        "column2_header": "Others",
+        "feature_1": "Painless",
+        "logo_icon_1": "check",
+        "others_icon_1": "check",
+        "feature_2": "Reusable",
+        "logo_icon_2": "check",
+        "others_icon_2": "cross",
+        "feature_3": "Easy to Use",
+        "logo_icon_3": "check",
+        "others_icon_3": "cross",
+        "feature_4": "Eco-Friendly",
+        "logo_icon_4": "check",
+        "others_icon_4": "cross",
+        "feature_5": "Costs $$$",
+        "logo_icon_5": "cross",
+        "others_icon_5": "check"
+      }
+    }
+  ]
+}
+{% endschema %}

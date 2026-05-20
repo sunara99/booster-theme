@@ -1,0 +1,170 @@
+{%- doc -%}
+  Cart countdown strip above the promo banner. Supports one or more [timer] placeholders.
+  When “Show text” runs out, the entire `.cart-timer__inner` block is replaced by the end message.
+
+  @param {string} context - 'drawer' or 'page'; controls when the deadline is first set.
+{%- enddoc -%}
+
+{%- liquid
+  assign ctx = context | default: 'drawer'
+  unless settings.show_cart_above_promo_richtext and settings.cart_above_promo_richtext != blank
+    assign skip_block = true
+  endunless
+-%}
+
+{% unless skip_block %}
+  {%- liquid
+    assign timer_minutes = settings.cart_above_promo_timer_minutes | default: 15 | plus: 0
+    if timer_minutes < 3
+      assign timer_minutes = 3
+    elsif timer_minutes > 50
+      assign timer_minutes = 50
+    endif
+
+    assign rich_html = settings.cart_above_promo_richtext
+    assign timer_markup = '<span class="cart-timer__countdown" data-cart-countdown-display aria-live="polite">--:--</span>'
+    assign rich_html = rich_html | replace: '[timer]', timer_markup
+
+    assign align_h = settings.cart_timer_text_alignment | default: 'center'
+    assign align_v_raw = settings.cart_timer_vertical_alignment | default: 'top'
+    case align_v_raw
+      when 'middle'
+        assign align_v = 'center'
+      when 'bottom'
+        assign align_v = 'flex-end'
+      else
+        assign align_v = 'flex-start'
+    endcase
+
+    assign pad_t = settings.cart_timer_padding_top | default: 8 | plus: 0
+    assign pad_b = settings.cart_timer_padding_bottom | default: 8 | plus: 0
+    assign pad_l = settings.cart_timer_padding_left | default: 20 | plus: 0
+    assign pad_r = settings.cart_timer_padding_right | default: 20 | plus: 0
+    assign mar_t = settings.cart_timer_margin_top | default: 0 | plus: 0
+    assign mar_b = settings.cart_timer_margin_bottom | default: 0 | plus: 0
+    assign mar_l = settings.cart_timer_margin_left | default: 0 | plus: 0
+    assign mar_r = settings.cart_timer_margin_right | default: 0 | plus: 0
+
+    assign bg_color = settings.cart_timer_background_color | default: '#f8f9fa'
+    assign text_color = settings.cart_timer_text_color | default: '#333333'
+    assign countdown_color = settings.cart_timer_countdown_color | default: '#333333'
+    assign use_gradient = settings.cart_timer_use_gradient | default: false
+    assign gradient_color = settings.cart_timer_gradient_color | default: '#ffffff'
+    assign gradient_dir = settings.cart_timer_gradient_direction | default: 'to right'
+
+    assign background_style = ''
+    if use_gradient
+      assign background_style = 'linear-gradient(' | append: gradient_dir | append: ', ' | append: bg_color | append: ', ' | append: gradient_color | append: ')'
+    else
+      assign background_style = bg_color
+    endif
+
+    assign timer_border_color = settings.cart_timer_border_color | default: '#e5e5e5'
+    # Bottom border: never use "| default: true" on checkboxes — false is treated as blank and becomes true.
+    assign timer_show_bottom_border = true
+    if settings.cart_timer_show_bottom_border == false
+      assign timer_show_bottom_border = false
+    endif
+    assign border_styles = ''
+    if settings.cart_timer_show_top_border
+      assign border_styles = border_styles | append: 'border-top: 1px solid ' | append: timer_border_color | append: ';'
+    endif
+    if timer_show_bottom_border
+      assign border_styles = border_styles | append: 'border-bottom: 1px solid ' | append: timer_border_color | append: ';'
+    endif
+    if settings.cart_timer_show_left_border
+      assign border_styles = border_styles | append: 'border-left: 1px solid ' | append: timer_border_color | append: ';'
+    endif
+    if settings.cart_timer_show_right_border
+      assign border_styles = border_styles | append: 'border-right: 1px solid ' | append: timer_border_color | append: ';'
+    endif
+
+    assign radius_num = settings.cart_timer_border_radius | default: 0 | plus: 0
+    assign border_styles = border_styles | append: 'border-radius: ' | append: radius_num | append: 'px;'
+
+    assign on_end_behavior = settings.cart_timer_on_end | default: 'repeat'
+  -%}
+  <div
+    class="cart-timer"
+    data-cart-countdown-root
+    data-cart-countdown-context="{{ ctx }}"
+    data-cart-countdown-minutes="{{ timer_minutes }}"
+    data-timer-on-end="{{ on_end_behavior }}"
+    style="
+      --cart-timer-text-align: {{ align_h }};
+      --cart-timer-align-items: {{ align_v }};
+      --cart-timer-padding-block-start: {{ pad_t }}px;
+      --cart-timer-padding-block-end: {{ pad_b }}px;
+      --cart-timer-padding-inline-start: {{ pad_l }}px;
+      --cart-timer-padding-inline-end: {{ pad_r }}px;
+      --cart-timer-margin-block-start: {{ mar_t }}px;
+      --cart-timer-margin-block-end: {{ mar_b }}px;
+      --cart-timer-margin-inline-start: {{ mar_l }}px;
+      --cart-timer-margin-inline-end: {{ mar_r }}px;
+      --cart-timer-text-color: {{ text_color }};
+      --cart-timer-countdown-color: {{ countdown_color }};
+      background: {{ background_style }};
+      color: {{ text_color }};
+      {{ border_styles }}
+    "
+  >
+    <div class="cart-timer__inner rte">
+      {{ rich_html }}
+    </div>
+    {% if on_end_behavior == 'show_message' %}
+      <template data-cart-countdown-end-template>
+        {% if settings.cart_timer_end_message != blank %}
+          {{ settings.cart_timer_end_message }}
+        {% else %}
+          <p>This offer has ended.</p>
+        {% endif %}
+      </template>
+    {% endif %}
+  </div>
+{% endunless %}
+
+{% stylesheet %}
+  .cart-timer {
+    box-sizing: border-box;
+    max-width: 100%;
+    display: flex;
+    align-items: var(--cart-timer-align-items, flex-start);
+    padding-block: var(--cart-timer-padding-block-start, 8px) var(--cart-timer-padding-block-end, 8px);
+    padding-inline: var(--cart-timer-padding-inline-start, 20px) var(--cart-timer-padding-inline-end, 20px);
+    margin-block: var(--cart-timer-margin-block-start, 0) var(--cart-timer-margin-block-end, 0);
+    margin-inline: var(--cart-timer-margin-inline-start, 0) var(--cart-timer-margin-inline-end, 0);
+    color: var(--cart-timer-text-color, inherit);
+  }
+
+  .cart-timer__inner {
+    width: 100%;
+    font-size: var(--font-size--sm);
+    line-height: 1.4;
+    text-align: var(--cart-timer-text-align, center);
+    color: inherit;
+  }
+
+  .cart-timer__inner :is(h1, h2, h3, h4, h5, h6, p) {
+    margin: 0;
+  }
+
+  .cart-timer__inner--ended {
+    white-space: normal;
+    font-variant-numeric: inherit;
+  }
+
+  .cart-timer__countdown {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--cart-timer-countdown-color, currentColor);
+  }
+
+  .cart-timer__countdown--ended {
+    white-space: normal;
+    font-variant-numeric: inherit;
+  }
+
+  .cart-timer__countdown--ended :is(h1, h2, h3, h4, h5, h6, p) {
+    margin: 0;
+  }
+{% endstylesheet %}

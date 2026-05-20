@@ -1,0 +1,624 @@
+
+{%- liquid
+  assign block_id = block.id | replace: '_', '' | downcase
+  assign product_resource = product | default: closest.product
+  assign initial_variant = product_resource.selected_or_first_available_variant
+-%}
+
+{% style %}
+  .lumin-inventory-status-{{ block_id}} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.padding }}px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .lumin-inventory-status__text-{{ block_id}} {
+    font-size: {{ block.settings.text_font_size }}px;
+    color: {{ block.settings.text_color }};
+    margin-bottom: 8px;
+    display: block;
+    transition: color 0.3s ease;
+  }
+
+  .lumin-inventory-status__text-{{ block_id}}.low-stock {
+    color: {{ block.settings.text_low_stock_color }};
+  }
+
+  .lumin-inventory-status__text-{{ block_id}}.out-of-stock {
+    color: {{ block.settings.text_out_of_stock_color }};
+  }
+
+  .lumin-inventory-status__text-{{ block_id}}.untracked {
+    color: {{ block.settings.text_untracked_color }};
+  }
+
+  .lumin-inventory-status__row-{{ block_id}} {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-bottom: 8px;
+  }
+
+  .lumin-inventory-status__row-{{ block_id}} .lumin-inventory-status__text-{{ block_id}} {
+    margin-bottom: 0;
+  }
+
+  .lumin-inventory-status__indicator-{{ block_id}} {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: {{ block.settings.indicator_color }};
+    transition: color 0.3s ease;
+  }
+
+  .lumin-inventory-status__indicator-{{ block_id}} svg {
+    width: {{ block.settings.indicator_size }}px;
+    height: {{ block.settings.indicator_size }}px;
+  }
+
+  .lumin-inventory-status__indicator-{{ block_id}} circle:first-of-type {
+    opacity: 0.3;
+  }
+
+  .lumin-inventory-status__indicator-{{ block_id}}.low-stock {
+    color: {{ block.settings.indicator_low_stock_color }};
+  }
+
+  .lumin-inventory-status__indicator-{{ block_id}}.out-of-stock {
+    color: {{ block.settings.indicator_out_of_stock_color }};
+  }
+
+  .lumin-inventory-status__indicator-{{ block_id}}.untracked {
+    color: {{ block.settings.indicator_untracked_color }};
+  }
+
+  .lumin-inventory-status__indicator-{{ block_id}}.pulse {
+    animation: lumin-inventory-pulse-{{ block_id}} 1.5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lumin-inventory-status__indicator-{{ block_id}}.pulse {
+      animation: none;
+    }
+  }
+
+  @keyframes lumin-inventory-pulse-{{ block_id}} {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.1); }
+  }
+
+  .lumin-inventory-status__bar-container-{{ block_id}} {
+    width: 100%;
+    height: {{ block.settings.bar_height }}px;
+    background-color: {{ block.settings.bar_background_color }};
+    border-radius: {{ block.settings.bar_border_radius }}px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .lumin-inventory-status__bar-fill-{{ block_id}} {
+    height: 100%;
+    background-color: {{ block.settings.bar_fill_color }};
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: {{ block.settings.bar_border_radius }}px;
+  }
+
+  .lumin-inventory-status__bar-fill-{{ block_id}}.low-stock {
+    background-color: {{ block.settings.bar_low_stock_color }};
+  }
+
+  .lumin-inventory-status__bar-fill-{{ block_id}}.out-of-stock {
+    background-color: {{ block.settings.bar_out_of_stock_color }};
+  }
+
+  .lumin-inventory-status__bar-fill-{{ block_id}}.untracked {
+    background-color: {{ block.settings.bar_fill_untracked_color }};
+  }
+{% endstyle %}
+
+<inventory-status-{{ block_id}}
+  class="lumin-inventory-status-{{ block_id}}"
+  data-max-inventory="{{ block.settings.max_inventory }}"
+  data-low-stock-threshold="{{ block.settings.low_stock_threshold }}"
+  data-in-stock-text="{{ block.settings.in_stock_text }}"
+  data-low-stock-text="{{ block.settings.low_stock_text }}"
+  data-out-of-stock-text="{{ block.settings.out_of_stock_text }}"
+  data-untracked-in-stock-text="{{ block.settings.untracked_in_stock_text | default: 'In stock' }}"
+  data-show-quantity="{{ block.settings.show_quantity }}"
+  data-product-id="{{ product_resource.id }}"
+  data-initial-variant-id="{{ initial_variant.id }}"
+  data-initial-inventory="{{ initial_variant.inventory_quantity | default: 0 }}"
+  data-show-indicator="{{ block.settings.show_indicator }}"
+  data-indicator-pulse="{{ block.settings.indicator_pulse }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.show_indicator %}
+    <div class="lumin-inventory-status__row-{{ block_id}}">
+      <span class="lumin-inventory-status__indicator-{{ block_id}} svg-wrapper{% if block.settings.indicator_pulse %} pulse{% endif %}" data-status-indicator aria-hidden="true">
+        {{ 'icon-inventory.svg' | inline_asset_content }}
+      </span>
+      <span class="lumin-inventory-status__text-{{ block_id}}" data-status-text></span>
+    </div>
+  {% else %}
+    <span class="lumin-inventory-status__text-{{ block_id}}" data-status-text></span>
+  {% endif %}
+
+  <div class="lumin-inventory-status__bar-container-{{ block_id}}">
+    <div class="lumin-inventory-status__bar-fill-{{ block_id}}" data-bar-fill></div>
+  </div>
+</inventory-status-{{ block_id}}>
+
+<script type="application/json" data-inventory-data-{{ block_id}}>
+  {
+    "variants": [
+      {% for variant in product_resource.variants %}
+        {
+          "id": {{ variant.id }},
+          "inventory_quantity": {{ variant.inventory_quantity | default: 0 }},
+          "inventory_management": {{ variant.inventory_management | json }},
+          "inventory_policy": {{ variant.inventory_policy | json }}
+        }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]
+  }
+</script>
+
+<script>
+  (function() {
+    class InventoryStatus{{ block_id}} extends HTMLElement {
+      constructor() {
+        super();
+        this.maxInventory = parseInt(this.dataset.maxInventory);
+        this.lowStockThreshold = parseInt(this.dataset.lowStockThreshold);
+        this.inStockText = this.dataset.inStockText;
+        this.lowStockText = this.dataset.lowStockText;
+        this.outOfStockText = this.dataset.outOfStockText;
+        this.untrackedInStockText = this.dataset.untrackedInStockText;
+        this.showQuantity = this.dataset.showQuantity === 'true';
+        this.productId = this.dataset.productId;
+        this.barFill = this.querySelector('[data-bar-fill]');
+        this.statusText = this.querySelector('[data-status-text]');
+        this.statusIndicator = this.querySelector('[data-status-indicator]');
+        this.inventoryData = null;
+      }
+
+      connectedCallback() {
+        this.loadInventoryData();
+        this.updateInventoryStatus();
+        this.setupVariantChangeListener();
+        requestAnimationFrame(() => this.updateInventoryStatus());
+        setTimeout(() => this.updateInventoryStatus(), 100);
+      }
+
+      loadInventoryData() {
+        const dataScript = document.querySelector('[data-inventory-data-{{ block_id}}]');
+        if (dataScript) {
+          try {
+            this.inventoryData = JSON.parse(dataScript.textContent);
+          } catch (e) {
+            console.error('Error parsing inventory data:', e);
+          }
+        }
+      }
+
+      setupVariantChangeListener() {
+        document.addEventListener('variant:update', this.handleVariantUpdate);
+        document.addEventListener('change', (event) => {
+          if (event.target.name === 'id' || event.target.closest('[name="id"]')) {
+            setTimeout(() => this.updateInventoryStatus(), 50);
+          }
+        });
+      }
+
+      disconnectedCallback() {
+        document.removeEventListener('variant:update', this.handleVariantUpdate);
+      }
+
+      handleVariantUpdate = (event) => {
+        if (event.detail.data.newProduct) {
+          return;
+        }
+        if (event.detail.data.productId && event.detail.data.productId !== this.dataset.productId) {
+          return;
+        }
+        const variant = event.detail.resource;
+        if (variant && variant.id) {
+          const liveQty = variant.inventory_quantity;
+          this.renderInventoryBar(variant.id, liveQty);
+        }
+      }
+
+      updateInventoryStatus() {
+        const variantId = this.getCurrentVariantId();
+        if (!variantId) {
+          return;
+        }
+
+        this.renderInventoryBar(variantId);
+      }
+
+      getCurrentVariantId() {
+        const productForm = document.querySelector(`product-form-component[data-product-id="${this.productId}"] form[data-type="add-to-cart-form"]`);
+        const variantInput = productForm?.querySelector('input[name="id"]');
+        if (variantInput?.value) {
+          return parseInt(variantInput.value);
+        }
+
+        const variantPicker = document.querySelector(`variant-picker[data-product-id="${this.productId}"]`);
+        const selectedOptions = variantPicker?.querySelectorAll('select option[selected], fieldset input:checked');
+        const lastSelected = selectedOptions?.length ? selectedOptions[selectedOptions.length - 1] : null;
+        const variantId = lastSelected?.dataset?.variantId;
+        if (variantId) {
+          return parseInt(variantId);
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const variantParam = urlParams.get('variant');
+        if (variantParam) {
+          return parseInt(variantParam);
+        }
+
+        const initialId = this.dataset.initialVariantId;
+        if (initialId) {
+          return parseInt(initialId);
+        }
+
+        return null;
+      }
+
+      getVariantRecord(variantId) {
+        if (!this.inventoryData || !this.inventoryData.variants) {
+          return null;
+        }
+        return this.inventoryData.variants.find(v => v.id === variantId) || null;
+      }
+
+      renderInventoryBar(variantId, liveQuantity) {
+        const record = this.getVariantRecord(variantId);
+        const managed = record?.inventory_management === 'shopify';
+        const policyContinue = record?.inventory_policy === 'continue';
+        const storedQty = record ? (record.inventory_quantity ?? 0) : 0;
+        const qty =
+          liveQuantity !== undefined && liveQuantity !== null ? liveQuantity : storedQty;
+
+        let barQuantity = qty;
+        let outOfStock = false;
+        let lowStock = false;
+        let inStockNoNumericQty = false;
+        let untrackedInStock = false;
+
+        if (!record) {
+          outOfStock = true;
+          barQuantity = 0;
+        } else if (!managed) {
+          untrackedInStock = true;
+          barQuantity = this.maxInventory;
+        } else if (qty > 0) {
+          barQuantity = qty;
+          lowStock = qty <= this.lowStockThreshold;
+        } else if (policyContinue) {
+          inStockNoNumericQty = true;
+          barQuantity = this.maxInventory;
+        } else {
+          outOfStock = true;
+          barQuantity = 0;
+        }
+
+        const percentage = Math.min((barQuantity / this.maxInventory) * 100, 100);
+
+        this.barFill.style.width = percentage + '%';
+
+        this.barFill.classList.remove('low-stock', 'out-of-stock', 'untracked');
+        this.statusText.classList.remove('low-stock', 'out-of-stock', 'untracked');
+        if (this.statusIndicator) {
+          this.statusIndicator.classList.remove('low-stock', 'out-of-stock', 'untracked');
+        }
+
+        let statusMessage = '';
+
+        if (outOfStock) {
+          this.barFill.classList.add('out-of-stock');
+          this.statusText.classList.add('out-of-stock');
+          if (this.statusIndicator) this.statusIndicator.classList.add('out-of-stock');
+          statusMessage = this.outOfStockText;
+        } else if (lowStock) {
+          this.barFill.classList.add('low-stock');
+          this.statusText.classList.add('low-stock');
+          if (this.statusIndicator) this.statusIndicator.classList.add('low-stock');
+          if (this.showQuantity) {
+            statusMessage = this.lowStockText.replace('{quantity}', qty);
+          } else {
+            statusMessage = this.lowStockText.replace('{quantity}', '').trim();
+          }
+        } else if (untrackedInStock) {
+          this.barFill.classList.add('untracked');
+          this.statusText.classList.add('untracked');
+          if (this.statusIndicator) this.statusIndicator.classList.add('untracked');
+          if (this.showQuantity) {
+            statusMessage = this.untrackedInStockText.replace('{quantity}', qty);
+          } else {
+            statusMessage = this.untrackedInStockText.replace('{quantity}', '').trim();
+          }
+        } else {
+          const showCount = this.showQuantity && !inStockNoNumericQty;
+          if (showCount) {
+            statusMessage = this.inStockText.replace('{quantity}', qty);
+          } else {
+            statusMessage = this.inStockText.replace('{quantity}', '').trim();
+          }
+        }
+
+        this.statusText.innerHTML = statusMessage;
+      }
+    }
+
+    customElements.define('inventory-status-{{ block_id}}', InventoryStatus{{ block_id}});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Inventory status bar",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Inventory settings"
+    },
+    {
+      "type": "range",
+      "id": "max_inventory",
+      "label": "Maximum inventory",
+      "min": 10,
+      "max": 500,
+      "step": 10,
+      "default": 100,
+      "info": "The maximum inventory level for the progress bar (100% full)"
+    },
+    {
+      "type": "range",
+      "id": "low_stock_threshold",
+      "label": "Low stock threshold",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "default": 10,
+      "info": "Inventory level at which to show low stock warning"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "Show quantity in text",
+      "default": true,
+      "info": "Display the actual quantity number in status messages"
+    },
+    {
+      "type": "header",
+      "content": "Status messages"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "in_stock_text",
+      "label": "In stock text",
+      "default": "{quantity} in stock",
+      "info": "Use {quantity} to show the number"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "low_stock_text",
+      "label": "Low stock text",
+      "default": "Only {quantity} left!",
+      "info": "Use {quantity} to show the number"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "out_of_stock_text",
+      "label": "Out of stock text",
+      "default": "Out of stock"
+    },
+    {
+      "type": "header",
+      "content": "Untracked inventory"
+    },
+    {
+      "type": "paragraph",
+      "content": "Shown when inventory is not tracked by Shopify for the variant (same as standard product inventory behavior)."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "untracked_in_stock_text",
+      "label": "In stock text",
+      "default": "In stock",
+      "info": "Use {quantity} to show the number when “Show quantity in text” is enabled."
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Text font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text (in stock)",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_low_stock_color",
+      "label": "Text (low stock)",
+      "default": "#ff9800"
+    },
+    {
+      "type": "color",
+      "id": "text_out_of_stock_color",
+      "label": "Text (out of stock)",
+      "default": "#D82C0D"
+    },
+    {
+      "type": "color",
+      "id": "text_untracked_color",
+      "label": "Text (untracked inventory)",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Status indicator"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_indicator",
+      "label": "Show circle before text",
+      "default": false,
+      "info": "Display a colored circle before the status text"
+    },
+    {
+      "type": "checkbox",
+      "id": "indicator_pulse",
+      "label": "Pulse animation",
+      "default": false,
+      "info": "Enable pulse animation on the circle"
+    },
+    {
+      "type": "range",
+      "id": "indicator_size",
+      "label": "Circle size",
+      "min": 6,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 16 
+    },
+    {
+      "type": "color",
+      "id": "indicator_color",
+      "label": "Circle (in stock)",
+      "default": "#00a650"
+    },
+    {
+      "type": "color",
+      "id": "indicator_low_stock_color",
+      "label": "Circle (low stock)",
+      "default": "#ff9800"
+    },
+    {
+      "type": "color",
+      "id": "indicator_out_of_stock_color",
+      "label": "Circle (out of stock)",
+      "default": "#D82C0D"
+    },
+    {
+      "type": "color",
+      "id": "indicator_untracked_color",
+      "label": "Circle (untracked inventory)",
+      "default": "#00a650"
+    },
+    {
+      "type": "header",
+      "content": "Progress bar"
+    },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "label": "Bar height",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "bar_border_radius",
+      "label": "Bar border radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "bar_background_color",
+      "label": "Bar background",
+      "default": "#E6E6E6"
+    },
+    {
+      "type": "color",
+      "id": "bar_fill_color",
+      "label": "Bar fill (in stock)",
+      "default": "#00a650"
+    },
+    {
+      "type": "color",
+      "id": "bar_low_stock_color",
+      "label": "Bar fill (low stock)",
+      "default": "#ff9800"
+    },
+    {
+      "type": "color",
+      "id": "bar_out_of_stock_color",
+      "label": "Bar fill (out of stock)",
+      "default": "#D82C0D"
+    },
+    {
+      "type": "color",
+      "id": "bar_fill_untracked_color",
+      "label": "Bar fill (untracked inventory)",
+      "default": "#00a650"
+    },
+    {
+      "type": "header",
+      "content": "Container style"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f5f5f5"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Inventory status bar"
+    }
+  ]
+}
+{% endschema %}

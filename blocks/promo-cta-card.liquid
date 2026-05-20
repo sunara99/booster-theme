@@ -1,0 +1,684 @@
+{% liquid
+  assign bid = block.id | replace: '_', '' | downcase
+  assign s = block.settings
+  assign widths = '352, 540, 720, 900, 1080'
+  assign img_alt = s.image_alt
+  if s.image and img_alt == blank
+    assign img_alt = s.image.alt | default: ''
+  endif
+
+  assign content_align_m = s.content_alignment_mobile | default: 'flex-start'
+  assign content_align_d = s.content_alignment_desktop | default: 'flex-start'
+  assign text_align_m = 'start'
+  if content_align_m == 'center'
+    assign text_align_m = 'center'
+  elsif content_align_m == 'flex-end'
+    assign text_align_m = 'end'
+  endif
+  assign text_align_d = 'start'
+  if content_align_d == 'center'
+    assign text_align_d = 'center'
+  elsif content_align_d == 'flex-end'
+    assign text_align_d = 'end'
+  endif
+%}
+
+{% style %}
+  .promo-cta-{{ bid }} {
+    --promo-cta-bg: {{ s.card_background }};
+    --promo-cta-border: {{ s.border_color }};
+    --promo-cta-accent: {{ s.accent_color }};
+    --promo-cta-heading: {{ s.heading_color }};
+    --promo-cta-muted: {{ s.muted_text_color }};
+    --promo-cta-star: {{ s.star_color }};
+    --promo-cta-radius: {{ s.border_radius }}px;
+    --promo-cta-pad: {{ s.inner_padding }}px;
+    --promo-cta-gap: {{ s.column_gap }}px;
+    --promo-cta-border-w: {{ s.border_width }}px;
+    position: relative;
+    margin-top: calc({{ s.badge_offset }}px + 6px);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__inner {
+    background: var(--promo-cta-bg);
+    border: var(--promo-cta-border-w) solid var(--promo-cta-border);
+    border-radius: var(--promo-cta-radius);
+    padding: var(--promo-cta-pad);
+    padding-top: calc(var(--promo-cta-pad) + {{ s.badge_offset | divided_by: 2 }}px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--promo-cta-gap);
+    align-items: stretch;
+  }
+
+  @media screen and (min-width: 750px) {
+    .promo-cta-{{ bid }} .promo-cta__inner {
+      flex-direction: {% if s.image_position == 'left' %}row-reverse{% else %}row{% endif %};
+      align-items: center;
+    }
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    background: var(--promo-cta-accent);
+    color: {{ s.badge_text_color }};
+    font-family: inherit;
+    font-size: {{ s.badge_text_size }}px;
+    font-weight: 500;
+    line-height: 1.25;
+    padding: 0.45em 1.15em;
+    border-radius: 999px;
+    text-align: center;
+    max-width: min(92%, 520px);
+    box-sizing: border-box;
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: {{ text_align_m }};
+    gap: {{ s.body_gap }}px;
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__reviews {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: {{ content_align_m }};
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__stars {
+    display: flex;
+    gap: 2px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__star {
+    width: {{ s.star_size }}px;
+    height: {{ s.star_size }}px;
+    flex-shrink: 0;
+    color: var(--promo-cta-star);
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__review-label {
+    margin: 0;
+    font-size: {{ s.review_text_size }}px;
+    color: var(--promo-cta-muted);
+    line-height: 1.3;
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__headline {
+    margin: 0;
+    font-size: clamp(1.125rem, 2.8vw, {{ s.headline_size }}px);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--promo-cta-heading);
+    letter-spacing: -0.02em;
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__discount {
+    margin: 0;
+    font-size: clamp(1.25rem, 3.2vw, {{ s.discount_size }}px);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--promo-cta-heading);
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: {{ content_align_m }};
+    gap: 0.35em;
+    margin-top: 0.25rem;
+    padding: {{ s.button_padding_y }}px {{ s.button_padding_x }}px;
+    background: var(--promo-cta-accent);
+    color: {{ s.button_text_color }};
+    font-size: {{ s.button_text_size }}px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: {{ s.button_radius }}px;
+    border: none;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+    box-sizing: border-box;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  @media screen and (min-width: 750px) {
+    .promo-cta-{{ bid }} .promo-cta__body {
+      text-align: {{ text_align_d }};
+    }
+
+    .promo-cta-{{ bid }} .promo-cta__reviews {
+      align-self: {{ content_align_d }};
+    }
+
+    .promo-cta-{{ bid }} .promo-cta__btn {
+      align-self: {{ content_align_d }};
+    }
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__btn:hover {
+    opacity: 0.92;
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__btn:active {
+    transform: scale(0.98);
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__footnote {
+    margin: 0;
+    font-size: {{ s.footnote_size }}px;
+    color: var(--promo-cta-muted);
+    line-height: 1.35;
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__media {
+    flex: 0 1 {{ s.image_column_max }}%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    max-width: 280px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .promo-cta-{{ bid }} .promo-cta__media {
+      max-width: none;
+      align-self: stretch;
+    }
+  }
+
+  .promo-cta-{{ bid }} .promo-cta__media img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  @media screen and (max-width: 749px) {
+    {% if s.mobile_image_first %}
+      .promo-cta-{{ bid }} .promo-cta__media {
+        order: -1;
+        max-width: 220px;
+      }
+    {% endif %}
+  }
+{% endstyle %}
+
+<div class="promo-cta-card promo-cta-{{ bid }}" {{ block.shopify_attributes }}>
+  {% if s.show_badge and s.badge_text != blank %}
+    <div class="promo-cta__badge">{{ s.badge_text }}</div>
+  {% endif %}
+
+  <div class="promo-cta__inner">
+    <div class="promo-cta__body">
+      {% if s.show_reviews %}
+        <div class="promo-cta__reviews">
+          <ul class="promo-cta__stars" role="presentation">
+            {% for i in (1..s.star_count) %}
+              <li>
+                <svg
+                  class="promo-cta__star"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.826 1.608 8.144L12 18.896l-7.544 4.38 1.608-8.144L.587 9.306l8.332-1.151z"/>
+                </svg>
+              </li>
+            {% endfor %}
+          </ul>
+          {% if s.review_label != blank %}
+            <p class="promo-cta__review-label">{{ s.review_label }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if s.headline != blank %}
+        <p class="promo-cta__headline">{{ s.headline }}</p>
+      {% endif %}
+      {% if s.discount_line != blank %}
+        <p class="promo-cta__discount">{{ s.discount_line }}</p>
+      {% endif %}
+
+      {% if s.button_label != blank and s.button_link != blank %}
+        <a class="promo-cta__btn" href="{{ s.button_link }}"{% if s.open_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}>
+          {{- s.button_label -}}
+        </a>
+      {% elsif s.button_label != blank %}
+        <span class="promo-cta__btn" role="text">{{ s.button_label }}</span>
+      {% endif %}
+
+      {% if s.footnote != blank %}
+        <p class="promo-cta__footnote">{{ s.footnote }}</p>
+      {% endif %}
+    </div>
+
+    {% if s.image %}
+      <div class="promo-cta__media">
+        {{
+          s.image
+          | image_url: width: 1200
+          | image_tag:
+            widths: widths,
+            sizes: '(min-width: 750px) 360px, 70vw',
+            alt: img_alt,
+            loading: 'lazy'
+        }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.promo-cta-card.name",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.promo-cta-card.badge"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badge",
+      "label": "t:sections.promo-cta-card.show_badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "t:sections.promo-cta-card.badge_text",
+      "default": "In high demand and stock keeps selling out"
+    },
+    {
+      "type": "range",
+      "id": "badge_text_size",
+      "label": "t:sections.promo-cta-card.badge_text_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "badge_offset",
+      "label": "t:sections.promo-cta-card.badge_offset",
+      "min": 8,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "t:sections.promo-cta-card.reviews"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reviews",
+      "label": "t:sections.promo-cta-card.show_reviews",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "star_count",
+      "label": "t:sections.promo-cta-card.star_count",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "review_label",
+      "label": "t:sections.promo-cta-card.review_label",
+      "default": "1,524 Reviews"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "t:sections.promo-cta-card.star_size",
+      "min": 12,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "review_text_size",
+      "label": "t:sections.promo-cta-card.review_text_size",
+      "min": 11,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "t:sections.promo-cta-card.content"
+    },
+    {
+      "type": "textarea",
+      "id": "headline",
+      "label": "t:sections.promo-cta-card.headline",
+      "default": "Your Skin Knows How to Heal. It Just Needs the Signal —"
+    },
+    {
+      "type": "text",
+      "id": "discount_line",
+      "label": "t:sections.promo-cta-card.discount_line",
+      "default": "30% OFF"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:sections.promo-cta-card.button_label",
+      "default": "Check Availability >>"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "t:sections.promo-cta-card.button_link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab",
+      "label": "t:sections.promo-cta-card.open_new_tab",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "footnote",
+      "label": "t:sections.promo-cta-card.footnote",
+      "default": "60-day money back guarantee"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.promo-cta-card.content_alignment_header"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment_desktop",
+      "label": "t:sections.promo-cta-card.content_alignment_desktop",
+      "options": [
+        { "value": "flex-start", "label": "t:options.left" },
+        { "value": "center", "label": "t:options.center" },
+        { "value": "flex-end", "label": "t:options.right" }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment_mobile",
+      "label": "t:sections.promo-cta-card.content_alignment_mobile",
+      "options": [
+        { "value": "flex-start", "label": "t:options.left" },
+        { "value": "center", "label": "t:options.center" },
+        { "value": "flex-end", "label": "t:options.right" }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.promo-cta-card.media"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:sections.promo-cta-card.image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "t:sections.promo-cta-card.image_alt"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "t:sections.promo-cta-card.image_position",
+      "options": [
+        { "value": "right", "label": "t:sections.promo-cta-card.image_right" },
+        { "value": "left", "label": "t:sections.promo-cta-card.image_left" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_image_first",
+      "label": "t:sections.promo-cta-card.mobile_image_first",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "image_column_max",
+      "label": "t:sections.promo-cta-card.image_column_max",
+      "min": 35,
+      "max": 55,
+      "step": 1,
+      "unit": "%",
+      "default": 44
+    },
+    {
+      "type": "header",
+      "content": "t:sections.promo-cta-card.colors"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "t:sections.promo-cta-card.card_background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "t:sections.promo-cta-card.border_color",
+      "default": "#E32636"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "t:sections.promo-cta-card.accent_color",
+      "default": "#E32636"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "t:sections.promo-cta-card.heading_color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "muted_text_color",
+      "label": "t:sections.promo-cta-card.muted_text_color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "t:sections.promo-cta-card.star_color",
+      "default": "#E32636"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "t:sections.promo-cta-card.badge_text_color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "t:sections.promo-cta-card.button_text_color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.promo-cta-card.layout_type"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "t:sections.promo-cta-card.border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:sections.promo-cta-card.border_radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "inner_padding",
+      "label": "t:sections.promo-cta-card.inner_padding",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "t:sections.promo-cta-card.column_gap",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "body_gap",
+      "label": "t:sections.promo-cta-card.body_gap",
+      "min": 8,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "t:sections.promo-cta-card.typography_buttons"
+    },
+    {
+      "type": "range",
+      "id": "headline_size",
+      "label": "t:sections.promo-cta-card.headline_size",
+      "min": 18,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "discount_size",
+      "label": "t:sections.promo-cta-card.discount_size",
+      "min": 18,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "button_text_size",
+      "label": "t:sections.promo-cta-card.button_text_size",
+      "min": 13,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_padding_y",
+      "label": "t:sections.promo-cta-card.button_padding_y",
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_x",
+      "label": "t:sections.promo-cta-card.button_padding_x",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "t:sections.promo-cta-card.button_radius",
+      "min": 0,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "footnote_size",
+      "label": "t:sections.promo-cta-card.footnote_size",
+      "min": 11,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.promo-cta-card.name",
+      "category": "t:categories.product",
+      "settings": {
+        "show_badge": true,
+        "badge_text": "In high demand and stock keeps selling out",
+        "headline": "Your Skin Knows How to Heal. It Just Needs the Signal —",
+        "discount_line": "30% OFF",
+        "button_label": "Check Availability >>",
+        "footnote": "60-day money back guarantee",
+        "review_label": "1,524 Reviews",
+        "accent_color": "#E32636",
+        "border_color": "#E32636",
+        "star_color": "#E32636"
+      }
+    }
+  ]
+}
+{% endschema %}

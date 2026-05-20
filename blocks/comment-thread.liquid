@@ -1,0 +1,368 @@
+{%- liquid
+  assign s = block.settings
+-%}
+<div
+  class="comment-thread comment-thread--{{ block.id }}{% if s.author_image == blank %} comment-thread--no-avatar{% endif %}"
+  style="
+    --comment-name-color: {{ s.name_color | default: '#2b4c7e' }};
+    --comment-body-color: {{ s.body_color | default: '#333333' }};
+    --comment-muted-color: {{ s.muted_color | default: '#8e8e8e' }};
+    --comment-like-color: {{ s.like_icon_color | default: '#1877f2' }};
+    --comment-divider: {{ s.divider_color | default: '#eeeeee' }};
+    --comment-bg: {{ s.background_color | default: '#ffffff' }};
+    --comment-avatar-size: {{ s.avatar_size }}px;
+    --comment-avatar-gap: {{ s.avatar_gap }}px;
+  "
+  {{ block.shopify_attributes }}
+>
+  {% render 'comment-thread-row', settings: s, shopify_attributes: '' %}
+
+  <div
+    class="comment-thread__replies{% if block.blocks.size == 0 %} comment-thread__replies--empty{% endif %}"
+  >
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+<style>
+  .comment-thread--{{ block.id }} {
+    background: var(--comment-bg);
+    padding-bottom: {{ s.thread_spacing }}px;
+    border-bottom: {{ s.divider_width }}px solid var(--comment-divider);
+    margin-bottom: {{ s.thread_spacing }}px;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--comment-avatar-gap);
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__avatar {
+    width: var(--ctr-avatar, var(--comment-avatar-size));
+    height: var(--ctr-avatar, var(--comment-avatar-size));
+    flex-shrink: 0;
+    border-radius: 2px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__name {
+    font-weight: 700;
+    font-size: {{ s.name_size }}px;
+    line-height: 1.3;
+    color: var(--comment-name-color);
+    margin: 0 0 0.35rem;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__text {
+    font-size: {{ s.body_size }}px;
+    line-height: 1.5;
+    color: var(--comment-body-color);
+    margin: 0 0 0.45rem;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__text p {
+    margin: 0 0 0.5rem;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    font-size: {{ s.meta_size }}px;
+    line-height: 1.3;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__links {
+    display: inline-flex;
+    gap: 0.75rem;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__link {
+    color: var(--comment-muted-color);
+    cursor: default;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__likes {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--comment-name-color);
+    font-weight: 600;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__like-icon {
+    display: inline-flex;
+    color: var(--comment-like-color);
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__like-num {
+    color: var(--comment-name-color);
+    font-weight: 600;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread-row__time {
+    margin-left: auto;
+    color: var(--comment-muted-color);
+    font-weight: 400;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread__replies {
+    margin-top: 0.65rem;
+    margin-left: calc(var(--comment-avatar-size) + var(--comment-avatar-gap));
+    padding-left: 14px;
+    border-left: 2px solid var(--comment-divider);
+  }
+
+  .comment-thread--{{ block.id }}.comment-thread--no-avatar .comment-thread__replies:not(.comment-thread__replies--empty) {
+    margin-left: 0;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread__replies--empty {
+    margin-top: 0;
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread__replies .comment-thread-row {
+    margin-top: 0.85rem;
+  }
+
+  .comment-thread--{{ block.id }} .comment-thread__replies .comment-thread__reply-item:first-child .comment-thread-row {
+    margin-top: 0.25rem;
+  }
+
+  @media (max-width: 749px) {
+    .comment-thread--{{ block.id }} .comment-thread-row__actions {
+      gap: 0.35rem 0.75rem;
+    }
+    .comment-thread--{{ block.id }} .comment-thread-row__time {
+      margin-left: 0;
+      width: 100%;
+      flex-basis: 100%;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Comment thread",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_comment-reply"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Comment"
+    },
+    {
+      "type": "image_picker",
+      "id": "author_image",
+      "label": "Profile image"
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Name",
+      "default": "Skyler M."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Comment text",
+      "default": "<p>I've tried so many serums, but nothing compares to this one — it's become a staple in my routine.</p>"
+    },
+    {
+      "type": "text",
+      "id": "like_count",
+      "label": "Like count",
+      "default": "12"
+    },
+    {
+      "type": "text",
+      "id": "time_ago",
+      "label": "Time (display text)",
+      "default": "39 min"
+    },
+    {
+      "type": "text",
+      "id": "like_label",
+      "label": "Like label",
+      "default": "Like"
+    },
+    {
+      "type": "text",
+      "id": "reply_label",
+      "label": "Reply label",
+      "default": "Reply"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reply_link",
+      "label": "Show Reply link",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "avatar_size",
+      "min": 32,
+      "max": 56,
+      "step": 2,
+      "unit": "px",
+      "label": "Avatar size",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "avatar_gap",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Space beside avatar",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "thread_spacing",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Space between threads",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom divider thickness",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "name_size",
+      "min": 13,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Name size",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "min": 13,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Body text size",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "meta_size",
+      "min": 11,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "label": "Like / time size",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "name_color",
+      "label": "Name",
+      "default": "#2b4c7e"
+    },
+    {
+      "type": "color",
+      "id": "body_color",
+      "label": "Body text",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Links & time",
+      "default": "#8e8e8e"
+    },
+    {
+      "type": "color",
+      "id": "like_icon_color",
+      "label": "Like icon",
+      "default": "#1877f2"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Dividers",
+      "default": "#eeeeee"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Comment thread",
+      "category": "Custom",
+      "blocks": {
+        "reply-1": {
+          "type": "_comment-reply",
+          "settings": {
+            "author_name": "Customer Service",
+            "body": "<p>We appreciate your kind words!</p>",
+            "like_count": "3",
+            "time_ago": "30 min"
+          }
+        }
+      },
+      "block_order": ["reply-1"]
+    }
+  ]
+}
+{% endschema %}

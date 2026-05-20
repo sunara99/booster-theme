@@ -1,0 +1,156 @@
+{%- liquid
+  assign s = block.settings
+  assign label_stripped = s.label | default: '' | strip
+  assign field_raw = s.field_name | strip | handleize
+  if field_raw == blank
+    assign field_key = 'preferred_date'
+  else
+    assign field_key = field_raw
+  endif
+  assign input_id = 'ContactForm-date-' | append: block.id
+  assign posted = form[field_key]
+-%}
+{%- if label_stripped != blank -%}
+  <div class="contact-form__floating-select-wrapper" {{ block.shopify_attributes }}>
+    <div class="contact-form__floating-select">
+      <input
+        type="date"
+        id="{{ input_id }}"
+        class="contact-form__input contact-form__floating-date-control"
+        name="contact[{{ field_key }}]"
+        value="{{ posted | escape }}"
+        {% if s.placeholder != blank %}
+          placeholder="{{ s.placeholder | escape }}"
+        {% endif %}
+        {% if s.required %}
+          required
+          aria-required="true"
+        {% endif %}
+        {% if s.min_date != blank %}
+          min="{{ s.min_date | strip | escape }}"
+        {% endif %}
+        {% if s.max_date != blank %}
+          max="{{ s.max_date | strip | escape }}"
+        {% endif %}
+      >
+      <label class="contact-form__floating-select-label" for="{{ input_id }}">
+        {{- s.label | escape -}}
+      </label>
+    </div>
+  </div>
+{%- else -%}
+  <div {{ block.shopify_attributes }}>
+    <input
+      type="date"
+      id="{{ input_id }}"
+      class="contact-form__input contact-form__input--date"
+      name="contact[{{ field_key }}]"
+      value="{{ posted | escape }}"
+      {% if s.placeholder != blank %}
+        placeholder="{{ s.placeholder | escape }}"
+        aria-label="{{ s.placeholder | escape }}"
+      {% else %}
+        aria-label="{{ 'blocks.contact_form.date' | t }}"
+      {% endif %}
+      {% if s.required %}
+        required
+        aria-required="true"
+      {% endif %}
+      {% if s.min_date != blank %}
+        min="{{ s.min_date | strip | escape }}"
+      {% endif %}
+      {% if s.max_date != blank %}
+        max="{{ s.max_date | strip | escape }}"
+      {% endif %}
+    >
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  /**
+   * Must beat .contact-form__input { padding: … } from the parent contact-form block
+   * when stylesheets are merged (otherwise the floating label has no reserved space).
+   */
+  .contact-form__floating-select .contact-form__input.contact-form__floating-date-control {
+    padding-block: calc(var(--padding-xl) + 0.65rem) var(--padding-md);
+    padding-inline: var(--padding-xl);
+    min-height: calc(var(--padding-lg) * 2 + 1.35em);
+  }
+
+  .contact-form__input.contact-form__input--date {
+    min-height: calc(var(--padding-lg) * 2 + 1.2em);
+  }
+
+  .contact-form__floating-select-wrapper {
+    width: 100%;
+  }
+
+  .contact-form__floating-select {
+    position: relative;
+    width: 100%;
+  }
+
+  .contact-form__floating-select .contact-form__floating-select-label {
+    position: absolute;
+    inset-inline-start: var(--padding-xl);
+    top: var(--padding-md);
+    z-index: 1;
+    font-size: max(0.75rem, var(--font-size--xs));
+    line-height: 1.2;
+    color: var(--color-foreground-muted);
+    pointer-events: none;
+    transition: color 0.15s ease;
+  }
+
+  .contact-form__floating-select .contact-form__input.contact-form__floating-date-control:focus + .contact-form__floating-select-label {
+    color: var(--color-foreground);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.contact_form_date",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:settings.label",
+      "default": "Preferred date"
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "t:settings.placeholder",
+      "default": "Choose a date",
+      "info": "t:settings.contact_form_date_placeholder_info"
+    },
+    {
+      "type": "text",
+      "id": "field_name",
+      "label": "t:settings.form_field_name",
+      "default": "preferred_date",
+      "info": "t:settings.form_field_name_info"
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "t:settings.required",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "min_date",
+      "label": "t:settings.contact_form_date_min",
+      "info": "t:settings.contact_form_date_min_max_info"
+    },
+    {
+      "type": "text",
+      "id": "max_date",
+      "label": "t:settings.contact_form_date_max",
+      "info": "t:settings.contact_form_date_min_max_info"
+    }
+  ],
+  "presets": []
+}
+{% endschema %}

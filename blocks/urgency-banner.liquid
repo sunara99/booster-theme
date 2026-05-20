@@ -1,0 +1,466 @@
+{% liquid
+  assign block_id = block.id | replace: '_', '' | downcase
+  assign s = block.settings
+  assign sold_percent = s.sold_percentage | default: 53
+  if sold_percent > 100
+    assign sold_percent = 100
+  elsif sold_percent < 0
+    assign sold_percent = 0
+  endif
+
+  comment
+    Dynamic date: compute from "days from today" so the displayed date updates automatically.
+  endcomment
+  if s.date_mode == 'dynamic'
+    assign days_to_add = s.days_from_today | default: 4
+    assign seconds_per_day = 86400
+    assign seconds_to_add = seconds_per_day | times: days_to_add
+    assign now_epoch = 'now' | date: '%s'
+    assign future_epoch = now_epoch | plus: seconds_to_add
+    assign format = s.date_format | default: '%B %d'
+    assign arrival_date_display = future_epoch | date: format
+  else
+    assign arrival_date_display = s.arrival_date
+  endif
+%}
+
+{% style %}
+  .urgency-banner-{{ block_id }} {
+    background-color: {{ s.background_color }};
+    border: 1px solid {{ s.accent_color }};
+    border-radius: {{ s.border_radius }}px;
+    padding: {{ s.padding }}px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__features {
+    display: flex;
+    gap: {{ s.feature_gap }}px;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: {{ s.feature_text_size }}px;
+    color: {{ s.text_color }};
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__date {
+    font-weight: {% if s.date_bold %}700{% else %}400{% endif %};
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__feature-icon {
+    flex-shrink: 0;
+    width: {{ s.icon_size }}px;
+    height: {{ s.icon_size }}px;
+    border-radius: 50%;
+    background-color: {{ s.accent_color }};
+    color: {{ s.icon_check_color }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc({{ s.icon_size }}px * 0.6);
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__divider {
+    height: 1px;
+    background-color: {{ s.accent_color }};
+    border: none;
+    margin: {{ s.section_spacing }}px 0;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__urgency-heading {
+    font-size: {{ s.heading_size }}px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: {{ s.text_color }};
+    text-align: center;
+    margin: 0 0 0.25rem 0;
+    letter-spacing: 0.02em;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__urgency-subtitle {
+    font-size: {{ s.subtitle_size }}px;
+    font-weight: 400;
+    color: {{ s.text_color }};
+    text-align: center;
+    margin: 0 0 {{ s.section_spacing }}px 0;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__progress-wrap {
+    background-color: {{ s.progress_track_color }};
+    border: 1px solid {{ s.accent_color }};
+    border-radius: {{ s.progress_border_radius }}px;
+    height: {{ s.progress_height }}px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: {{ sold_percent }}%;
+    background-color: {{ s.accent_color }};
+    border-radius: {{ s.progress_border_radius }}px 0 0 {{ s.progress_border_radius }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: fit-content;
+    transition: width 0.3s ease;
+  }
+
+  .urgency-banner-{{ block_id }} .urgency-banner__progress-label {
+    font-size: {{ s.progress_text_size }}px;
+    font-weight: 700;
+    color: {{ s.progress_text_color }};
+    white-space: nowrap;
+    padding: 0 8px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.2;
+  }
+{% endstyle %}
+
+<div class="urgency-banner urgency-banner-{{ block_id }}" {{ block.shopify_attributes }}>
+  <ul class="urgency-banner__features">
+    {% if s.feature_1_label != blank or arrival_date_display != blank %}
+      <li class="urgency-banner__feature">
+        <span class="urgency-banner__feature-icon" aria-hidden="true">✓</span>
+        <span>{{ s.feature_1_label }} <span class="urgency-banner__date">{{ arrival_date_display }}</span></span>
+      </li>
+    {% endif %}
+    {% if s.feature_2 != blank %}
+      <li class="urgency-banner__feature">
+        <span class="urgency-banner__feature-icon" aria-hidden="true">✓</span>
+        <span>{{ s.feature_2 }}</span>
+      </li>
+    {% endif %}
+    {% if s.feature_3 != blank %}
+      <li class="urgency-banner__feature">
+        <span class="urgency-banner__feature-icon" aria-hidden="true">✓</span>
+        <span>{{ s.feature_3 }}</span>
+      </li>
+    {% endif %}
+  </ul>
+
+  <hr class="urgency-banner__divider">
+
+  {% if s.heading != blank or s.subtitle != blank %}
+    <div class="urgency-banner__urgency">
+      {% if s.heading != blank %}
+        <p class="urgency-banner__urgency-heading">{{ s.heading }}</p>
+      {% endif %}
+      {% if s.subtitle != blank %}
+        <p class="urgency-banner__urgency-subtitle">{{ s.subtitle }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="urgency-banner__progress-wrap">
+    <div class="urgency-banner__progress-fill">
+      <span class="urgency-banner__progress-label">{{ sold_percent }}% {{ s.progress_suffix }}</span>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.urgency-banner.name",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.urgency-banner.date_features"
+    },
+    {
+      "type": "select",
+      "id": "date_mode",
+      "label": "t:sections.urgency-banner.date",
+      "options": [
+        { "value": "fixed", "label": "t:sections.urgency-banner.date_mode_fixed" },
+        { "value": "dynamic", "label": "t:sections.urgency-banner.date_mode_dynamic" }
+      ],
+      "default": "dynamic"
+    },
+    {
+      "type": "range",
+      "id": "days_from_today",
+      "label": "t:sections.urgency-banner.days_from_today",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "default": 4,
+      "visible_if": "{{ block.settings.date_mode == 'dynamic' }}"
+    },
+    {
+      "type": "select",
+      "id": "date_format",
+      "label": "t:sections.urgency-banner.date_format",
+      "options": [
+        { "value": "%B %d", "label": "February 12" },
+        { "value": "%b %d", "label": "Feb 12" },
+        { "value": "%d %B", "label": "12 February" },
+        { "value": "%B %d, %Y", "label": "February 12, 2026" },
+        { "value": "%a, %b %d", "label": "Wed, Feb 12" }
+      ],
+      "default": "%B %d",
+      "visible_if": "{{ block.settings.date_mode == 'dynamic' }}"
+    },
+    {
+      "type": "text",
+      "id": "arrival_date",
+      "label": "t:sections.urgency-banner.arrival_date",
+      "default": "February 12",
+      "visible_if": "{{ block.settings.date_mode == 'fixed' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "date_bold",
+      "label": "t:sections.urgency-banner.date_bold",
+      "default": false
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_1_label",
+      "label": "t:sections.urgency-banner.feature_1_label",
+      "default": "Estimated arrival"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_2",
+      "label": "t:sections.urgency-banner.feature_2",
+      "default": "1-Year Warranty"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "feature_3",
+      "label": "t:sections.urgency-banner.feature_3",
+      "default": "Free Shipping"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.urgency-banner.urgency_message"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:sections.urgency-banner.heading",
+      "default": "SELLING OUT FAST"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "subtitle",
+      "label": "t:sections.urgency-banner.subtitle",
+      "default": "Due to high demand, limited quantities available"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.urgency-banner.progress_bar"
+    },
+    {
+      "type": "range",
+      "id": "sold_percentage",
+      "label": "t:sections.urgency-banner.sold_percentage",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 53
+    },
+    {
+      "type": "text",
+      "id": "progress_suffix",
+      "label": "t:sections.urgency-banner.progress_suffix",
+      "default": "SOLD"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:sections.urgency-banner.background_color",
+      "default": "#FDF6F6"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "t:sections.urgency-banner.accent_color",
+      "default": "#70262F"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:sections.urgency-banner.text_color",
+      "default": "#70262F"
+    },
+    {
+      "type": "color",
+      "id": "icon_check_color",
+      "label": "t:sections.urgency-banner.icon_check_color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "progress_track_color",
+      "label": "t:sections.urgency-banner.progress_track_color",
+      "default": "#F6F6F6"
+    },
+    {
+      "type": "color",
+      "id": "progress_text_color",
+      "label": "t:sections.urgency-banner.progress_text_color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.urgency-banner.layout_size"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "t:settings.padding",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "feature_gap",
+      "label": "t:settings.spacing",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "section_spacing",
+      "label": "t:settings.spacing",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "t:sections.timer.icon_size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "feature_text_size",
+      "label": "t:sections.timer.text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "t:sections.timer.heading_size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "label": "t:sections.timer.text_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "progress_height",
+      "label": "t:sections.timer.number_size",
+      "min": 10,
+      "max": 56,
+      "step": 1,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "progress_text_size",
+      "label": "t:sections.timer.text_size",
+      "min": 11,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "progress_border_radius",
+      "label": "t:sections.timer.border_radius",
+      "min": 0,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.urgency-banner.name",
+      "category": "t:categories.product",
+      "settings": {
+        "date_mode": "dynamic",
+        "days_from_today": 4,
+        "date_format": "%B %d",
+        "arrival_date": "February 12",
+        "feature_1_label": "Estimated arrival",
+        "feature_2": "1-Year Warranty",
+        "feature_3": "Free Shipping",
+        "heading": "SELLING OUT FAST",
+        "subtitle": "Due to high demand, limited quantities available",
+        "sold_percentage": 53,
+        "progress_suffix": "SOLD",
+        "background_color": "#FDF6F6",
+        "accent_color": "#70262F",
+        "text_color": "#70262F"
+      }
+    }
+  ]
+}
+{% endschema %}

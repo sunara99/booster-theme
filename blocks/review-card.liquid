@@ -1,0 +1,390 @@
+{%- liquid
+  assign s = block.settings
+  assign star_rating = s.star_rating | default: 5
+  assign full_stars = star_rating | floor
+  assign remainder = star_rating | minus: full_stars
+  assign next_after_full = full_stars | plus: 1
+-%}
+
+<div
+  class="review-card review-card--{{ block.id }}"
+  style="
+    --review-card-bg: {{ s.background_color | default: '#F8F7F4' }};
+    --review-card-text: {{ s.text_color | default: 'rgb(0, 0, 0)' }};
+    --review-card-title-size: {{ s.title_size }}px;
+    --review-card-body-size: {{ s.body_size }}px;
+    --review-card-star-color: {{ s.star_color | default: '#D4AF37' }};
+    --review-card-star-size: {{ s.star_size }}px;
+    --review-card-radius: {{ s.corner_radius }}px;
+    --review-card-border-width: {{ s.border_width }}px;
+    --review-card-border-color: {{ s.border_color | default: 'rgba(0, 0, 0, 0.1)' }};
+    --review-card-padding: {{ s.padding_top }}px {{ s.padding_sides }}px {{ s.padding_bottom }}px;
+    --review-card-avatar-size: {{ s.avatar_size }}px;
+  "
+  {{ block.shopify_attributes }}
+>
+  <div class="review-card__inner">
+    {%- comment -%} Star rating {%- endcomment -%}
+    <div class="review-card__stars" aria-label="{{ star_rating }} out of 5 stars">
+      {%- for i in (1..5) -%}
+        {%- if i <= full_stars -%}
+          <svg class="review-card__star review-card__star--filled" viewBox="0 0 24 24" fill="var(--review-card-star-color)" aria-hidden="true">
+            <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.826 1.608 8.144L12 18.896l-7.544 4.38 1.608-8.144L.587 9.306l8.332-1.151z"/>
+          </svg>
+        {%- elsif i == next_after_full and remainder > 0 -%}
+          <span class="review-card__star review-card__star--half" style="--star-color: var(--review-card-star-color);">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <defs>
+                <linearGradient id="review-card-half-{{ block.id }}">
+                  <stop offset="50%" stop-color="var(--star-color)"/>
+                  <stop offset="50%" stop-color="rgba(0,0,0,0.08)"/>
+                </linearGradient>
+              </defs>
+              <path fill="url(#review-card-half-{{ block.id }})" d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.826 1.608 8.144L12 18.896l-7.544 4.38 1.608-8.144L.587 9.306l8.332-1.151z"/>
+            </svg>
+          </span>
+        {%- else -%}
+          <svg class="review-card__star review-card__star--empty" viewBox="0 0 24 24" fill="rgba(0,0,0,0.08)" aria-hidden="true">
+            <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.826 1.608 8.144L12 18.896l-7.544 4.38 1.608-8.144L.587 9.306l8.332-1.151z"/>
+          </svg>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if s.title != blank -%}
+      <h3 class="review-card__title">{{ s.title }}</h3>
+    {%- endif -%}
+
+    {%- if s.body != blank -%}
+      <div class="review-card__body">{{ s.body }}</div>
+    {%- endif -%}
+
+    <div class="review-card__author">
+      {%- if s.author_image != blank -%}
+        <div class="review-card__avatar">
+          {{ s.author_image | image_url: width: 120 | image_tag: loading: 'lazy', alt: s.author_name, class: 'review-card__avatar-img' }}
+        </div>
+      {%- else -%}
+        <div class="review-card__avatar review-card__avatar--placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
+      {%- endif -%}
+      <div class="review-card__author-info">
+        <span class="review-card__author-name">{{ s.author_name | default: 'Customer' }}</span>
+        {%- if s.show_verified -%}
+          <span class="review-card__verified">
+            <span class="review-card__verified-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm4.707-12.293a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L11 13.586l4.293-4.293a1 1 0 011.414 0z"/></svg>
+            </span>
+            <span class="review-card__verified-text">{{ s.verified_text | default: 'Verified Customer' }}</span>
+          </span>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .review-card--{{ block.id }} {
+    --review-card-star-size: {{ s.star_size }}px;
+    background-color: var(--review-card-bg);
+    color: var(--review-card-text);
+    border-radius: var(--review-card-radius);
+    border-width: var(--review-card-border-width);
+    border-style: solid;
+    border-color: var(--review-card-border-color);
+    padding: var(--review-card-padding);
+  }
+
+  .review-card__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .review-card__stars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .review-card--{{ block.id }} .review-card__star {
+    display: inline-block;
+    flex-shrink: 0;
+    width: var(--review-card-star-size);
+    height: var(--review-card-star-size);
+  }
+
+  .review-card--{{ block.id }} .review-card__star svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .review-card__title {
+    margin: 0;
+    font-size: var(--review-card-title-size);
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+  }
+
+  .review-card__body {
+    font-size: var(--review-card-body-size);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .review-card__author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .review-card__avatar {
+    width: var(--review-card-avatar-size);
+    height: var(--review-card-avatar-size);
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.06);
+  }
+
+  .review-card__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .review-card__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .review-card__avatar--placeholder svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.5;
+  }
+
+  .review-card__author-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .review-card__author-name {
+    font-size: var(--review-card-body-size);
+    font-weight: 500;
+  }
+
+  .review-card__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: calc(var(--review-card-body-size) * 0.9);
+    color: var(--review-card-text);
+    opacity: 0.85;
+  }
+
+  .review-card__verified-icon {
+    display: inline-flex;
+    color: var(--review-card-text);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Review card",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Rating"
+    },
+    {
+      "type": "range",
+      "id": "star_rating",
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "label": "Star rating",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "min": 14,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "label": "Star size",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#D4AF37"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Review title",
+      "default": "GREAT FLAVOR!"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "body",
+      "label": "Review text",
+      "default": "I used to grab a second coffee to get through the day, but it left me jittery with liquid i.v., I feel refreshed, focused, and hydrated without the crash it's a must-have in my daily routine now."
+    },
+    {
+      "type": "header",
+      "content": "Reviewer"
+    },
+    {
+      "type": "image_picker",
+      "id": "author_image",
+      "label": "Profile image"
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Reviewer name",
+      "default": "Isaac M."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_verified",
+      "label": "Show verified badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "verified_text",
+      "label": "Verified badge text",
+      "default": "Verified Customer",
+      "visible_if": "{{ block.settings.show_verified }}"
+    },
+    {
+      "type": "range",
+      "id": "avatar_size",
+      "min": 32,
+      "max": 56,
+      "step": 2,
+      "unit": "px",
+      "label": "Avatar size",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Title size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Body text size",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Design"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F8F7F4"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Corner radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e0ddd6"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_sides",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding left & right",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Review card",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

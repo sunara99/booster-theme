@@ -1,0 +1,30 @@
+{% liquid
+  assign input_id = 'ContactForm-phone-' | append: block.id
+%}
+<div {{ block.shopify_attributes }}>
+  <label
+    class="visually-hidden"
+    for="{{ input_id }}"
+  >
+    {{- 'blocks.contact_form.phone' | t -}}
+  </label>
+  <input
+    type="tel"
+    id="{{ input_id }}"
+    class="contact-form__input"
+    autocomplete="tel"
+    name="contact[phone]"
+    pattern="[0-9\-]*"
+    value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
+    placeholder="{{ 'blocks.contact_form.phone' | t }}"
+  >
+</div>
+
+{% schema %}
+{
+  "name": "t:names.contact_form_phone", 
+  "tag": null,
+  "settings": [],
+  "presets": []
+}
+{% endschema %}

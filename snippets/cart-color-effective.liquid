@@ -1,0 +1,49 @@
+{%- doc -%}
+  Normalizes cart color settings so fully transparent values do not override the theme.
+
+  @param {string} color - Color string
+  @param {string} [fallback] - Used when color is blank, then transparency is evaluated
+  @param {boolean} [for_background] - If true, returns empty when transparent (omit background). Otherwise returns inherit.
+{%- enddoc -%}
+{%- liquid
+  assign for_background = for_background | default: false
+  assign c = color | strip
+  if c == blank and fallback != blank
+    assign c = fallback | strip
+  endif
+
+  assign is_clear = false
+  if c == blank
+    assign is_clear = true
+  else
+    assign cl = c | downcase | replace: ' ', ''
+    if cl == 'transparent'
+      assign is_clear = true
+    elsif cl == 'rgba(0,0,0,0)' or cl == 'rgba(0,0,0,0.0)'
+      assign is_clear = true
+    else
+      assign hex = cl | remove: '#'
+      if hex.size == 8
+        assign a = hex | slice: 6, 2 | downcase
+        if a == '00'
+          assign is_clear = true
+        endif
+      endif
+    endif
+  endif
+
+  if for_background
+    if is_clear
+      assign out = ''
+    else
+      assign out = c
+    endif
+  else
+    if is_clear
+      assign out = 'inherit'
+    else
+      assign out = c
+    endif
+  endif
+-%}
+{{- out -}}

@@ -1,0 +1,1207 @@
+
+{% assign block_id = block.id | replace: '_', '' | downcase %}
+{% assign swiper_id = 'video-swiper-' | append: block_id %}
+
+{% liquid
+  if block.settings.aspect_ratio == 'auto'
+    assign aspect_ratio_value = 'auto'
+  elsif block.settings.aspect_ratio == 'square'
+    assign aspect_ratio_value = '1 / 1'
+  elsif block.settings.aspect_ratio == 'portrait'
+    assign aspect_ratio_value = '3 / 4'
+  elsif block.settings.aspect_ratio == 'widescreen'
+    assign aspect_ratio_value = '16 / 9'
+  else
+    assign aspect_ratio_value = '16 / 9'
+  endif
+%}
+
+{% style %}
+  .lumin-video-swiper-{{ block_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    {% if block.settings.background %}
+      background-color: {{ block.settings.background_color | default: '#00000026' }};
+      border-radius: {{ block.settings.corner_radius }}px;
+    {% endif %}
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper {
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-wrapper {
+    display: flex;
+    align-items: flex-start;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  .lumin-video-swiper-{{ block_id }}[data-autoplay-smooth="true"] .swiper-wrapper {
+    transition-timing-function: linear;
+  }
+
+  /* Mobile-first (matches Swiper below 750px; !important beats Swiper inline widths — see blocks/slider-swiper.liquid) */
+  .lumin-video-swiper-{{ block_id }} .swiper-slide {
+    flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }});
+    width: calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }});
+    max-width: calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }});
+    {% if block.settings.aspect_ratio == 'auto' %}
+    aspect-ratio: 16 / 9;
+    {% else %}
+    aspect-ratio: {{ aspect_ratio_value }};
+    {% endif %}
+    height: auto;
+    position: relative;
+    background-color: {{ block.settings.video_background_color }};
+    border-radius: {{ block.settings.video_border_radius }}px;
+    overflow: hidden;
+    box-sizing: border-box;
+    contain: layout;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-slide-active,
+  .lumin-video-swiper-{{ block_id }} .swiper-slide-next,
+  .lumin-video-swiper-{{ block_id }} .swiper-slide-prev {
+    flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }}) !important;
+    width: calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }}) !important;
+    max-width: calc((100% - ({{ block.settings.slides_per_view_mobile | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_mobile }}) !important;
+    height: auto !important;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lumin-video-swiper-{{ block_id }} .swiper-slide {
+      flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }});
+      width: calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }});
+      max-width: calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }});
+    }
+
+    .lumin-video-swiper-{{ block_id }} .swiper-slide-active,
+    .lumin-video-swiper-{{ block_id }} .swiper-slide-next,
+    .lumin-video-swiper-{{ block_id }} .swiper-slide-prev {
+      flex: 0 0 calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }}) !important;
+      width: calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }}) !important;
+      max-width: calc((100% - ({{ block.settings.slides_per_view_desktop | minus: 1 }} * {{ block.settings.gap }}px)) / {{ block.settings.slides_per_view_desktop }}) !important;
+      height: auto !important;
+    }
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-slide iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .lumin-video-wrapper-{{ block_id }} {
+    position: relative;
+    width: 100%;
+    {% if block.settings.aspect_ratio == 'auto' %}
+      height: auto;
+    {% else %}
+      aspect-ratio: {{ aspect_ratio_value }};
+    {% endif %}
+  }
+
+  .lumin-video-swiper-{{ block_id }} .lumin-video-wrapper-{{ block_id }}.playing {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="1"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>') 16 16, pointer;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .lumin-video-placeholder-{{ block_id }} {
+    width: 100%;
+    {% if block.settings.aspect_ratio == 'auto' %}
+      aspect-ratio: 16 / 9;
+    {% else %}
+      aspect-ratio: {{ aspect_ratio_value }};
+    {% endif %}
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .lumin-video-placeholder-{{ block_id }} svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+  }
+
+  .lumin-video-empty-state-{{ block_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .lumin-video-play-button-{{ block_id }} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: {{ block.settings.play_button_size }}px;
+    height: {{ block.settings.play_button_size }}px;
+    min-width: {{ block.settings.play_button_size }}px;
+    min-height: {{ block.settings.play_button_size }}px;
+    background-color: {{ block.settings.play_button_color }};
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+    opacity: {{ block.settings.play_button_opacity | divided_by: 100.0 }};
+    contain: layout style;
+  }
+
+  .lumin-video-play-button-{{ block_id }}:hover {
+    background-color: {{ block.settings.play_button_hover_color }};
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+
+  .lumin-video-play-button-{{ block_id }}.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .lumin-video-play-button-{{ block_id }} .icon-play {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lumin-video-play-button-{{ block_id }} .icon-play svg {
+    width: calc({{ block.settings.play_button_size }}px * 0.4);
+    height: calc({{ block.settings.play_button_size }}px * 0.4);
+    min-width: calc({{ block.settings.play_button_size }}px * 0.4);
+    min-height: calc({{ block.settings.play_button_size }}px * 0.4);
+    flex-shrink: 0;
+    color: {{ block.settings.play_button_icon_color }};
+  }
+
+  .lumin-video-mute-button-{{ block_id }} {
+    position: absolute;
+    top: {{ block.settings.mute_button_offset }}px;
+    right: {{ block.settings.mute_button_offset }}px;
+    width: {{ block.settings.mute_button_size }}px;
+    height: {{ block.settings.mute_button_size }}px;
+    min-width: {{ block.settings.mute_button_size }}px;
+    min-height: {{ block.settings.mute_button_size }}px;
+    background-color: {{ block.settings.mute_button_color }};
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    opacity: {{ block.settings.mute_button_opacity | divided_by: 100.0 }};
+  }
+
+  .lumin-video-mute-button-{{ block_id }}:hover {
+    background-color: {{ block.settings.mute_button_hover_color }};
+    opacity: 1;
+  }
+
+  .lumin-video-mute-button-{{ block_id }} svg {
+    width: calc({{ block.settings.mute_button_size }}px * 0.5);
+    height: calc({{ block.settings.mute_button_size }}px * 0.5);
+    min-width: calc({{ block.settings.mute_button_size }}px * 0.5);
+    min-height: calc({{ block.settings.mute_button_size }}px * 0.5);
+    flex-shrink: 0;
+    fill: {{ block.settings.mute_button_icon_color }};
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-button-next,
+  .lumin-video-swiper-{{ block_id }} .swiper-button-prev {
+    background-color: {{ block.settings.nav_button_color }};
+    color: {{ block.settings.nav_button_icon_color }};
+    width: {{ block.settings.nav_button_size }}px;
+    height: {{ block.settings.nav_button_size }}px;
+    border-radius: 50%;
+    opacity: {{ block.settings.nav_button_opacity | divided_by: 100.0 }};
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-button-next:hover,
+  .lumin-video-swiper-{{ block_id }} .swiper-button-prev:hover {
+    background-color: {{ block.settings.nav_button_hover_color }};
+    opacity: 1;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-button-next::after,
+  .lumin-video-swiper-{{ block_id }} .swiper-button-prev::after {
+    content: none !important;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-button-next svg,
+  .lumin-video-swiper-{{ block_id }} .swiper-button-prev svg {
+    width: calc({{ block.settings.nav_button_size }}px * 0.4);
+    height: calc({{ block.settings.nav_button_size }}px * 0.4);
+    flex-shrink: 0;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-button-prev {
+    left: {{ block.settings.nav_button_offset }}px;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-button-next {
+    right: {{ block.settings.nav_button_offset }}px;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-pagination {
+    margin-top: {{ block.settings.dots_margin_top }}px;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-pagination-bullet {
+    width: {{ block.settings.dot_size }}px;
+    height: {{ block.settings.dot_size }}px;
+    background-color: {{ block.settings.dot_color }};
+    cursor: pointer;
+    opacity: 1;
+  }
+
+  .lumin-video-swiper-{{ block_id }} .swiper-pagination-bullet-active {
+    width: 6px !important;
+    background-color: {{ block.settings.dot_active_color }};
+    transform: scale(1.2);
+  }
+
+  @media screen and (max-width: 749px) {
+    .lumin-video-swiper-{{ block_id }} .swiper-button-next,
+    .lumin-video-swiper-{{ block_id }} .swiper-button-prev {
+      width: calc({{ block.settings.nav_button_size }}px * 0.8);
+      height: calc({{ block.settings.nav_button_size }}px * 0.8);
+    }
+
+    .lumin-video-swiper-{{ block_id }} .swiper-button-next svg,
+    .lumin-video-swiper-{{ block_id }} .swiper-button-prev svg {
+      width: calc({{ block.settings.nav_button_size }}px * 0.8 * 0.4);
+      height: calc({{ block.settings.nav_button_size }}px * 0.8 * 0.4);
+    }
+
+    .lumin-video-swiper-{{ block_id }} .swiper-button-prev {
+      left: calc({{ block.settings.nav_button_offset }}px * 0.5);
+    }
+
+    .lumin-video-swiper-{{ block_id }} .swiper-button-next {
+      right: calc({{ block.settings.nav_button_offset }}px * 0.5);
+    }
+
+    .lumin-video-play-button-{{ block_id }} {
+      width: calc({{ block.settings.play_button_size }}px * 0.8);
+      height: calc({{ block.settings.play_button_size }}px * 0.8);
+    }
+
+    .lumin-video-mute-button-{{ block_id }} {
+      width: calc({{ block.settings.mute_button_size }}px * 0.8);
+      height: calc({{ block.settings.mute_button_size }}px * 0.8);
+      top: calc({{ block.settings.mute_button_offset }}px * 0.5);
+      right: calc({{ block.settings.mute_button_offset }}px * 0.5);
+    }
+  }
+{% endstyle %}
+
+<div
+  class="lumin-video-swiper-{{ block_id }} spacing-style swiper-video-slider"
+  id="{{ swiper_id }}-wrapper"
+  style="{% render 'spacing-style', settings: block.settings %}"
+  {{ block.shopify_attributes }}
+  data-slides-desktop="{{ block.settings.slides_per_view_desktop }}"
+  data-slides-mobile="{{ block.settings.slides_per_view_mobile }}"
+  data-autoplay="{{ block.settings.autoplay }}"
+  data-autoplay-delay="{{ block.settings.autoplay_delay }}"
+  data-autoplay-smooth="{{ block.settings.autoplay_smooth }}"
+  data-autoplay-smooth-duration="{{ block.settings.autoplay_smooth_duration | default: 3 }}"
+  data-loop="{{ block.settings.loop }}"
+  data-autoplay-reverse="{{ block.settings.autoplay_reverse }}"
+  data-video-autoplay="{{ block.settings.video_autoplay }}"
+  data-gap="{{ block.settings.gap }}"
+  data-show-navigation="{{ block.settings.show_navigation }}"
+  data-show-dots="{{ block.settings.show_dots }}"
+>
+  <div
+    class="swiper lumin-video-swiper-inner-{{ block_id }}"
+    id="{{ swiper_id }}"
+  >
+    <div class="swiper-wrapper">
+      {% for i in (1..6) %}
+        {% liquid
+          assign video_url_key = 'video_url_' | append: i
+          assign video_shopify_key = 'video_shopify_' | append: i
+          assign video_enabled_key = 'video_enabled_' | append: i
+          assign video_url = block.settings[video_url_key]
+          assign video_shopify = block.settings[video_shopify_key]
+          assign video_enabled = block.settings[video_enabled_key]
+        %}
+        {% if video_enabled %}
+        <div class="swiper-slide" data-slide-index="{{ forloop.index0 }}">
+          {% if video_shopify %}
+            <div class="lumin-video-wrapper-{{ block_id }} swiper-no-swiping" data-video-type="shopify">
+              {{
+                video_shopify
+                | video_tag:
+                  image_size: '1100x',
+                  controls: false,
+                  muted: true,
+                  loop: block.settings.loop_videos,
+                  autoplay: false
+              }}
+              {% unless block.settings.video_autoplay %}
+                <button class="lumin-video-play-button-{{ block_id }}" type="button" aria-label="{{ 'accessibility.play_video' | t }}">
+                  <span class="icon-play">
+                    <span class="visually-hidden">{{ 'accessibility.play_video' | t }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="100%" height="100%" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M15.375 8.48516C16.5417 9.15874 16.5417 10.8427 15.375 11.5163L7.875 15.8464C6.70833 16.52 5.25 15.678 5.25 14.3308L5.25 5.67058C5.25 4.32343 6.70833 3.48146 7.875 4.15504L15.375 8.48516Z"/></svg>
+                  </span>
+                </button>
+              {% endunless %}
+              <button class="lumin-video-mute-button-{{ block_id }}" aria-label="Toggle mute">
+                <svg class="lumin-mute-icon-{{ block_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <line x1="23" y1="9" x2="17" y2="15"></line>
+                  <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+                <svg class="lumin-unmute-icon-{{ block_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+              </button>
+            </div>
+          {% elsif video_url %}
+            <div class="lumin-video-wrapper-{{ block_id }} swiper-no-swiping" data-video-type="external">
+              {% if video_url.type == 'youtube' %}
+                <iframe
+                  src="https://www.youtube.com/embed/{{ video_url.id }}?controls=0&mute=1&loop={{ block.settings.loop_videos | default: 0 }}&playlist={{ video_url.id }}&enablejsapi=1"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              {% elsif video_url.type == 'vimeo' %}
+                <iframe
+                  src="https://player.vimeo.com/video/{{ video_url.id }}?controls=0&muted=1&loop={{ block.settings.loop_videos | default: 0 }}"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="lumin-video-placeholder-{{ block_id }}">
+              {{ 'collection-1' | placeholder_svg_tag: 'placeholder-video' }}
+              {% if forloop.first %}
+                <div class="lumin-video-empty-state-{{ block_id }}"></div>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if block.settings.show_navigation %}
+      <div class="swiper-button-prev" aria-label="Previous slide">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </div>
+      <div class="swiper-button-next" aria-label="Next slide">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+    {% endif %}
+
+    {% if block.settings.show_dots %}
+      <div class="swiper-pagination"></div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  (function() {
+    const blockId = '{{ block_id }}';
+    const swiperId = '{{ swiper_id }}';
+
+    function initVideoSwiper(container) {
+      if (typeof Swiper === 'undefined') {
+        setTimeout(() => initVideoSwiper(container), 100);
+        return;
+      }
+
+      const swiperEl = container.querySelector('.lumin-video-swiper-inner-' + blockId);
+      if (!swiperEl) return;
+      if (swiperEl.swiper) {
+        swiperEl.swiper.destroy(true, true);
+        swiperEl.swiper = null;
+      }
+
+      const wrapper = swiperEl.querySelector('.swiper-wrapper');
+      const minSlidesForLoop = Math.max(
+        parseInt(container.dataset.slidesDesktop) || 3,
+        parseInt(container.dataset.slidesMobile) || 2
+      ) * 2;
+      if (container.dataset.loop === 'true' && wrapper) {
+        wrapper.querySelectorAll('.swiper-slide[data-loop-duplicate]').forEach(el => el.remove());
+        const slides = wrapper.querySelectorAll('.swiper-slide:not([data-loop-duplicate])');
+        if (slides.length > 0 && slides.length < minSlidesForLoop) {
+          const toAdd = minSlidesForLoop - slides.length;
+          for (let i = 0; i < toAdd; i++) {
+            const clone = slides[i % slides.length].cloneNode(true);
+            clone.setAttribute('data-loop-duplicate', '');
+            wrapper.appendChild(clone);
+          }
+        }
+      }
+
+      const slidesDesktop = parseInt(container.dataset.slidesDesktop) || 3;
+      const slidesMobile = parseInt(container.dataset.slidesMobile) || 2;
+      const autoplay = container.dataset.autoplay === 'true';
+      const autoplaySmooth = container.dataset.autoplaySmooth === 'true';
+      const autoplaySmoothDuration = parseInt(container.dataset.autoplaySmoothDuration) || 3;
+      const autoplayDelay = autoplaySmooth ? (autoplaySmoothDuration * 1000) : (parseInt(container.dataset.autoplayDelay) || 3) * 1000;
+      const loop = container.dataset.loop === 'true';
+      const autoplayReverse = container.dataset.autoplayReverse === 'true';
+      const gap = parseInt(container.dataset.gap) || 12;
+      const showNavigation = container.dataset.showNavigation === 'true';
+      const showDots = container.dataset.showDots === 'true';
+
+      const navSpeed = 300;
+      const maxSlidesPerView = Math.max(slidesDesktop, slidesMobile);
+      const config = {
+        loop: loop,
+        loopAdditionalSlides: Math.max(slidesDesktop, slidesMobile),
+        speed: autoplaySmooth ? (autoplaySmoothDuration * 1000) : 500,
+        spaceBetween: gap,
+        slidesPerView: slidesMobile,
+        breakpoints: {
+          750: { slidesPerView: slidesDesktop }
+        },
+        navigation: false,
+        pagination: showDots ? {
+          el: swiperEl.querySelector('.swiper-pagination'),
+          clickable: false
+        } : false,
+        autoplay: autoplay ? {
+          delay: autoplaySmooth ? 50 : autoplayDelay,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+          reverseDirection: autoplayReverse,
+          waitForTransition: true
+        } : false,
+        on: {
+          init: function() {
+            const swiper = this;
+            setupVideoControls(container, blockId);
+
+            if (showNavigation) {
+              const nextBtn = swiperEl.querySelector('.swiper-button-next');
+              const prevBtn = swiperEl.querySelector('.swiper-button-prev');
+              nextBtn?.addEventListener('click', () => swiper.slideNext(navSpeed));
+              prevBtn?.addEventListener('click', () => swiper.slidePrev(navSpeed));
+            }
+
+            if (showDots) {
+              const paginationEl = swiperEl.querySelector('.swiper-pagination');
+              paginationEl?.addEventListener('click', (e) => {
+                const bullet = e.target.closest('.swiper-pagination-bullet');
+                if (bullet) {
+                  const index = Array.from(paginationEl.querySelectorAll('.swiper-pagination-bullet')).indexOf(bullet);
+                  if (index >= 0) {
+                    if (loop && typeof swiper.slideToLoop === 'function') {
+                      swiper.slideToLoop(index, navSpeed);
+                    } else {
+                      swiper.slideTo(index, navSpeed);
+                    }
+                  }
+                }
+              });
+            }
+          }
+        }
+      };
+
+      new Swiper(swiperEl, config);
+    }
+
+    function setupVideoControls(container, blockId) {
+      const slides = container.querySelectorAll('.swiper-slide:not(.hidden)');
+      const allVideos = [];
+
+      slides.forEach((slide) => {
+        const wrapper = slide.querySelector('.lumin-video-wrapper-' + blockId);
+        if (!wrapper) return;
+
+        const videoType = wrapper.dataset.videoType;
+        const videoAutoplay = container.dataset.videoAutoplay === 'true';
+
+        if (videoType === 'shopify') {
+          const video = wrapper.querySelector('video');
+          const playButton = wrapper.querySelector('.lumin-video-play-button-' + blockId);
+          const muteButton = wrapper.querySelector('.lumin-video-mute-button-' + blockId);
+          const muteIcon = muteButton?.querySelector('.lumin-mute-icon-' + blockId);
+          const unmuteIcon = muteButton?.querySelector('.lumin-unmute-icon-' + blockId);
+
+          if (!video) return;
+
+          allVideos.push({ video, muteIcon, unmuteIcon });
+
+          if (videoAutoplay) {
+            video.play().catch(() => {});
+            wrapper.classList.add('playing');
+          }
+
+          const updateMuteIcons = (muted) => {
+            if (muteIcon && unmuteIcon) {
+              muteIcon.style.display = muted ? 'block' : 'none';
+              unmuteIcon.style.display = muted ? 'none' : 'block';
+            }
+          };
+
+          const muteAllOthers = (current) => {
+            allVideos.forEach(({ video: v }) => {
+              if (v !== current && !v.muted) {
+                v.muted = true;
+                const data = allVideos.find(d => d.video === v);
+                if (data?.muteIcon) data.muteIcon.style.display = 'block';
+                if (data?.unmuteIcon) data.unmuteIcon.style.display = 'none';
+              }
+            });
+          };
+
+          if (playButton) {
+            playButton.addEventListener('click', () => {
+              muteAllOthers(video);
+              video.muted = false;
+              updateMuteIcons(false);
+              video.play();
+              playButton.classList.add('hidden');
+              wrapper.classList.add('playing');
+            });
+          }
+
+          wrapper.addEventListener('click', (e) => {
+            if (e.target.closest('.lumin-video-play-button-' + blockId) || e.target.closest('.lumin-video-mute-button-' + blockId)) return;
+            if (!video.paused) {
+              if (video.muted) {
+                muteAllOthers(video);
+                video.muted = false;
+                updateMuteIcons(false);
+              } else {
+                video.pause();
+                wrapper.classList.remove('playing');
+                if (playButton) playButton.classList.remove('hidden');
+              }
+            } else {
+              muteAllOthers(video);
+              video.muted = false;
+              updateMuteIcons(false);
+              video.play();
+              wrapper.classList.add('playing');
+              if (playButton) playButton.classList.add('hidden');
+            }
+          });
+
+          if (muteButton) {
+            muteButton.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (video.muted) {
+                muteAllOthers(video);
+                video.muted = false;
+                if (muteIcon) muteIcon.style.display = 'none';
+                if (unmuteIcon) unmuteIcon.style.display = 'block';
+              } else {
+                video.muted = true;
+                if (muteIcon) muteIcon.style.display = 'block';
+                if (unmuteIcon) unmuteIcon.style.display = 'none';
+              }
+            });
+          }
+        }
+      });
+    }
+
+    function init() {
+      const container = document.getElementById(swiperId + '-wrapper');
+      if (container && !container.dataset.initialized) {
+        container.dataset.initialized = 'true';
+        initVideoSwiper(container);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    document.addEventListener('shopify:section:load', (e) => {
+      const container = e.target.querySelector('#' + swiperId + '-wrapper');
+      if (container) {
+        delete container.dataset.initialized;
+        initVideoSwiper(container);
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Video slider (Swiper)",
+  "tag": null,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "video_enabled_1",
+      "label": "t:sections.video-slider.video_enabled_1",
+      "default": true
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_1",
+      "label": "t:sections.video-slider.video_url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "video",
+      "id": "video_shopify_1",
+      "label": "t:sections.video-slider.video_shopify"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.video_2"
+    },
+    {
+      "type": "checkbox",
+      "id": "video_enabled_2",
+      "label": "t:sections.video-slider.video_enabled_2",
+      "default": true
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_2",
+      "label": "t:sections.video-slider.video_url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "video",
+      "id": "video_shopify_2",
+      "label": "t:sections.video-slider.video_shopify"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.video_3"
+    },
+    {
+      "type": "checkbox",
+      "id": "video_enabled_3",
+      "label": "t:sections.video-slider.video_enabled_3",
+      "default": true
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_3",
+      "label": "t:sections.video-slider.video_url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "video",
+      "id": "video_shopify_3",
+      "label": "t:sections.video-slider.video_shopify"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.video_4"
+    },
+    {
+      "type": "checkbox",
+      "id": "video_enabled_4",
+      "label": "t:sections.video-slider.video_enabled_4",
+      "default": true
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_4",
+      "label": "t:sections.video-slider.video_url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "video",
+      "id": "video_shopify_4",
+      "label": "t:sections.video-slider.video_shopify"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.video_5"
+    },
+    {
+      "type": "checkbox",
+      "id": "video_enabled_5",
+      "label": "t:sections.video-slider.video_enabled_5",
+      "default": true
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_5",
+      "label": "t:sections.video-slider.video_url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "video",
+      "id": "video_shopify_5",
+      "label": "t:sections.video-slider.video_shopify"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.video_6"
+    },
+    {
+      "type": "checkbox",
+      "id": "video_enabled_6",
+      "label": "t:sections.video-slider.video_enabled_6",
+      "default": true
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_6",
+      "label": "t:sections.video-slider.video_url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "video",
+      "id": "video_shopify_6",
+      "label": "t:sections.video-slider.video_shopify"
+    },
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_desktop",
+      "label": "t:sections.video-slider.slides_per_view_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "slides_per_view_mobile",
+      "label": "t:sections.video-slider.slides_per_view_mobile",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "t:sections.video-slider.gap",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "t:sections.video-slider.desktop_width_percent",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.video_settings"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "t:options.aspect_ratio",
+      "options": [
+        { "value": "auto", "label": "t:options.auto" },
+        { "value": "square", "label": "t:options.square" },
+        { "value": "portrait", "label": "t:options.portrait" },
+        { "value": "widescreen", "label": "t:options.landscape" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "checkbox",
+      "id": "video_autoplay",
+      "label": "t:settings.enable_video_autoplay",
+      "default": false,
+      "info": "t:info.video_autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop_videos",
+      "label": "t:settings.video_loop",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "video_border_radius",
+      "label": "t:settings.border_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "video_background_color",
+      "label": "t:content.background_video",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.play_button"
+    },
+    {
+      "type": "range",
+      "id": "play_button_size",
+      "label": "t:content.size",
+      "min": 24,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "play_button_opacity",
+      "label": "t:settings.opacity",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 90
+    },
+    {
+      "type": "color",
+      "id": "play_button_color",
+      "label": "t:settings.background_color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "play_button_hover_color",
+      "label": "t:settings.hover_background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "play_button_icon_color",
+      "label": "t:content.icon",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.mute_button"
+    },
+    {
+      "type": "range",
+      "id": "mute_button_size",
+      "label": "t:settings.size",
+      "min": 20,
+      "max": 56,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "mute_button_offset",
+      "label": "t:sections.video-slider.offset_from_corner",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "mute_button_opacity",
+      "label": "t:settings.opacity",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "color",
+      "id": "mute_button_color",
+      "label": "t:settings.background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "mute_button_hover_color",
+      "label": "t:settings.hover_background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "mute_button_icon_color",
+      "label": "t:content.icon",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.slider_behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": "t:sections.video-slider.loop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "t:settings.autoplay",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_smooth",
+      "label": "t:sections.video-slider.autoplay_smooth",
+      "default": false,
+      "info": "t:info.autoplay_smooth",
+      "visible_if": "{{ block.settings.autoplay }}"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_smooth_duration",
+      "label": "t:sections.video-slider.autoplay_smooth_duration",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "s",
+      "default": 3,
+      "visible_if": "{{ block.settings.autoplay_smooth }}"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_delay",
+      "label": "t:sections.video-slider.autoplay_delay",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 3,
+      "visible_if": "{{ block.settings.autoplay }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay_reverse",
+      "label": "t:sections.video-slider.autoplay_reverse",
+      "default": false,
+      "visible_if": "{{ block.settings.autoplay }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "t:sections.video-slider.show_navigation",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "nav_button_size",
+      "label": "t:content.size",
+      "min": 24,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "nav_button_offset",
+      "label": "t:sections.video-slider.offset_from_corner",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "nav_button_opacity",
+      "label": "t:settings.opacity",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "color",
+      "id": "nav_button_color",
+      "label": "t:settings.background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_hover_color",
+      "label": "t:settings.hover_background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "nav_button_icon_color",
+      "label": "t:content.icon",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.dots"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "t:sections.video-slider.show_dots",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "t:content.size",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "dots_margin_top",
+      "label": "t:sections.video-slider.margin_top",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "t:settings.color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "t:sections.video-slider.active_dot_color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.video-slider.appearance"
+    },
+    {
+      "type": "checkbox",
+      "id": "background",
+      "label": "t:settings.background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background_color",
+      "alpha": true,
+      "default": "#00000026",
+      "visible_if": "{{ block.settings.background }}"
+    },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "t:settings.corner_radius",
+      "default": 0,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "visible_if": "{{ block.settings.background }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video slider (Swiper)"
+    }
+  ]
+}
+{% endschema %}

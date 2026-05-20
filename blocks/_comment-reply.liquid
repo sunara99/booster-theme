@@ -1,0 +1,77 @@
+{%- liquid
+  assign s = block.settings
+-%}
+<div class="comment-thread__reply-item" {{ block.shopify_attributes }}>
+  {% render 'comment-thread-row', settings: s, shopify_attributes: '' %}
+</div>
+
+{% schema %}
+{
+  "name": "Comment reply",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "author_image",
+      "label": "Profile image"
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Name",
+      "default": "Admin"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Comment text",
+      "default": "<p>Thanks for your feedback!</p>"
+    },
+    {
+      "type": "text",
+      "id": "like_count",
+      "label": "Like count",
+      "default": "2"
+    },
+    {
+      "type": "text",
+      "id": "time_ago",
+      "label": "Time (display text)",
+      "default": "1 h"
+    },
+    {
+      "type": "text",
+      "id": "like_label",
+      "label": "Like label",
+      "default": "Like"
+    },
+    {
+      "type": "text",
+      "id": "reply_label",
+      "label": "Reply label",
+      "default": "Reply"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reply_link",
+      "label": "Show Reply link",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "avatar_size",
+      "min": 28,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Avatar size",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Comment reply"
+    }
+  ]
+}
+{% endschema %}

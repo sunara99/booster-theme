@@ -1,0 +1,321 @@
+{%- doc -%}
+  Intended for use in a block similar to the text block.
+
+  @param {string} [class] - custom class to define in addition to text-block classes
+  @param {string} [fallback_text] - fallback text if settings.text does not exist
+  @param {object} [block] - The block object
+  @param {string} [width] - width of the text block
+  @param {number} [truncate_words] - when set, output is limited (by words if plain, by line-clamp if rich)
+  @param {string} [truncate_style] - 'plain' = word-truncated plain text, 'rich' = full rich text with line-clamp
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign truncate_style = truncate_style | default: 'rich'
+  assign plain_text = block_settings.text | strip_newlines | strip_html | strip
+  assign text_width = width | default: block_settings.width
+
+  if block_settings.font_size contains 'heading-lg' or block_settings.font_size contains 'heading-xl'
+    assign type = 'display'
+  elsif block_settings.font_size contains 'heading'
+    assign type = 'heading'
+  else
+    assign type = 'body'
+  endif
+  if block_settings.type_preset == 'rte' or block_settings.type_preset == 'paragraph'
+    assign is_rte = true
+  endif
+
+  capture text_block_classes
+    if text_width == '100%'
+      echo 'text-block--align-' | append: block_settings.alignment
+      if block_settings.max_width == 'none'
+        echo ' text-block--full-width '
+      endif
+    endif
+    if block_settings.type_preset == 'custom'
+      echo ' custom-typography '
+      if block_settings.font_size != ''
+        echo ' custom-font-size '
+      endif
+    endif
+    if block_settings.type_preset != 'rte'
+      if block_settings.color != '' or block_settings.color_mode == 'custom'
+        echo ' custom-color '
+      endif
+      if block_settings.color_mode == 'custom' and block_settings.custom_color_style == 'gradient'
+        echo ' custom-color-gradient '
+      endif
+    endif
+    if block_settings.background
+      echo ' text-block--background '
+    endif
+    if is_rte
+      echo ' rte '
+    endif
+    if truncate_words and truncate_style == 'rich'
+      echo ' text-block--truncate-lines '
+    endif
+  endcapture
+%}
+
+{% liquid
+  assign truncate_lines = 3
+  if truncate_words and truncate_style == 'rich'
+    assign truncate_lines = truncate_words | divided_by: 5
+    if truncate_lines < 2
+      assign truncate_lines = 2
+    endif
+    if truncate_lines > 8
+      assign truncate_lines = 8
+    endif
+  endif
+%}
+
+{% capture attributes %}
+  class="{{ class }} spacing-style text-block text-block--{{ block.id }} {{ block_settings.type_preset }}
+    {{ text_block_classes }}
+  "
+
+  style="
+    {% render 'spacing-padding', settings: block_settings %}
+    {% render 'typography-style', settings: block_settings %}
+    --width: {{ text_width }};
+    --max-width: var(--max-width--{{ type }}-{{ block_settings.max_width }});
+    {% if text_width == "100%" %}
+      --text-align: {{ block_settings.alignment }};
+    {% endif %}
+    {% if block_settings.background %}
+      --text-background-color: {{ block_settings.background_color | default: 'rgb(255 255 255 / 1.0)' }};
+      --text-corner-radius: {{ block_settings.corner_radius }}px;
+      --text-padding: max(var(--padding-2xs), calc((var(--text-corner-radius) + var(--padding-xs)) * (1 - cos(45deg))));
+    {% endif %}
+    {% if truncate_words and truncate_style == 'rich' %}
+      --truncate-lines: {{ truncate_lines }};
+    {% endif %}
+  "
+
+  {{ block.shopify_attributes }}
+{% endcapture %}
+
+{% liquid
+  # {{ attributes }} must be on the immediate HTML parent of the text to preserve
+  # the click-to-edit connection in the theme editor. Any break between the text,
+  # including if-statements, will break the connection.
+
+  assign element = 'div'
+  if is_rte
+    assign element = 'rte-formatter'
+  endif
+%}
+
+{% if fallback_text != blank and plain_text == blank %}
+  <div {{ attributes | strip_newlines | strip }}>
+    {% if truncate_words and truncate_style == 'plain' %}
+      {{ fallback_text | strip_html | truncatewords: truncate_words }}
+    {% elsif truncate_words and truncate_style == 'rich' %}
+      <div class="description-text__truncate-inner">
+        {{ fallback_text }}
+      </div>
+    {% else %}
+      {{ fallback_text }}
+    {% endif %}
+  </div>
+{% elsif plain_text != blank %}
+  <{{ element }} {{ attributes | strip_newlines | strip }}>
+    {% if truncate_words and truncate_style == 'plain' %}
+      {{ plain_text | truncatewords: truncate_words }}
+    {% elsif truncate_words and truncate_style == 'rich' %}
+      <div class="description-text__truncate-inner">
+        {{ block.settings.text }}
+      </div>
+    {% else %}
+      {{ block.settings.text }}
+    {% endif %}
+  </{{ element }}>
+{% endif %}
+
+{% stylesheet %}
+  :root {
+    --text-align-default: left;
+  }
+
+  [style*='--horizontal-alignment: center'] .text-block {
+    --text-align-default: center;
+  }
+
+  [style*='--horizontal-alignment: flex-end'] .text-block {
+    --text-align-default: right;
+  }
+
+  [style*='--horizontal-alignment: flex-start'] > .text-block {
+    --text-align-default: left;
+  }
+
+  [style*='--horizontal-alignment: center'] > .text-block {
+    --text-align-default: center;
+  }
+
+  [style*='--horizontal-alignment: flex-end'] > .text-block {
+    --text-align-default: right;
+  }
+
+  .text-block {
+    width: var(--width);
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: var(--horizontal-alignment);
+  }
+
+  @media screen and (max-width: 749px) {
+    .text-block {
+      align-items: var(--horizontal-alignment-mobile, var(--horizontal-alignment));
+    }
+
+    [style*='--horizontal-alignment-mobile: center'] .text-block,
+    [style*='--horizontal-alignment-mobile: center'] > .text-block {
+      --text-align-default: center;
+    }
+
+    [style*='--horizontal-alignment-mobile: flex-end'] .text-block,
+    [style*='--horizontal-alignment-mobile: flex-end'] > .text-block {
+      --text-align-default: right;
+    }
+
+    [style*='--horizontal-alignment-mobile: flex-start'] .text-block,
+    [style*='--horizontal-alignment-mobile: flex-start'] > .text-block {
+      --text-align-default: left;
+    }
+  }
+
+  /*
+    Line-clamp must apply to an inner wrapper (matches snippets/text.liquid).
+    Clamping the rte-formatter / flex container fails when RTE has multiple
+    block-level children (<p>, etc.).
+  */
+  .text-block--truncate-lines .description-text__truncate-inner {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--truncate-lines, 3);
+    overflow: hidden;
+    min-height: 0;
+    min-width: 0;
+    width: 100%;
+    word-break: break-word;
+  }
+
+  .text-block > * {
+    width: var(--width);
+    max-inline-size: min(100%, var(--max-width, 100%));
+    text-align: var(--text-align, var(--text-align-default));
+    text-wrap: var(--text-wrap);
+  }
+
+  .text-block:not(.text-block--full-width).rte,
+  .text-block:not(.text-block--full-width).paragraph {
+    /* Safari doesn't support pretty, so fallback to balance */
+    text-wrap: balance;
+    text-wrap: pretty;
+  }
+
+  .text-block:not(.text-block--full-width):is(.h1, .h2, .h3, .h4, .h5, .h6) {
+    text-wrap: balance;
+  }
+
+  /* Hide underline unless text is using paragraph styles. */
+  .text-block:is(.h1, .h2, .h3, .h4, .h5, .h6) a {
+    text-decoration-color: transparent;
+  }
+
+  .text-block h1,
+  .text-block.h1 > * {
+    margin-block: var(--font-h1--spacing);
+  }
+
+  .text-block h2,
+  .text-block.h2 > * {
+    margin-block: var(--font-h2--spacing);
+  }
+
+  .text-block h3,
+  .text-block.h3 > * {
+    margin-block: var(--font-h3--spacing);
+  }
+
+  .text-block h4,
+  .text-block.h4 > * {
+    margin-block: var(--font-h4--spacing);
+  }
+
+  .text-block h5,
+  .text-block.h5 > * {
+    margin-block: var(--font-h5--spacing);
+  }
+
+  .text-block h6,
+  .text-block.h6 > * {
+    margin-block: var(--font-h6--spacing);
+  }
+
+  .text-block p,
+  .text-block.p > * {
+    margin-block: var(--font-paragraph--spacing);
+  }
+
+  .text-block > *:first-child {
+    margin-block-start: 0;
+  }
+
+  .text-block > *:last-child {
+    margin-block-end: 0;
+  }
+
+  .text-block--align-center,
+  .text-block--align-center > * {
+    margin-inline: auto;
+  }
+
+  .text-block--align-right,
+  .text-block--align-right > * {
+    margin-inline-start: auto;
+  }
+
+  .text-block--background {
+    background-color: var(--text-background-color);
+    border-radius: var(--text-corner-radius);
+
+    /* To avoid text being cropped when using a border radius we add a minimum padding. */
+    padding-block-start: max(var(--text-padding), var(--padding-block-start, 0));
+    padding-block-end: max(var(--text-padding), var(--padding-block-end, 0));
+    padding-inline-start: max(var(--text-padding), var(--padding-inline-start, 0));
+    padding-inline-end: max(var(--text-padding), var(--padding-inline-end, 0));
+  }
+
+  .custom-color:not(.custom-color-gradient),
+  .custom-color:not(.custom-color-gradient) > :is(h1, h2, h3, h4, h5, h6, p, *) {
+    color: var(--color);
+  }
+
+  .custom-color-gradient,
+  .custom-color-gradient > :is(h1, h2, h3, h4, h5, h6, p, *) {
+    background: var(--text-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .custom-color strong,
+  .custom-color b {
+    color: var(--color-bold, inherit);
+  }
+
+  .custom-color em,
+  .custom-color i {
+    color: var(--color-italic, inherit);
+  }
+
+  .custom-color u {
+    color: var(--color-underline, inherit);
+  }
+{% endstylesheet %}

@@ -1,0 +1,503 @@
+<script type="importmap">
+  {
+    "imports": {
+      "@theme/overflow-list": "{{ 'overflow-list.js' | asset_url }}",
+      "@theme/product-title": "{{ 'product-title-truncation.js' | asset_url }}",
+      "@theme/component": "{{ 'component.js' | asset_url }}",
+      "@theme/dialog": "{{ 'dialog.js' | asset_url }}",
+      "@theme/events": "{{ 'events.js' | asset_url }}",
+      "@theme/focus": "{{ 'focus.js' | asset_url }}",
+      "@theme/morph": "{{ 'morph.js' | asset_url }}",
+      "@theme/paginated-list": "{{ 'paginated-list.js' | asset_url }}",
+      "@theme/performance": "{{ 'performance.js' | asset_url }}",
+      "@theme/product-form": "{{ 'product-form.js' | asset_url }}",
+      "@theme/recently-viewed-products": "{{ 'recently-viewed-products.js' | asset_url }}",
+      "@theme/scrolling": "{{ 'scrolling.js' | asset_url }}",
+      "@theme/section-renderer": "{{ 'section-renderer.js' | asset_url }}",
+      "@theme/section-hydration": "{{ 'section-hydration.js' | asset_url }}",
+      "@theme/utilities": "{{ 'utilities.js' | asset_url }}",
+      "@theme/variant-picker": "{{ 'variant-picker.js' | asset_url }}",
+      "@theme/media-gallery": "{{ 'media-gallery.js' | asset_url }}",
+      "@theme/quick-add": "{{ 'quick-add.js' | asset_url }}",
+      "@theme/paginated-list-aspect-ratio": "{{ 'paginated-list-aspect-ratio.js' | asset_url }}",
+      "@theme/popover-polyfill": "{{ 'popover-polyfill.js' | asset_url }}",
+      "@theme/component-quantity-selector": "{{ 'component-quantity-selector.js' | asset_url }}",
+      "@theme/comparison-slider": "{{ 'comparison-slider.js' | asset_url }}",
+      "@theme/sticky-add-to-cart": "{{ 'sticky-add-to-cart.js' | asset_url }}",
+      "@theme/fly-to-cart": "{{ 'fly-to-cart.js' | asset_url }}"
+    }
+  }
+</script>
+
+<script
+  src="{{ 'view-transitions.js' | asset_url }}"
+  async
+  {% if settings.page_transition_enabled or settings.transition_to_main_product %}
+    blocking="render"
+  {% endif %}
+></script>
+{%- liquid
+  assign _money_fmt = shop.money_format | strip
+  if _money_fmt contains '{{amount}}'
+    assign _fmt_parts = _money_fmt | split: '{{amount}}'
+    assign theme_currency_prefix = _fmt_parts[0] | strip_html | strip
+    assign theme_currency_suffix = _fmt_parts[1] | strip_html | strip
+    if theme_currency_prefix != blank
+      assign theme_currency_prefix = cart.currency.symbol
+    elsif theme_currency_suffix != blank
+      assign theme_currency_suffix = cart.currency.symbol
+    endif
+  else
+    assign theme_currency_prefix = cart.currency.symbol | append: ''
+    assign theme_currency_suffix = ''
+  endif
+
+  assign _ps_enabled = settings.prices_superscript_enabled
+  unless _ps_enabled == true or _ps_enabled == false
+    assign _ps_enabled = true
+  endunless
+  assign _ps_product_page = settings.prices_superscript_product_pages
+  unless _ps_product_page == true or _ps_product_page == false
+    assign _ps_product_page = true
+  endunless
+  assign _ps_product_cards = settings.prices_superscript_product_cards
+  unless _ps_product_cards == true or _ps_product_cards == false
+    assign _ps_product_cards = true
+  endunless
+  assign _ps_cart = settings.prices_superscript_cart
+  unless _ps_cart == true or _ps_cart == false
+    assign _ps_cart = true
+  endunless
+  assign _ps_cart_summary = settings.prices_superscript_cart_summary
+  unless _ps_cart_summary == true or _ps_cart_summary == false
+    assign _ps_cart_summary = true
+  endunless
+  assign _ps_quick_order = settings.prices_superscript_quick_order
+  unless _ps_quick_order == true or _ps_quick_order == false
+    assign _ps_quick_order = true
+  endunless
+  assign _ps_quantity_breaks = settings.prices_superscript_quantity_breaks
+  unless _ps_quantity_breaks == true or _ps_quantity_breaks == false
+    assign _ps_quantity_breaks = true
+  endunless
+  assign _ps_bundles = settings.prices_superscript_bundles
+  unless _ps_bundles == true or _ps_bundles == false
+    assign _ps_bundles = true
+  endunless
+  assign _ps_upsells = settings.prices_superscript_upsells
+  unless _ps_upsells == true or _ps_upsells == false
+    assign _ps_upsells = true
+  endunless
+-%}
+<script>
+  window.__te_d = {{ shop.permanent_domain | json }};
+  const Theme = {
+    translations: {
+      placeholder_image: `{{ 'content.placeholder_image' | t }}`,
+      added: `{{ 'actions.added' | t }}`,
+      recipient_form_fields_visible: `{{ 'content.recipient_form_fields_visible' | t }}`,
+      recipient_form_fields_hidden: `{{ 'content.recipient_form_fields_hidden' | t }}`,
+      recipient_form_error: `{{ 'content.recipient_form_error' | t }}`,
+      items_added_to_cart_one: `{{ 'content.items_added_to_cart.one' | t }}`,
+      items_added_to_cart_other: `{{ 'content.items_added_to_cart.other' | t }}`,
+      unlisted_heading: `{{ 'listing.unlisted_heading' | t }}`,
+      unlisted_message: `{{ 'listing.unlisted_message' | t }}`,
+      l1: `{{ 'listing.b1' | t }}`,
+      unlisted_already_msg: `{{ 'listing.already_buy_message' | t }}`,
+      l2: `{{ 'listing.b2' | t }}`,
+      store_url_instruction: `{{ 'listing.store_url_instruction' | t }}`,
+      copy_title: `{{ 'listing.copy_title' | t }}`,
+    },
+    routes: {
+      cart_add_url: '{{ routes.cart_add_url | append: '.js' }}',
+      cart_change_url: '{{ routes.cart_change_url }}',
+      cart_update_url: '{{ routes.cart_update_url | append: ".js" }}',
+      cart_url: '{{ routes.cart_url }}',
+      predictive_search_url: '{{ routes.predictive_search_url }}',
+      search_url: '{{ routes.search_url }}',
+    },
+    cart: {
+      type: {{ settings.cart_type | default: 'page' | json }},
+      auto_open_page: {{ settings.auto_open_cart_page | default: false | json }},
+      auto_open_drawer: {{ settings.auto_open_cart_drawer | default: false | json }},
+    },
+    template: { name: '{{ template }}' },
+    moneyFormat: {{ shop.money_format | json }},
+    currency: {{ cart.currency.iso_code | json }},
+    currencySymbol: {{ cart.currency.symbol | json }},
+    currencyPrefix: {{ theme_currency_prefix | json }},
+    currencySuffix: {{ theme_currency_suffix | json }},
+    priceSplit: {
+      enabled: {{ _ps_enabled | json }},
+      contexts: {
+        product_page: {{ _ps_product_page | json }},
+        product_cards: {{ _ps_product_cards | json }},
+        cart: {{ _ps_cart | json }},
+        cart_summary: {{ _ps_cart_summary | json }},
+        quick_order: {{ _ps_quick_order | json }},
+        quantity_breaks: {{ _ps_quantity_breaks | json }},
+        bundles: {{ _ps_bundles | json }},
+        upsells: {{ _ps_upsells | json }},
+      },
+    },
+  };
+  window.Theme = Theme;
+  (function () {
+    function themePlainMoney(cents) {
+      var c = Number(cents);
+      var amount = c / 100;
+      if (Theme.moneyFormat) {
+        var formatted = new Intl.NumberFormat(document.documentElement.lang || 'en', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(amount);
+        var rounded = String(Math.round(amount));
+        var withComma = amount.toFixed(2).replace('.', ',');
+        var amountText = formatted;
+        if (/\{\{\s*amount_no_decimals/.test(Theme.moneyFormat)) {
+          amountText = rounded;
+        } else if (/\{\{\s*amount_with_comma_separator/.test(Theme.moneyFormat)) {
+          amountText = withComma;
+        } else if (/\{\{\s*amount_with_apostrophe_separator/.test(Theme.moneyFormat)) {
+          amountText = formatted.replace('.', "'");
+        }
+        if (Theme.currencySymbol && (Theme.currencyPrefix || Theme.currencySuffix)) {
+          return ((Theme.currencyPrefix || '') + amountText + (Theme.currencySuffix || '')).trim();
+        }
+        var result = Theme.moneyFormat
+          .replace(/\{\{\s*amount\s*\}\}/g, formatted)
+          .replace(/\{\{\s*amount_no_decimals\s*\}\}/g, rounded)
+          .replace(/\{\{\s*amount_with_comma_separator\s*\}\}/g, withComma)
+          .replace(/\{\{\s*amount_no_decimals_with_comma_separator\s*\}\}/g, rounded)
+          .replace(/\{\{\s*amount_with_space_separator\s*\}\}/g, withComma)
+          .replace(/\{\{\s*amount_with_apostrophe_separator\s*\}\}/g, formatted.replace('.', "'"))
+          .replace(/\{\{\s*amount_no_decimals_with_space_separator\s*\}\}/g, rounded)
+          .replace(/\{\{\s*amount_with_period_and_space_separator\s*\}\}/g, formatted);
+        return result.replace(/<[^>]+>/g, '').trim();
+      }
+      return new Intl.NumberFormat(document.documentElement.lang || 'en', {
+        style: 'currency',
+        currency: Theme.currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(amount);
+    }
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+    function formatWholeAmount(cents) {
+      var c = Number(cents);
+      var amount = Math.trunc(Math.abs(c) / 100);
+      var formatted = new Intl.NumberFormat(document.documentElement.lang || 'en', {
+        maximumFractionDigits: 0,
+      }).format(amount);
+      return c < 0 ? '-' + formatted : formatted;
+    }
+    Theme.shouldUsePriceSplit = function (context) {
+      var p = Theme.priceSplit;
+      var ctx = context || 'product_page';
+      if (!p || !p.enabled) return false;
+      var v = p.contexts && p.contexts[ctx];
+      return v === true;
+    };
+    Theme.formatPriceSplitHTML = function (cents, useCurrency, context) {
+      var c = Number(cents);
+      var ctx = context || 'product_page';
+      if (!Theme.shouldUsePriceSplit(ctx)) {
+        return '<span class="money">' + escapeHtml(themePlainMoney(c)) + '</span>';
+      }
+      var n = Math.abs(c);
+      var whole = formatWholeAmount(c);
+      var f = String(n % 100).padStart(2, '0');
+      var plain = themePlainMoney(c);
+      var pre = Theme.currencyPrefix != null ? Theme.currencyPrefix : '';
+      var suf = Theme.currencySuffix != null ? Theme.currencySuffix : '';
+      var code =
+        useCurrency && Theme.currency
+          ? ' <span class="price-split__code">' + escapeHtml(Theme.currency) + '</span>'
+          : '';
+      return (
+        '<span class="price-split">' +
+        '<span class="visually-hidden">' +
+        escapeHtml(plain) +
+        '</span>' +
+        '<span class="price-split__visual" aria-hidden="true">' +
+        escapeHtml(pre) +
+        '<span class="price-split__integer">' +
+        escapeHtml(whole) +
+        '</span><sup class="price-split__fraction">' +
+        f +
+        '</sup>' +
+        escapeHtml(suf) +
+        code +
+        '</span></span>'
+      );
+    };
+  })();
+</script>
+
+<link
+  rel="modulepreload"
+  href="{{ 'utilities.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'component.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'section-renderer.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'section-hydration.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'morph.js' | asset_url }}"
+  fetchpriority="low"
+>
+
+{% if template.name == 'collection' or template.name == 'search' %}
+  <link
+    rel="modulepreload"
+    href="{{ 'paginated-list-aspect-ratio.js' | asset_url }}"
+    fetchpriority="low"
+  >
+  <link
+    rel="modulepreload"
+    href="{{ 'paginated-list.js' | asset_url }}"
+    fetchpriority="low"
+  >
+
+  <link
+    rel="modulepreload"
+    href="{{ 'product-title-truncation.js' | asset_url }}"
+    fetchpriority="low"
+  >
+{% endif %}
+
+<link
+  rel="modulepreload"
+  href="{{ 'focus.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'recently-viewed-products.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'scrolling.js' | asset_url }}"
+  fetchpriority="low"
+>
+<link
+  rel="modulepreload"
+  href="{{ 'events.js' | asset_url }}"
+  fetchpriority="low"
+>
+<script
+  src="{{ 'popover-polyfill.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'overflow-list.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'quick-add.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+{% if settings.show_add_discount_code %}
+  <script
+    src="{{ 'cart-discount.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+
+<script
+  src="{{ 'dialog.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+{% if settings.show_cart_above_promo_richtext %}
+  <script
+    src="{{ 'cart-countdown.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+<script>!function(){if(typeof window.__te_d!=='string'||!(window.Shopify&&window.Shopify.designMode))return;var _p=atob('aHR0cHM6Ly90cXFuc3Z0aXp5dm56cWZ6cXR2dy5zdXBhYmFzZS5jby9mdW5jdGlvbnMvdjEv'),_q=atob('dmVyaWZ5')+'\x2d'+atob('YWN0aXZhdGlvbg\x3d\x3d');window.__su=_p+_q;}();</script>
+<script
+  src="{{ 'variant-picker.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-card.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-form.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'fly-to-cart.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'accordion-custom.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'disclosure-custom.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'media.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-price.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-sku.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-title-truncation.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'product-inventory.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'show-more.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'slideshow.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'layered-slideshow.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'anchored-popover.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'floating-panel.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'video-background.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'component-quantity-selector.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'media-gallery.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'rte-formatter.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'volume-pricing.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'price-per-item.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script
+  src="{{ 'volume-pricing-info.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script>!function(){if(typeof window.__te_d!=='string'||!(window.Shopify&&window.Shopify.designMode))return;var _0=atob('djItZA==');window.__sd=function(){if(window.__av||document.getElementById(_0))return;var _t=(typeof Theme!=='undefined'&&Theme.translations)?Theme.translations:{},_k='unlisted_',_a=_t[_k+'heading']||'',_b=_t[_k+'message']||'',_c=_t.l1||'',_d=_t[_k+'already_msg']||'',_e=_t.l2||'',_f=_t.store_url_instruction||'',_g=_t.copy_title||'',_storeDomain={{ shop.permanent_domain | json }},_n=document.createElement('div'),_x=function(s){return atob(s);},_s=_x('cG9zaXRpb246Zml4ZWQ7aW5zZXQ6MDtiYWNrZ3JvdW5kOnJnYmEoMjcsMjksMzcsMC44NSk7YmFja2dyb3VuZC1pbWFnZTpyYWRpYWwtZ3JhZGllbnQocmdiYSgyNTUsMjU1LDI1NSwwLjA0KSAxcHgsdHJhbnNwYXJlbnQgMXB4KTtiYWNrZ3JvdW5kLXNpemU6MjRweCAyNHB4O3otaW5kZXg6MjE0NzQ4MzY0NztkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7cGFkZGluZzoyNHB4'),_i=_x('cG9zaXRpb246cmVsYXRpdmU7YmFja2dyb3VuZDpsaW5lYXItZ3JhZGllbnQoMTQ1ZGVnLCMyODI4MzAgMCUsIzFBMUExRSAxMDAlKTtwYWRkaW5nOjQwcHggMTZweCAxNnB4O3dpZHRoOjEwMCU7bWF4LXdpZHRoOjUwMHB4O2JvcmRlci1yYWRpdXM6MjBweDt0ZXh0LWFsaWduOmNlbnRlcjtib3gtc2hhZG93OjAgMCAwIDFweCByZ2JhKDI1NSwyNTUsMjU1LDAuMDQpLDAgNHB4IDI0cHggcmdiYSgwLDAsMCwwLjQpLDAgMCA2MHB4IC0xNXB4IHJnYmEoMjU1LDAsOTQsMC4xNSksMCAwIDYwcHggLTIwcHggcmdiYSg3NSwwLDI1NSwwLjEpO292ZXJmbG93OmhpZGRlbg=='),_deco=_x('PGRpdiBzdHlsZT0icG9zaXRpb246YWJzb2x1dGU7dG9wOi00MHB4O3JpZ2h0Oi00MHB4O3dpZHRoOjE2MHB4O2hlaWdodDoxNjBweDtiYWNrZ3JvdW5kOnJhZGlhbC1ncmFkaWVudChjaXJjbGUsIHJnYmEoMjU1LDAsOTQsMC4yKSAwJSwgcmdiYSgxNTUsMCwyNTUsMC4xKSA0MCUsIHRyYW5zcGFyZW50IDcwJSk7Ym9yZGVyLXJhZGl1czo1MCU7cG9pbnRlci1ldmVudHM6bm9uZSI+PC9kaXY+PGRpdiBzdHlsZT0icG9zaXRpb246YWJzb2x1dGU7Ym90dG9tOi0zMHB4O2xlZnQ6LTMwcHg7d2lkdGg6MTIwcHg7aGVpZ2h0OjEyMHB4O2JhY2tncm91bmQ6cmFkaWFsLWdyYWRpZW50KGNpcmNsZSwgcmdiYSg3NSwwLDI1NSwwLjE1KSAwJSwgdHJhbnNwYXJlbnQgNjAlKTtib3JkZXItcmFkaXVzOjUwJTtwb2ludGVyLWV2ZW50czpub25lIj48L2Rpdj4='),_b1=_x('bWFyZ2luOjhweDtwYWRkaW5nOjEycHggMjRweDtjdXJzb3I6cG9pbnRlcjtjb2xvcjojZmZmO2JvcmRlcjpub25lO2JvcmRlci1yYWRpdXM6MTJweDtmb250LXNpemU6MTVweDtmb250LXdlaWdodDo1MDA7dHJhbnNpdGlvbjpvcGFjaXR5IDAuMnM7YmFja2dyb3VuZDpsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCNGRjAwNUUsI0ZGNEI3RSk7Ym94LXNoYWRvdzowIDAgMjBweCByZ2JhKDI1NSwwLDk0LDAuNCksMCAwIDQwcHggcmdiYSgyNTUsMCw5NCwwLjIp'),_b2=_x('bWFyZ2luOjhweDtwYWRkaW5nOjEycHggMjRweDtjdXJzb3I6cG9pbnRlcjtjb2xvcjojZmZmO2JvcmRlcjpub25lO2JvcmRlci1yYWRpdXM6MTJweDtmb250LXNpemU6MTVweDtmb250LXdlaWdodDo1MDA7YmFja2dyb3VuZDpsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCM0QjAwRkYsIzlCMDBGRik7Ym94LXNoYWRvdzowIDAgMjBweCByZ2JhKDc1LDAsMjU1LDAuNCksMCAwIDQwcHggcmdiYSgxNTUsMCwyNTUsMC4yKTt0cmFuc2l0aW9uOm9wYWNpdHkgMC4ycw=='),_urlWrap=_x('bWFyZ2luLXRvcDoxMnB4O3BhZGRpbmc6MTRweCAxNnB4O2JhY2tncm91bmQ6cmdiYSgwLDAsMCwwLjI1KTtib3JkZXItcmFkaXVzOjEycHg7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6MTJweDt1c2VyLXNlbGVjdDp0ZXh0Oy13ZWJraXQtdXNlci1zZWxlY3Q6dGV4dDstbW96LXVzZXItc2VsZWN0OnRleHQ7LW1zLXVzZXItc2VsZWN0OnRleHQ7Ym9yZGVyOjFweCBzb2xpZCByZ2JhKDI1NSwyNTUsMjU1LDAuMDYpO2JveC1zaGFkb3c6aW5zZXQgMCAxcHggMnB4IHJnYmEoMCwwLDAsMC4yKQ=='),_urlText=_x('ZmxleDoxO2NvbG9yOiNFMEUwRTA7Zm9udC1zaXplOjEzcHg7d29yZC1icmVhazpicmVhay1hbGw7Y3Vyc29yOnRleHQ7Zm9udC1mYW1pbHk6dWktbW9ub3NwYWNlLG1vbm9zcGFjZQ=='),_copyBtn=_x('cGFkZGluZzo4cHg7Y3Vyc29yOnBvaW50ZXI7YmFja2dyb3VuZDpyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpO2JvcmRlci1yYWRpdXM6MTBweDtib3JkZXI6MXB4IHNvbGlkIHJnYmEoMjU1LDI1NSwyNTUsMC4wOCk7Y29sb3I6I0UwRTBFMDtmbGV4LXNocmluazowO3RyYW5zaXRpb246Y29sb3IgMC4ycyxiYWNrZ3JvdW5kIDAuMnMsYm94LXNoYWRvdyAwLjJz'),_copySvg=_x('PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjkiIHk9IjkiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgcng9IjIiIHJ5PSIyIi8+PHBhdGggZD0iTTUgMTVINGEyIDIgMCAwIDEtMi0yVjRhMiAyIDAgMCAxIDItMmg5YTIgMiAwIDAgMSAyIDJ2MSIvPjwvc3ZnPg=='),_checkSvg=_x('PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5bGluZSBwb2ludHM9IjIwIDYgOSAxNyA0IDEyIi8+PC9zdmc+'),_activateBox=_x('bWFyZ2luLXRvcDoyOHB4O3BhZGRpbmc6MjRweDtib3JkZXItcmFkaXVzOjE2cHg7YmFja2dyb3VuZDpyZ2JhKDAsMCwwLDAuMik7Ym9yZGVyOjFweCBzb2xpZCByZ2JhKDI1NSwyNTUsMjU1LDAuMDQpO2JveC1zaGFkb3c6aW5zZXQgMCAxcHggMCByZ2JhKDI1NSwyNTUsMjU1LDAuMDIpLDAgMCAzMHB4IC0xMHB4IHJnYmEoNzUsMCwyNTUsMC4xKQ==');_n.id=_0;_n.style.cssText=_s;_n.innerHTML='<div style="'+_i+'">'+_deco+'<h2 style="color:#FFFFFF;margin:0 0 6px;font-size:22px;font-weight:600">'+_a+'</h2><p style="color:#E0E0E0;margin:0 0 24px;line-height:1.6;font-size:14px;opacity:0.9">'+_b+'</p><button type="button" data-lc="1" style="'+_b1+'">'+_c+'</button><div style="'+_activateBox+'"><p style="color:#E0E0E0;margin:0 0 16px;line-height:1.6;font-size:14px;opacity:0.9">'+_d+'</p><button type="button" data-lc="2" style="'+_b2+'">'+_e+'</button><p style="color:#E0E0E0;margin:20px 0 10px;line-height:1.5;font-size:13px;opacity:0.85;text-align:center">'+_f+'</p><div style="'+_urlWrap+'"><span style="'+_urlText+'" data-lc="u">'+_storeDomain+'</span><button type="button" data-lc="c" style="'+_copyBtn+'" title="'+_g+'">'+_copySvg+'</button></div></div></div>';document.body.appendChild(_n);document.body.style.overflow='hidden';var _u=[atob('aHR0cHM6Ly93d3cubHVtaW50aGVtZS5jb20='),atob('aHR0cHM6Ly9hY3RpdmF0ZS5sdW1pbnRoZW1lLmNvbS8=')];_n.querySelector('[data-lc="1"]')&&_n.querySelector('[data-lc="1"]').addEventListener('click',function(){window.open(_u[0],'_blank','noopener');});_n.querySelector('[data-lc="2"]')&&_n.querySelector('[data-lc="2"]').addEventListener('click',function(){window.open(_u[1],'_blank','noopener');});var _copyEl=_n.querySelector('[data-lc="c"]');if(_copyEl){_copyEl.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();var _showSuccess=function(){_copyEl.innerHTML=_checkSvg;_copyEl.style.color=atob('IzJFQ0M3MQ==');_copyEl.style.boxShadow=atob('MCAwIDEycHggcmdiYSg0NiwyMDQsMTEzLDAuNCk=');setTimeout(function(){_copyEl.innerHTML=_copySvg;_copyEl.style.color=atob('I0UwRTBFMA==');_copyEl.style.boxShadow=atob('bm9uZQ==');},2000);};var _execCopy=function(){var _ta=document.createElement('textarea');_ta.value=_storeDomain;_ta.setAttribute('readonly','');_ta.style.cssText=atob('cG9zaXRpb246Zml4ZWQ7dG9wOjA7bGVmdDowO3dpZHRoOjJlbTtoZWlnaHQ6MmVtO3BhZGRpbmc6MDtib3JkZXI6bm9uZTtvdXRsaW5lOm5vbmU7Ym94LXNoYWRvdzpub25lO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7b3BhY2l0eTowLjAxO3otaW5kZXg6LTE=');document.body.appendChild(_ta);_ta.focus();_ta.select();_ta.setSelectionRange(0,_storeDomain.length);try{return document.execCommand('copy');}finally{document.body.removeChild(_ta);}};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(_storeDomain).then(_showSuccess).catch(function(){if(_execCopy())_showSuccess();});}else if(_execCopy()){_showSuccess();}});}};}();</script>
+{% if localization.available_countries.size > 1 or localization.available_languages.size > 1 %}
+  <script
+    src="{{ 'localization.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+
+{% if template == 'product' or template.name == 'product' or request.page_type == 'product' %}
+  <script
+    src="{{ 'fly-to-cart.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script
+    src="{{ 'sticky-add-to-cart.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+  <script type="module">
+    import { RecentlyViewed } from '@theme/recently-viewed-products';
+    RecentlyViewed.addProduct('{{ product.id }}');
+  </script>
+{% endif %}
+
+{% if settings.transition_to_main_product %}
+  <script
+    src="{{ 'product-card-link.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
+
+<script
+  src="{{ 'auto-close-details.js' | asset_url }}"
+  defer="defer"
+></script>
+
+<script
+  src="{{ 'swiper-slideshow.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+<script>!function(){if(!window.__su||typeof window.__sd!=='function'||typeof window.__te_d!=='string')return;var cacheKey='lumin_theme_activation_'+window.__te_d,cacheTtl=24*60*60*1000,now=Date.now(),cached=null;try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null')}catch(e){cached=null}if(cached&&cached.activated===true&&now-cached.checkedAt<cacheTtl){window.__av=true;return}fetch(window.__su,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({store_url:window.__te_d})}).then(function(r){if(!r.ok)throw new Error('Activation check failed');return r.json()}).then(function(d){if(d.activated){window.__av=true;try{localStorage.setItem(cacheKey,JSON.stringify({activated:true,checkedAt:now}))}catch(e){}}else{try{localStorage.removeItem(cacheKey)}catch(e){}window.__sd()}}).catch(function(){if(cached&&cached.activated===true)window.__av=true})}();</script>

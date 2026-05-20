@@ -1,0 +1,28 @@
+{%- doc -%}
+  Renders a valid CSS `font-family` value from a `font_picker` font.
+
+  - `| json` on `.family` correctly quotes names with spaces (e.g. "Open Sans") for CSS.
+  - When the value is used inside a **double-quoted** HTML `style` attribute, set
+    `in_style_attribute: true` so inner `"` is escaped as &quot; and the rule is not
+    cut off in the middle of the family name (a common reason some webfonts only work
+    for single-word names).
+
+  @param {object} font - Shopify font from font_picker
+  @param {boolean} [in_style_attribute] - If true, escape " for use in style=""
+{%- enddoc -%}
+
+{%- if font == blank -%}
+{%- else -%}
+  {%- capture font_family_s -%}
+    {%- if font.fallback_families != blank -%}
+      {{ font.family | json }}, {{ font.fallback_families }}
+    {%- else -%}
+      {{ font.family | json }}
+    {%- endif -%}
+  {%- endcapture -%}
+  {%- if in_style_attribute -%}
+    {{- font_family_s | strip | replace: '"', '&quot;' -}}
+  {%- else -%}
+    {{- font_family_s | strip -}}
+  {%- endif -%}
+{%- endif -%}

@@ -1,0 +1,2982 @@
+
+{% liquid
+  assign product = product
+  if section.settings.product != blank
+    assign product = section.settings.product
+  endif
+
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign thumbnail_size = section.settings.thumbnail_size
+  assign thumbnail_aspect_ratio = section.settings.thumbnail_aspect_ratio
+  assign default_add_to_cart_text = 'actions.add_to_cart' | t
+  case thumbnail_aspect_ratio
+    when 'portrait'
+      assign thumbnail_width = thumbnail_size
+      assign thumbnail_height = thumbnail_size | times: 1.33 | round
+    when 'landscape'
+      assign thumbnail_width = thumbnail_size | times: 1.33 | round
+      assign thumbnail_height = thumbnail_size
+    when 'wide'
+      assign thumbnail_width = thumbnail_size | times: 1.78 | round
+      assign thumbnail_height = thumbnail_size
+    when 'adaptive'
+      assign thumbnail_width = thumbnail_size
+      assign thumbnail_height = thumbnail_size
+    else
+      assign thumbnail_width = thumbnail_size
+      assign thumbnail_height = thumbnail_size
+  endcase
+
+  assign variant = product.selected_or_first_available_variant
+  assign inventory_quantity = variant.inventory_quantity
+  assign inventory_policy = variant.inventory_policy
+
+  if variant.inventory_management == 'shopify'
+    assign inventory_managed = true
+  endif
+
+  if variant.quantity_rule.min > variant.inventory_quantity and inventory_managed and inventory_policy == 'deny'
+    assign quantity_rule_soldout = true
+  endif
+
+  if inventory_managed
+    if inventory_quantity <= 0 and inventory_policy == 'deny' or quantity_rule_soldout
+      assign can_add_to_cart = false
+      assign add_to_cart_text = 'products.product.sold_out' | t
+    else
+      assign can_add_to_cart = true
+      assign add_to_cart_text = 'products.product.add_to_cart' | t
+    endif
+  else
+    if product.selected_or_first_available_variant != null
+      assign can_add_to_cart = true
+      assign add_to_cart_text = 'products.product.add_to_cart' | t
+    else
+      assign can_add_to_cart = false
+      assign add_to_cart_text = 'products.product.unavailable' | t
+    endif
+  endif
+%}
+
+<div
+  class="sticky-add-to-cart sticky-add-to-cart--{{ section.id }}{% if thumbnail_aspect_ratio == 'adaptive' %} sticky-add-to-cart--adaptive{% endif %}{% unless section.settings.show_on_desktop %} sticky-add-to-cart--hide-desktop{% endunless %}{% unless section.settings.show_on_mobile %} sticky-add-to-cart--hide-mobile{% endunless %}{% if section.settings.mobile_only_button %} sticky-add-to-cart--mobile-only-button{% endif %}{% if section.settings.mobile_no_padding %} sticky-add-to-cart--mobile-no-padding{% endif %} color-{{ section.settings.color_scheme }}
+  {% if section.settings.show_at_top %} sticky-add-to-cart--top{% else %} sticky-add-to-cart--bottom{% endif %}{% if section.settings.compact%} atc-compact{% endif %}"
+  {{ section.shopify_attributes }}
+  style="--compact-radius: {{ section.settings.compact_radius | default: 4 }}px; --thumbnail-size: {{ section.settings.thumbnail_size }}px; --title-text-size: var(--font-size--{% if section.settings.title_text_size %}{{ section.settings.title_text_size }}{% else %}sm{% endif %}); --variants-text-size: var(--font-size--{% if section.settings.variants_text_size %}{{ section.settings.variants_text_size }}{% else %}xs{% endif %}); --price-text-size: var(--font-size--{% if section.settings.price_text_size %}{{ section.settings.price_text_size }}{% else %}sm{% endif %}); --price-font-family: var(--font-{{ section.settings.sticky_price_font | default: 'subheading' }}--family); --price-font-style: var(--font-{{ section.settings.sticky_price_font | default: 'subheading' }}--style); --price-font-weight: var(--font-{{ section.settings.sticky_price_font | default: 'subheading' }}--weight);{% if section.settings.edit_price_color and section.settings.price_color != blank %} --sticky-price-color: {{ section.settings.price_color }};{% endif %}{% if section.settings.edit_price_color and section.settings.compare_price_color != blank %} --sticky-compare-price-color: {{ section.settings.compare_price_color }};{% endif %}"
+  data-sticky-add-to-cart
+  data-override-product-price="{% if section.settings.override_product_price == true %}true{% else %}false{% endif %}"
+  data-money-format="{{ shop.money_format | escape }}"
+  data-currency="{{ cart.currency.iso_code | escape }}"
+  data-thumbnail-size="{{ thumbnail_size }}"
+  data-thumbnail-aspect-ratio="{{ thumbnail_aspect_ratio }}"
+  data-section-settings='{"show_image": {{ section.settings.show_image | json }}, "show_image_mobile": {{ section.settings.show_image_mobile | json }}, "show_title_desktop": {{ section.settings.show_title_desktop | json }}, "show_title_mobile": {{ section.settings.show_title_mobile | json }}, "show_variants": {{ section.settings.show_variants | json }}, "show_price": {{ section.settings.show_price | json }}, "show_on_desktop": {{ section.settings.show_on_desktop | json }}, "show_on_mobile": {{ section.settings.show_on_mobile | json }}, "show_at_top": {{ section.settings.show_at_top | json }}, "mobile_only_button": {{ section.settings.mobile_only_button | json }}, "mobile_no_padding": {{ section.settings.mobile_no_padding | json }}, "image_border_radius": {{ section.settings.image_border_radius | json }}, "compact": {{ section.settings.compact | json }}, "change_variant_text": {{ section.settings.change_variant_text | json }}, "change_variant_link_enabled": {{ section.settings.change_variant_link_enabled | json }}, "change_variant_link_style": {{ section.settings.change_variant_link_style | json }}}'
+>
+  {%- if product != blank -%}
+    <div class="sticky-add-to-cart__content">
+      {% if section.settings.show_image %}
+        <div class="sticky-add-to-cart__image{% unless section.settings.show_image_mobile %} sticky-add-to-cart__image--hide-mobile{% endunless %}" data-sticky-image>
+          {% if variant.featured_media %}
+            <img 
+              src="{{ variant.featured_media | image_url: width: thumbnail_width, height: thumbnail_height, crop: 'center' }}"
+              alt="{{ variant.featured_media.alt | escape }}"
+              width="{{ thumbnail_width }}"
+              height="{{ thumbnail_height }}"
+              loading="lazy"
+              data-variant-image="{{ variant.id }}"
+            >
+          {% elsif product.featured_media %}
+            <img 
+              src="{{ product.featured_media | image_url: width: thumbnail_width, height: thumbnail_height, crop: 'center' }}"
+              alt="{{ product.featured_media.alt | escape }}"
+              width="{{ thumbnail_width }}"
+              height="{{ thumbnail_height }}"
+              loading="lazy"
+              data-fallback-image
+            >
+          {% else %}
+            <div class="sticky-add-to-cart__image-placeholder">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+      <div class="sticky-add-to-cart__product-info">
+        <div>
+        {% if section.settings.show_title_desktop or section.settings.show_title_mobile %}
+          <h3 class="sticky-add-to-cart__title{% unless section.settings.show_title_desktop %} sticky-add-to-cart__title--hide-desktop{% endunless %}{% unless section.settings.show_title_mobile %} sticky-add-to-cart__title--hide-mobile{% endunless %}">{{ product.title }}</h3>
+        {% endif %}
+
+        {% if section.settings.show_variants %}
+          <div class="sticky-add-to-cart__variants" data-sticky-variants>
+            <!-- Variants will be populated by JavaScript -->
+          </div>
+        {% endif %}
+        </div> 
+        {% if section.settings.show_price %}
+          <div class="sticky-add-to-cart__price" data-sticky-price data-show-sale-price-first="{% if section.settings.show_sale_price_first == true %}true{% else %}false{% endif %}">
+            {% render 'price', product_resource: product,  show_sale_price_first: section.settings.show_sale_price_first, show_sale_badge: false %}
+          </div>
+        {% endif %}
+      </div>
+      
+      <div class="sticky-add-to-cart__actions">
+        <button
+          id="StickyAddToCart-Button-{{ section.id }}"
+          class="sticky-add-to-cart__button button"
+          data-sticky-add-to-cart-button
+          {% unless can_add_to_cart %}
+            disabled
+          {% endunless %}
+        >
+          <span class="add-to-cart-text">
+            {% if can_add_to_cart %}
+              <span class="svg-wrapper add-to-cart-icon">
+                {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
+              </span>
+            {% endif %}
+            <span class="add-to-cart-text__content">
+              {{- add_to_cart_text | default: default_add_to_cart_text -}}
+            </span>
+          </span>
+          <span
+            ref="quantityDisplay"
+            class="sticky-add-to-cart__quantity-display"
+            data-quantity-display
+            style="display: none;"
+          >
+            (<span ref="quantityNumber" data-quantity-number>1</span>)
+          </span>
+          <span class="add-to-cart__added">
+            <span class="svg-wrapper add-to-cart__added-icon">
+              {{- 'icon-checkmark-burst.svg' | inline_asset_content -}}
+            </span>
+          </span>
+          <span class="sticky-add-to-cart__loading-dots" aria-hidden="true">
+            <span class="sticky-add-to-cart__dot"></span>
+            <span class="sticky-add-to-cart__dot"></span>
+            <span class="sticky-add-to-cart__dot"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+  {%- else -%}
+    <div class="sticky-add-to-cart__content">
+      {% if section.settings.show_image %}
+        <div class="sticky-add-to-cart__image{% unless section.settings.show_image_mobile %} sticky-add-to-cart__image--hide-mobile{% endunless %}">
+          <div class="sticky-add-to-cart__image-placeholder">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+            </svg>
+          </div>
+        </div>
+      {% endif %}
+      <div class="sticky-add-to-cart__product-info">
+        {% if section.settings.show_title_desktop or section.settings.show_title_mobile %}
+          <h3 class="sticky-add-to-cart__title{% unless section.settings.show_title_desktop %} sticky-add-to-cart__title--hide-desktop{% endunless %}{% unless section.settings.show_title_mobile %} sticky-add-to-cart__title--hide-mobile{% endunless %}">No product selected</h3>
+        {% endif %}
+        {% if section.settings.show_price %}
+          <p class="sticky-add-to-cart__price">Please select a product in the section settings</p>
+        {% endif %}
+      </div>
+      <div class="sticky-add-to-cart__actions">
+        <button class="sticky-add-to-cart__button button" disabled>
+          Add to cart
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+</div>
+<style>
+  /* Desktop title visibility */
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart__title--hide-desktop {
+      display: none !important;
+    }
+  }
+
+  /* Mobile title visibility */
+  @media screen and (max-width: 749px) {
+    .sticky-add-to-cart__title--hide-mobile {
+      display: none !important;
+    }
+  }
+
+  /* Mobile image visibility */
+  @media screen and (max-width: 749px) {
+    .sticky-add-to-cart__image--hide-mobile {
+      display: none !important;
+    }
+  }
+</style>
+
+{% stylesheet %}
+  .sticky-add-to-cart {
+    position: fixed !important;
+    left: 0 ;
+    right: 0 ;
+    z-index: 100 ;
+    background-color: var(--color-background);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    padding: var(--padding-md);
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+    width: 100% ;
+    height: fit-content !important;
+  }
+
+  .sticky-add-to-cart--bottom {
+    bottom: 0;
+    top: auto;
+  }
+  
+  .sticky-add-to-cart--top {
+    top: 0;
+    bottom: auto;
+  }
+  @media screen and (min-width: 750px) {
+  .atc-compact.sticky-add-to-cart--bottom  {
+    bottom: 8px !important;
+    top: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--compact-radius) !important;
+  }
+  .atc-compact.sticky-add-to-cart--top {
+    top: 8px !important;
+    bottom: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--compact-radius) !important;
+  }
+}
+
+  /* Compact mode styling */
+  .atc-compact {
+    padding: var(--padding-xs) var(--padding-sm) !important;
+    max-width: 700px;
+    margin: auto;
+  }
+
+  .atc-compact .sticky-add-to-cart__content {
+    gap: var(--padding-sm);
+  }
+
+  .atc-compact .sticky-add-to-cart__title {
+    font-size: var(--title-text-size, var(--font-size--xs));
+    margin: 0 0 var(--margin-2xs) 0;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .atc-compact .sticky-add-to-cart__variants {
+    font-size: var(--variants-text-size, var(--font-size--2xs));
+    margin: 0 0 var(--margin-2xs) 0;
+  }
+
+  .atc-compact .sticky-add-to-cart__price {
+    font-size: var(--price-text-size, var(--font-size--xs));
+    font-family: var(--price-font-family);
+    font-style: var(--price-font-style);
+    font-weight: var(--price-font-weight);
+  }
+
+  .atc-compact .sticky-add-to-cart__price .price {
+    font-size: var(--price-text-size, var(--font-size--xs));
+    font-family: var(--price-font-family);
+    font-style: var(--price-font-style);
+    font-weight: var(--price-font-weight);
+  }
+
+  .atc-compact .sticky-add-to-cart__button {
+    min-width: 100px;
+    padding: var(--padding-sm) var(--padding-sm);
+    font-size: var(--font-size--xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .atc-compact .sticky-add-to-cart .add-to-cart-text {
+    font-size: var(--font-size--xs);
+  }
+
+  /* Reduce image size in compact mode 
+  .atc-compact .sticky-add-to-cart__image {
+    width: calc(var(--thumbnail-size, 40px) * 0.8);
+    height: calc(var(--thumbnail-height, 40px) * 0.8);
+  }*/
+
+  .sticky-add-to-cart.sticky-add-to-cart--visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Ensure smooth transitions */
+  .sticky-add-to-cart {
+    opacity: 0;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+
+  .sticky-add-to-cart__content {
+    display: flex;
+    align-items: center;
+    gap: var(--padding-md);
+    max-width: var(--page-width);
+    margin: 0 auto;
+  }
+
+  .sticky-add-to-cart__image {
+    flex-shrink: 0;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    background-color: var(--color-background);
+  }
+
+  .sticky-add-to-cart__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .sticky-add-to-cart--adaptive .sticky-add-to-cart__image img {
+    object-fit: contain;
+  }
+
+  /* Layout adjustments when elements are hidden */
+  .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)) .sticky-add-to-cart__product-info {
+    margin-left: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__title)) .sticky-add-to-cart__variants {
+      margin-top: 0;
+    }
+  }
+
+  @media screen and (max-width: 750px) {
+    .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__title)) .sticky-add-to-cart__variants {
+      margin-top: 0;
+    }
+  }
+
+  .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__title)) .sticky-add-to-cart__variants {
+    margin-top: 0;
+  }
+
+  @media screen and (max-width: 750px) {
+    .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__variants)) .sticky-add-to-cart__price {
+      margin-top: 0;
+    }
+  }
+
+  .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__variants)) .sticky-add-to-cart__price {
+    margin-top: 0;
+  }
+
+  /* Fallback for browsers that don't support :has() */
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart__content.no-image .sticky-add-to-cart__product-info {
+      margin-left: 0;
+    }
+  }
+
+  .sticky-add-to-cart__content.no-image .sticky-add-to-cart__product-info {
+    margin-left: 0;
+  }
+
+  @media screen and (max-width: 750px) {
+    .sticky-add-to-cart__content.no-image .sticky-add-to-cart__product-info {
+      margin-left: 0;
+    }
+  }
+
+  .sticky-add-to-cart__content.no-title .sticky-add-to-cart__variants {
+    margin-top: 0;
+  }
+
+  @media screen and (max-width: 750px) {
+    .sticky-add-to-cart__content.no-title .sticky-add-to-cart__variants {
+      margin-top: 0;
+    }
+  }
+
+  .sticky-add-to-cart__content.no-variants .sticky-add-to-cart__price {
+    margin-top: 0;
+  }
+
+  @media screen and (max-width: 750px) {
+    .sticky-add-to-cart__content.no-variants .sticky-add-to-cart__price {
+      margin-top: 0;
+    }
+  }
+
+  /* Full width button when all elements are hidden - CSS only using :has() */
+  .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):not(:has(.sticky-add-to-cart__title)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price)) .sticky-add-to-cart__actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap:0 !important;
+  }
+  .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):not(:has(.sticky-add-to-cart__title)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price))  {
+    gap: 0 !important;
+    max-width: 480px;
+  }
+
+  .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):not(:has(.sticky-add-to-cart__title)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price)) .sticky-add-to-cart__actions {
+    width: 100%;
+  }
+
+  /* Mobile: Full width button when image, variant, price are hidden AND title mobile is hidden */
+  @media screen and (max-width: 749px) {
+    .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price)):has(.sticky-add-to-cart__title--hide-mobile) .sticky-add-to-cart__actions {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 0 !important;
+    }
+    
+    .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price)):has(.sticky-add-to-cart__title--hide-mobile) {
+      gap: 0 !important;
+      max-width: 100%;
+    }
+    
+    
+    .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price)):has(.sticky-add-to-cart__title--hide-mobile) .sticky-add-to-cart__button {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 1;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+  .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):has(.sticky-add-to-cart__title--hide-mobile):not(:has(.sticky-add-to-cart__title)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price)) .sticky-add-to-cart__button {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1;
+  }
+}
+@media screen and (max-width: 750px) {
+  .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):has(.sticky-add-to-cart__title--hide-desktop):not(:has(.sticky-add-to-cart__title)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price)) .sticky-add-to-cart__button {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1;
+  }
+}
+
+  /* Desktop: max 400px width and centered */
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart__content:not(:has(.sticky-add-to-cart__image)):not(:has(.sticky-add-to-cart__title)):not(:has(.sticky-add-to-cart__variants)):not(:has(.sticky-add-to-cart__price)) .sticky-add-to-cart__button {
+      max-width: 100%;
+    }
+  }
+  
+
+  /* Fallback for browsers that don't support :has() - using the all-elements-hidden class */
+  .sticky-add-to-cart__content.all-elements-hidden .sticky-add-to-cart__actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .sticky-add-to-cart__content.all-elements-hidden .sticky-add-to-cart__button {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1;
+  }
+
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart__content.all-elements-hidden .sticky-add-to-cart__button {
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+
+  /* Fallback for mobile: Full width button when image, variant, price are hidden AND title mobile is hidden */
+  @media screen and (max-width: 749px) {
+    .sticky-add-to-cart__content.no-image.no-variants.no-price.has-title-mobile-hidden .sticky-add-to-cart__actions {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 0 !important;
+    }
+    
+    .sticky-add-to-cart__content.no-image.no-variants.no-price.has-title-mobile-hidden {
+      gap: 0 !important;
+      max-width: 100%;
+    }
+    
+    
+    .sticky-add-to-cart__content.no-image.no-variants.no-price.has-title-mobile-hidden .sticky-add-to-cart__button {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 1;
+    }
+  }
+
+  /* Mobile-only button mode: Hide all elements except button on mobile */
+  @media screen and (max-width: 749px) {
+    .sticky-add-to-cart--mobile-only-button .sticky-add-to-cart__image,
+    .sticky-add-to-cart--mobile-only-button .sticky-add-to-cart__product-info {
+      display: none !important;
+    }
+    
+    .sticky-add-to-cart--mobile-only-button .sticky-add-to-cart__content {
+      justify-content: center;
+      gap: 0 !important;
+    }
+    
+    .sticky-add-to-cart--mobile-only-button .sticky-add-to-cart__actions {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    
+    
+    .sticky-add-to-cart--mobile-only-button .sticky-add-to-cart__button {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 1;
+    }
+    
+    /* Hide background, border, and box shadow for mobile-only button mode */
+    .sticky-add-to-cart--mobile-only-button {
+      background-color: transparent !important;
+      border-top: none !important;
+      box-shadow: none !important;
+      padding: var(--padding-sm) var(--padding-md) !important;
+    }
+    
+    /* No padding mode: Remove all padding and button border radius (only when mobile-only button is enabled) */
+    .sticky-add-to-cart--mobile-only-button.sticky-add-to-cart--mobile-no-padding {
+      padding: 0 !important;
+    }
+    
+    .sticky-add-to-cart--mobile-only-button.sticky-add-to-cart--mobile-no-padding .sticky-add-to-cart__button {
+      border-radius: 0 !important;
+    }
+  }
+
+  .sticky-add-to-cart__image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .sticky-add-to-cart__product-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart__product-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+   }
+  }
+
+  .sticky-add-to-cart__title {
+    font-size: var(--title-text-size, var(--font-size--sm));
+    font-weight: 600;
+    margin: 0 0 var(--margin-xs) 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-wrap: balance;
+    text-wrap: pretty;
+    white-space: pre-wrap;
+  }
+
+  .sticky-add-to-cart__variants {
+    font-size: var(--variants-text-size, var(--font-size--xs));
+    color: rgba(var(--color-foreground), 0.6);
+    margin: 0 0 var(--margin-2xs) 0;
+      line-height: 1.2;
+    }
+
+  .sticky-add-to-cart__variant-label {
+    font-weight: 500;
+    color: rgb(var(--color-foreground));
+  }
+
+  .sticky-add-to-cart__variant-value {
+    color: rgba(var(--color-foreground), 0.6);
+  }
+
+  .sticky-add-to-cart__variant-link {
+    color: rgb(var(--color-primary));
+    text-decoration: underline;
+    font-size: var(--font-size--2xs);
+    margin-left: var(--margin-xs);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .sticky-add-to-cart__variant-link:hover {
+    opacity: 0.7;
+  }
+
+  .sticky-add-to-cart__variant-link:has(.sticky-add-to-cart__change-icon) {
+    text-decoration: none;
+  }
+
+  .sticky-add-to-cart__change-icon {
+    display: inline-block;
+    vertical-align: middle;
+    width: 1.25em;
+    height: 1.25em;
+  }
+
+  .sticky-add-to-cart__price {
+    font-size: var(--price-text-size, var(--font-size--sm));
+    font-family: var(--price-font-family);
+    font-style: var(--price-font-style);
+    font-weight: var(--price-font-weight);
+  }
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart__price {
+      text-align: right;
+    }
+  }
+
+  .sticky-add-to-cart__price .price {
+    font-size: var(--price-text-size, var(--font-size--sm));
+    font-family: var(--price-font-family);
+    font-style: var(--price-font-style);
+    font-weight: var(--price-font-weight);
+  }
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart__price .price {
+      text-align: right;
+    }
+  }
+  .sticky-add-to-cart__price .price,
+  .sticky-add-to-cart__price .price--sale {
+    color: var(--sticky-price-color, var(--color-foreground));
+  }
+
+  .sticky-add-to-cart__price .price--sale {
+    color: var(--sticky-price-color, var(--color-sale));
+  }
+
+  .sticky-add-to-cart__price .price--compare,
+  .sticky-add-to-cart__price .compare-at-price {
+    color: var(--sticky-compare-price-color, rgba(var(--color-foreground), 0.6));
+    text-decoration: none;
+    margin-left: var(--margin-xs);
+  }
+
+  .sticky-add-to-cart__actions {
+    flex-shrink: 0;
+  }
+
+  .sticky-add-to-cart__button {
+    --text-speed: 0.26;
+    --base-delay: calc(var(--text-speed) * 0.25);
+    --tick-speed: 0.1;
+    --ring-speed: 0.2;
+    --check-speed: 0.2;
+    --burst-speed: 0.32;
+    --step-delay: 3;
+    --speed: 1;
+
+    min-width: 120px;
+    padding: var(--padding-sm) var(--padding-lg);
+    font-size: var(--font-size--sm);
+    font-weight: 600;
+    white-space: nowrap;
+    position: relative;
+    width: 100%;
+    user-select: none;
+    transition-property: color, box-shadow, background-color, scale, translate;
+    transition-duration: var(--animation-speed);
+    transition-timing-function: var(--ease-out-cubic);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:active {
+      scale: 0.99;
+      translate: 0 1px;
+    }
+  }
+
+  .sticky-add-to-cart__button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .sticky-add-to-cart__button .svg-wrapper .checkmark-burst {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Add to cart button text styling - matching original add-to-cart button */
+  .sticky-add-to-cart__button .add-to-cart-text {
+    --atc-opacity: 0;
+    --atc-destination: -1em;
+    display: flex;
+    gap: var(--gap-2xs);
+    align-items: center;
+    justify-content: center;
+    animation-duration: var(--animation-speed);
+    animation-timing-function: var(--animation-easing);
+    animation-fill-mode: forwards;
+    transition: width var(--animation-speed) var(--animation-easing),
+      opacity var(--animation-speed) var(--animation-easing);
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    clip-path: circle(100% at 50% 50%);
+  }
+
+  .sticky-add-to-cart__button .add-to-cart__added {
+    --atc-opacity: 1;
+    --atc-destination: 0px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+
+  .sticky-add-to-cart__button .add-to-cart__added-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .sticky-add-to-cart__loading-dots {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    z-index: 2;
+  }
+
+  .sticky-add-to-cart__button.loading .sticky-add-to-cart__loading-dots {
+    display: flex;
+  }
+
+  .sticky-add-to-cart__button.loading .add-to-cart-text,
+  .sticky-add-to-cart__button.loading .add-to-cart__added {
+    visibility: hidden;
+  }
+
+  .sticky-add-to-cart__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: sticky-add-to-cart-dots-bounce 0.9s ease-in-out infinite both;
+  }
+
+  .sticky-add-to-cart__dot:nth-child(1) { animation-delay: -0.2s; }
+  .sticky-add-to-cart__dot:nth-child(2) { animation-delay: -0.1s; }
+  .sticky-add-to-cart__dot:nth-child(3) { animation-delay: 0s; }
+
+  @keyframes sticky-add-to-cart-dots-bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .sticky-add-to-cart__button[data-added='true'] .add-to-cart-text,
+  .sticky-add-to-cart__button[data-added='true'] .add-to-cart__added {
+    animation-name: atc-slide;
+  }
+
+  .sticky-add-to-cart__button .checkmark-burst {
+    opacity: 0;
+    overflow: visible;
+
+    .burst {
+      rotate: 20deg;
+    }
+
+    .check {
+      opacity: 0.2;
+      scale: 0.8;
+      filter: blur(2px);
+      transform: translateZ(0);
+    }
+
+    :is(.ring, .line, .check, .burst, .tick) {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    :is(.line) {
+      stroke-dasharray: 1.5 1.5;
+      stroke-dashoffset: -1.5;
+      translate: 0 -180%;
+    }
+
+    g {
+      transform-origin: center;
+      rotate: calc(var(--index) * (360 / 8) * 1deg);
+    }
+  }
+
+  .sticky-add-to-cart__button[data-added='true'] .checkmark-burst {
+    opacity: 1;
+  }
+
+  .sticky-add-to-cart__button[data-added='true'] {
+    .check {
+      opacity: 1;
+      scale: 1;
+      filter: blur(0);
+    }
+
+    .tick {
+      scale: 1.75;
+    }
+
+    .ring {
+      opacity: 0;
+      scale: 1;
+    }
+
+    .line {
+      stroke-dashoffset: 1.5;
+    }
+
+    .add-to-cart-text {
+      /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+      clip-path: circle(0% at 50% 50%);
+      filter: blur(2px);
+      opacity: 0;
+      translate: 0 4px;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sticky-add-to-cart__button[data-added='true'] {
+      .check {
+        transition-property: opacity, scale, filter;
+        transition-duration: calc(calc(var(--check-speed) * 1s));
+        transition-delay: calc((var(--base-delay) * 1s));
+        transition-timing-function: var(--ease-out-quad);
+      }
+
+      .tick {
+        transition-property: scale;
+        transition-duration: calc((calc(var(--tick-speed) * 1s)));
+        transition-delay: calc(((var(--base-delay) + (var(--check-speed) * (var(--step-delay) * 1.1))) * 1s));
+        transition-timing-function: ease-out;
+      }
+
+      .ring {
+        transition-property: opacity, scale;
+        transition-duration: calc((calc(var(--ring-speed) * 1s)));
+        transition-delay: calc(((var(--base-delay) + (var(--check-speed) * var(--step-delay))) * 1s));
+        transition-timing-function: var(--ease-out-quad);
+      }
+
+      .line {
+        transition-property: stroke-dashoffset;
+        transition-duration: calc((calc(var(--burst-speed) * 1s)));
+        transition-delay: calc(((var(--base-delay) + (var(--check-speed) * var(--step-delay))) * 1s));
+        transition-timing-function: var(--ease-out-cubic);
+      }
+    }
+    .sticky-add-to-cart__button .add-to-cart-text {
+      transition-property: clip-path, opacity, filter, translate;
+      transition-duration: calc((var(--text-speed) * 0.6s)), calc((var(--text-speed) * 1s));
+      transition-timing-function: ease-out;
+    }
+  }
+
+  @keyframes atc-slide {
+    to {
+      opacity: var(--atc-opacity, 1);
+      translate: 0px var(--atc-destination, 0px);
+    }
+  }
+
+  .sticky-add-to-cart .add-to-cart-text {
+    font-size: var(--font-size--sm);
+  }
+
+  /* Quantity display styling */
+  .sticky-add-to-cart__quantity-display {
+    margin-left: var(--margin-xs);
+    font-weight: 600;
+    font-size: var(--font-size--sm);
+  }
+
+  /* Desktop visibility */
+  @media screen and (min-width: 750px) {
+    .sticky-add-to-cart--hide-desktop {
+      display: none !important;
+    }
+  }
+
+  /* Mobile visibility */
+  @media screen and (max-width: 749px) {
+    .sticky-add-to-cart--hide-mobile {
+      display: none !important;
+    }
+  }
+
+  /* Ensure it doesn't interfere with other sticky elements */
+  .sticky-add-to-cart {
+    z-index: 50;
+  }
+
+  /* Force sticky positioning on all screen sizes when not in editor 
+  .sticky-add-to-cart:not([style*="position: relative"]) {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+  }
+    */
+
+  /* Ensure it stays above other elements */
+  .sticky-add-to-cart {
+    z-index: 7 !important;
+  }
+{% endstylesheet %}
+
+<style>
+  .sticky-add-to-cart__image {
+    width: {{ thumbnail_width }}px;
+    height: {{ thumbnail_height }}px;
+    border-radius: {{ section.settings.image_border_radius | default: 4 }}px;
+  }
+  
+  .sticky-add-to-cart__image img {
+    border-radius: {{ section.settings.image_border_radius | default: 4 }}px;
+  }
+</style>
+
+{% javascript %}
+  class StickyAddToCart {
+    constructor() {
+      this.element = document.querySelector('[data-sticky-add-to-cart]');
+      this.mainAddToCartButton = this.findMainAddToCartButton();
+      this.destroyed = false;
+      this.intervals = [];
+      this.observers = [];
+      
+      if (!this.element) return;
+
+      this.init();
+    }
+
+    destroy() {
+      this.destroyed = true;
+      this.intervals.forEach(id => clearInterval(id));
+      this.intervals = [];
+      this.observers.forEach(obs => obs.disconnect());
+      this.observers = [];
+      if (this.quantityBreaksObserver) {
+        this.quantityBreaksObserver.disconnect();
+        this.quantityBreaksObserver = null;
+      }
+      if (this.animationObserver) {
+        this.animationObserver.disconnect();
+        this.animationObserver = null;
+      }
+      if (this.quantityBreaksClickHandler) {
+        document.removeEventListener('click', this.quantityBreaksClickHandler);
+      }
+    }
+
+    findMainAddToCartButton() {
+      // Look for the main add to cart button in various possible locations
+      const selectors = [
+        '.buy-buttons-block .add-to-cart-button',
+        '.product-form-buttons .add-to-cart-button',
+        '.product-details .add-to-cart-button',
+        '[data-testid="product-information-details"] .add-to-cart-button',
+        'product-form-component .add-to-cart-button',
+        'form[data-type="add-to-cart-form"] button[type="submit"]',
+        '.product-form button[type="submit"]',
+        '.add-to-cart-button',
+        'button[name="add"]'
+      ];
+      
+      for (const selector of selectors) {
+        const button = document.querySelector(selector);
+        if (button) return button;
+      }
+      
+      return null;
+    }
+
+    init() {
+      this.setupScrollListener();
+      this.setupPriceUpdates();
+      this.setupPriceObserver();
+      this.setupVariantsDisplay();
+      this.setupVisibilityClasses();
+      this.setupThemeEditorUpdates();
+      this.setupVariantLinkClick();
+      this.setupStickyButtonClick();
+      this.setupButtonStateSync();
+      this.setupQuantityBreaksListener();
+      this.setupQuantityUpdates();
+      
+      // Initialize compact class
+      this.updateCompactClass();
+      
+      // Get initial quantity after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        this.currentQuantity = this.getInitialQuantity();
+        this.updateButtonText();
+      }, 100);
+      
+      // Also update on DOMContentLoaded if not already loaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          this.currentQuantity = this.getInitialQuantity();
+          this.updateButtonText();
+        });
+      }
+      
+      // Initialize image with current variant
+      this.updateImage();
+      
+      // Check main button visibility immediately
+      this.updateVisibility();
+      
+      // Check for quantity breaks price on initial load
+      setTimeout(() => this.updatePriceFromQuantityBreaks(), 100);
+    }
+
+
+    isMainAddToCartVisible() {
+      if (!this.mainAddToCartButton) return false;
+      
+      const rect = this.mainAddToCartButton.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      
+      // Check if the main button is visible in the viewport
+      return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= windowHeight &&
+        rect.right <= window.innerWidth
+      );
+    }
+
+    setupPriceUpdates() {
+      // Listen for variant selected events (from variant picker)
+      document.addEventListener('variant:selected', (event) => {
+        this.updatePriceFromVariantId(event.detail.resource.id);
+        this.updateImage();
+      });
+
+      // Listen for variant update events - this is the main event with full variant data
+      document.addEventListener('variant:update', (event) => {
+        // The variant data is in event.detail.resource
+        const variant = event.detail.resource;
+        if (variant) {
+          this.updatePrice(variant);
+          this.updateImageFromVariant(variant);
+        } else {
+          this.copyPriceFromMain();
+          this.updateImage();
+        }
+      });
+
+      // The main variant:update event should handle most cases
+      // Keep a simple fallback for any missed events
+      document.addEventListener('change', (event) => {
+        if (event.target.name === 'id' && event.target.closest('form[data-type="add-to-cart-form"]')) {
+          this.updatePriceFromVariantId(event.target.value);
+          this.updateImage();
+        }
+      });
+    }
+
+    setupQuantityBreaksListener() {
+      // Listen for clicks on quantity break cards
+      this.quantityBreaksClickHandler = (event) => {
+        const clickedCard = event.target.closest('.quantity-breaks__card');
+        if (clickedCard) {
+          setTimeout(() => this.updatePriceFromQuantityBreaks(), 50);
+        }
+      };
+      document.addEventListener('click', this.quantityBreaksClickHandler);
+      
+      // Watch for active class changes on quantity break cards
+      const quantityBreaksComponent = document.querySelector('[data-quantity-breaks-component]');
+      if (quantityBreaksComponent) {
+        this.quantityBreaksObserver = new MutationObserver(() => {
+          if (this.destroyed) return;
+          this.updatePriceFromQuantityBreaks();
+        });
+        
+        this.quantityBreaksObserver.observe(quantityBreaksComponent, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class']
+        });
+      }
+    }
+
+    updatePriceFromQuantityBreaks() {
+      if (this.destroyed || !this.element || !document.contains(this.element)) return;
+      // Check if price override is enabled in sticky-add-to-cart
+      const stickyOverrideEnabled = this.element.dataset.overrideProductPrice === 'true';
+      if (!stickyOverrideEnabled) return;
+
+      const quantityBreaksComponent = document.querySelector('[data-quantity-breaks-component]');
+      if (!quantityBreaksComponent) return;
+
+      const activeCard = quantityBreaksComponent.querySelector('.quantity-breaks__card--active');
+      if (!activeCard) return;
+
+      const quantityPriceElement = activeCard.querySelector('.quantity-breaks__price');
+      const quantityComparePriceElement = activeCard.querySelector('.quantity-breaks__original-price');
+      
+      if (!quantityPriceElement) return;
+
+      const priceElement = this.element.querySelector('[data-sticky-price]');
+      if (!priceElement) return;
+
+      // Get show_sale_price_first setting
+      const showSalePriceFirst = priceElement.dataset.showSalePriceFirst === 'true';
+
+      // Update only the price values, preserving price-split markup (strip per-unit label clone)
+      const priceContainer = priceElement.querySelector('[ref="priceContainer"]') || priceElement;
+      const currentPriceSpan = priceContainer.querySelector('.price') || priceElement.querySelector('.price');
+      
+      // Find ALL compare price elements to handle duplicates
+      // Check both in priceContainer and priceElement to catch all instances
+      const containerComparePrices = priceContainer.querySelectorAll('.compare-at-price');
+      const elementComparePrices = priceElement.querySelectorAll('.compare-at-price');
+      const allComparePriceSpans = [];
+      
+      // Collect all unique compare price elements
+      containerComparePrices.forEach(span => allComparePriceSpans.push(span));
+      elementComparePrices.forEach(span => {
+        if (!priceContainer.contains(span) && !allComparePriceSpans.includes(span)) {
+          allComparePriceSpans.push(span);
+        }
+      });
+      
+      if (currentPriceSpan) {
+        const priceClone = quantityPriceElement.cloneNode(true);
+        priceClone.querySelectorAll('.quantity-breaks__per-unit-text').forEach((el) => el.remove());
+        currentPriceSpan.innerHTML = priceClone.innerHTML.trim();
+        if (!quantityComparePriceElement) {
+          currentPriceSpan.style.marginLeft = '';
+        }
+      }
+
+      if (quantityComparePriceElement) {
+        allComparePriceSpans.forEach(compareSpan => {
+          compareSpan.remove();
+        });
+
+        const comparePriceSpan = document.createElement('span');
+        comparePriceSpan.className = 'compare-at-price price--compare';
+        const compareClone = quantityComparePriceElement.cloneNode(true);
+        compareClone.querySelectorAll('.quantity-breaks__per-unit-text').forEach((el) => el.remove());
+        comparePriceSpan.innerHTML = compareClone.innerHTML.trim();
+        
+        // Set margin based on show_sale_price_first setting
+        if (showSalePriceFirst) {
+          comparePriceSpan.style.marginLeft = 'var(--margin-xs, 0.5rem)';
+        } else {
+          comparePriceSpan.style.marginLeft = '';
+          if (currentPriceSpan) {
+            currentPriceSpan.style.marginLeft = 'var(--margin-xs, 0.5rem)';
+          }
+        }
+        
+        // Respect show_sale_price_first setting for positioning
+        if (currentPriceSpan) {
+          if (showSalePriceFirst) {
+            // Sale price first: price comes before compare price
+            currentPriceSpan.insertAdjacentElement('afterend', comparePriceSpan);
+          } else {
+            // Compare price first: compare price comes before price
+            currentPriceSpan.insertAdjacentElement('beforebegin', comparePriceSpan);
+          }
+        } else {
+          priceContainer.appendChild(comparePriceSpan);
+        }
+      } else {
+        // If compare price doesn't exist in quantity breaks but exists in sticky price, remove all of them
+        allComparePriceSpans.forEach(compareSpan => {
+          compareSpan.remove();
+        });
+        
+        // Reset margin on price span when compare price is removed
+        if (currentPriceSpan) {
+          currentPriceSpan.style.marginLeft = '';
+        }
+      }
+    }
+
+    // Removed complex observers since we're using the main event system
+
+
+    setupVariantsDisplay() {
+      // Initialize variants display
+      this.updateVariantsDisplay();
+      
+      // Listen for variant changes to update variants display
+      document.addEventListener('variant:update', (event) => {
+        this.updateVariantsDisplay();
+      });
+    }
+
+    setupVariantLinkClick() {
+      // Use event delegation to handle clicks on variant links (and descendants like SVG icon)
+      this.element.addEventListener('click', (event) => {
+        if (event.target.matches('[data-scroll-to-variants]') || event.target.closest('[data-scroll-to-variants]')) {
+          event.preventDefault();
+          this.scrollToVariantSelector();
+        }
+      });
+    }
+
+    setupStickyButtonClick() {
+      // Handle clicks on the sticky add to cart button
+      this.element.addEventListener('click', (event) => {
+        if (event.target.matches('[data-sticky-add-to-cart-button]') || 
+            event.target.closest('[data-sticky-add-to-cart-button]')) {
+          event.preventDefault();
+          this.triggerMainAddToCart();
+        }
+      });
+    }
+
+    triggerMainAddToCart() {
+      if (!this.mainAddToCartButton) {
+        console.warn('Main add to cart button not found');
+        return;
+      }
+
+      // Check if the main button is disabled
+      if (this.mainAddToCartButton.disabled) {
+        return;
+      }
+
+      // Also check if the sticky button itself is disabled
+      const stickyButton = this.element.querySelector('[data-sticky-add-to-cart-button]');
+      if (stickyButton && stickyButton.disabled) {
+        return;
+      }
+
+      if (this.hasQuantityBreaksWithDiscount()) {
+        stickyButton.classList.add('loading');
+      }
+
+      // Trigger the main add to cart button click
+      this.mainAddToCartButton.click();
+    }
+
+    hasQuantityBreaksWithDiscount() {
+      const quantityBreaksEl = document.querySelector('[data-quantity-breaks-component]');
+      const activeCard = quantityBreaksEl?.querySelector('.quantity-breaks__card--active');
+      return !!activeCard?.dataset?.discountCode?.trim?.();
+    }
+
+    setupButtonStateSync() {
+      // Sync the sticky button state with the main button state
+      this.syncButtonState();
+      
+      // Listen for variant changes to update button state
+      document.addEventListener('variant:update', (event) => {
+        this.syncButtonState();
+      });
+      
+      // Listen for variant selected events
+      document.addEventListener('variant:selected', (event) => {
+        this.syncButtonState();
+      });
+      
+      // Also listen for form changes
+      document.addEventListener('change', (event) => {
+        if (event.target.name === 'id' && event.target.closest('form[data-type="add-to-cart-form"]')) {
+          this.syncButtonState();
+        }
+      });
+      
+      // Add a small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        this.syncButtonState();
+      }, 100);
+      
+      // Setup animation sync
+      this.setupAnimationSync();
+    }
+
+    syncButtonState() {
+      const stickyButton = this.element.querySelector('[data-sticky-add-to-cart-button]');
+      if (!stickyButton) return;
+
+      if (this.mainAddToCartButton) {
+        // Sync disabled state
+        stickyButton.disabled = this.mainAddToCartButton.disabled;
+        
+        // Sync button text
+        const mainButtonText = this.getMainButtonText();
+        const stickyButtonTextElement = stickyButton.querySelector('.add-to-cart-text__content');
+        if (stickyButtonTextElement && mainButtonText) {
+          stickyButtonTextElement.textContent = mainButtonText;
+        }
+        
+        // Sync icon visibility
+        const stickyIcon = stickyButton.querySelector('.add-to-cart-icon');
+        const mainIcon = this.mainAddToCartButton.querySelector('.add-to-cart-icon');
+        
+        if (stickyIcon) {
+          if (mainIcon) {
+            // Check if main icon is visible (not hidden by CSS or display:none)
+            const mainIconComputedStyle = window.getComputedStyle(mainIcon);
+            const isMainIconVisible = mainIconComputedStyle.display !== 'none' && 
+                                     mainIconComputedStyle.visibility !== 'hidden' &&
+                                     mainIconComputedStyle.opacity !== '0';
+            
+            // Show sticky icon if main icon is visible, hide if not
+            stickyIcon.style.display = isMainIconVisible ? 'inline' : 'none';
+          } else {
+            // No main icon found - check if main button is disabled
+            // If main button is disabled, hide icon; if enabled, show icon
+            stickyIcon.style.display = this.mainAddToCartButton.disabled ? 'none' : 'inline';
+          }
+        }
+      } else {
+        // Fallback: if main button not found, check if sticky button should be disabled based on initial state
+        // The sticky button's initial disabled state should already be correct from Liquid
+        // Just ensure the icon visibility matches the disabled state
+        const stickyIcon = stickyButton.querySelector('.add-to-cart-icon');
+        if (stickyIcon) {
+          stickyIcon.style.display = stickyButton.disabled ? 'none' : 'inline';
+        }
+      }
+      
+      // Update quantity display
+      this.updateButtonText();
+    }
+    
+    setupQuantityUpdates() {
+      // Listen for quantity selector update events
+      // The event name is 'quantity-selector:update' (with hyphen)
+      document.addEventListener('quantity-selector:update', (event) => {
+        // Only respond to product page quantity selector updates, not cart drawer
+        if (event.detail && event.detail.cartLine) return;
+        
+        this.currentQuantity = (event.detail && event.detail.quantity) ? parseInt(event.detail.quantity) : 1;
+        this.updateButtonText();
+      });
+      
+      // Also listen for ThemeEvents if available (for compatibility)
+      if (window.ThemeEvents && window.ThemeEvents.quantitySelectorUpdate) {
+        document.addEventListener(window.ThemeEvents.quantitySelectorUpdate, (event) => {
+          if (event.detail && event.detail.cartLine) return;
+          this.currentQuantity = (event.detail && event.detail.quantity) ? parseInt(event.detail.quantity) : 1;
+          this.updateButtonText();
+        });
+      }
+      
+      // Also listen for direct input changes as a fallback
+      const quantityInput = document.querySelector('quantity-selector-component input[type="number"], input[name="quantity"]');
+      if (quantityInput) {
+        quantityInput.addEventListener('change', () => {
+          this.currentQuantity = parseInt(quantityInput.value) || 1;
+          this.updateButtonText();
+        });
+        quantityInput.addEventListener('input', () => {
+          this.currentQuantity = parseInt(quantityInput.value) || 1;
+          this.updateButtonText();
+        });
+      }
+    }
+    
+    getInitialQuantity() {
+      // Try to get initial quantity from quantity selector component
+      const quantitySelector = document.querySelector('quantity-selector-component');
+      if (quantitySelector) {
+        const quantityInput = quantitySelector.querySelector('input[type="number"]');
+        if (quantityInput) {
+          return parseInt(quantityInput.value) || 1;
+        }
+        // Try to get value from component method if available
+        if (quantitySelector.getValue && typeof quantitySelector.getValue === 'function') {
+          const value = quantitySelector.getValue();
+          if (value) return parseInt(value) || 1;
+        }
+      }
+      
+      // Try to get from form
+      const form = document.querySelector('form[data-type="add-to-cart-form"]');
+      if (form) {
+        const quantityInput = form.querySelector('input[name="quantity"]');
+        if (quantityInput) {
+          return parseInt(quantityInput.value) || 1;
+        }
+      }
+      
+      return 1;
+    }
+    
+    updateButtonText() {
+      const stickyButton = this.element.querySelector('[data-sticky-add-to-cart-button]');
+      if (!stickyButton) return;
+      
+      const quantityDisplay = stickyButton.querySelector('[data-quantity-display], [ref="quantityDisplay"]');
+      const quantityNumber = stickyButton.querySelector('[data-quantity-number], [ref="quantityNumber"]');
+      
+      if (!quantityDisplay || !quantityNumber) return;
+      
+      const available = !stickyButton.disabled;
+      const quantity = this.currentQuantity || 1;
+      
+      // Update the quantity number
+      quantityNumber.textContent = quantity.toString();
+      
+      // Show/hide the quantity display based on availability and quantity
+      if (available && quantity > 1) {
+        quantityDisplay.style.display = 'inline';
+      } else {
+        quantityDisplay.style.display = 'none';
+      }
+    }
+
+    getMainButtonText() {
+      if (!this.mainAddToCartButton) return null;
+      
+      const textElement = this.mainAddToCartButton.querySelector('.add-to-cart-text__content');
+      return textElement ? textElement.textContent.trim() : null;
+    }
+
+    debugIconState() {
+      const stickyButton = this.element.querySelector('[data-sticky-add-to-cart-button]');
+      const stickyIcon = stickyButton?.querySelector('.add-to-cart-icon');
+      const mainIcon = this.mainAddToCartButton?.querySelector('.add-to-cart-icon');
+      
+      console.log('Icon Debug:', {
+        stickyButtonDisabled: stickyButton?.disabled,
+        mainButtonDisabled: this.mainAddToCartButton?.disabled,
+        stickyIconExists: !!stickyIcon,
+        mainIconExists: !!mainIcon,
+        stickyIconDisplay: stickyIcon?.style.display,
+        mainIconDisplay: mainIcon?.style.display,
+        mainIconComputedDisplay: mainIcon ? window.getComputedStyle(mainIcon).display : 'N/A'
+      });
+    }
+
+    setupAnimationSync() {
+      if (!this.mainAddToCartButton) return;
+
+      // Animation duration constant (same as in product-form.js)
+      const ADD_TO_CART_TEXT_ANIMATION_DURATION = 2000;
+      const stickyButton = this.element.querySelector('[data-sticky-add-to-cart-button]');
+      if (!stickyButton) return;
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type !== 'attributes') return;
+          const target = mutation.target;
+          const stickyBtn = this.element.querySelector('[data-sticky-add-to-cart-button]');
+          if (!stickyBtn) return;
+
+          if (mutation.attributeName === 'data-added') {
+            if (target.dataset.added === 'true') {
+              if (stickyBtn.dataset.added !== 'true') {
+                stickyBtn.dataset.added = 'true';
+                setTimeout(() => stickyBtn.removeAttribute('data-added'), ADD_TO_CART_TEXT_ANIMATION_DURATION);
+              }
+            } else if (stickyBtn.dataset.added === 'true') {
+              stickyBtn.removeAttribute('data-added');
+            }
+          } else if (mutation.attributeName === 'class' && this.hasQuantityBreaksWithDiscount()) {
+            const mainHasLoading = this.mainAddToCartButton.classList.contains('loading');
+            if (mainHasLoading) {
+              stickyBtn.classList.add('loading');
+            } else {
+              stickyBtn.classList.remove('loading');
+            }
+          }
+        });
+      });
+
+      observer.observe(this.mainAddToCartButton, {
+        attributes: true,
+        attributeFilter: ['data-added', 'class']
+      });
+
+      this.animationObserver = observer;
+    }
+
+    scrollToVariantSelector() {
+      // Try to find variant selector in various possible locations
+      const variantSelectors = [
+        '.product-variants',
+        '.variant-picker',
+        '.product-options',
+        '.product-form__options',
+        '[data-testid="product-information-details"] .variant-picker',
+        '.product-details .variant-picker',
+        '.buy-buttons-block .variant-picker',
+        'variant-picker'
+      ];
+
+      let targetElement = null;
+      
+      for (const selector of variantSelectors) {
+        targetElement = document.querySelector(selector);
+        if (targetElement) break;
+      }
+
+      if (targetElement) {
+        // Scroll to the variant selector with smooth behavior
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+        
+        // Add a temporary highlight effect
+        targetElement.style.transition = 'box-shadow 0.3s ease';
+        targetElement.style.boxShadow = '0 0 0 2px var(--color-primary, #007bff)';
+        
+        // Remove highlight after 2 seconds
+        setTimeout(() => {
+          targetElement.style.boxShadow = '';
+        }, 2000);
+      } else {
+        // Fallback: scroll to the main product form
+        const productForm = document.querySelector('form[data-type="add-to-cart-form"]');
+        if (productForm) {
+          productForm.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }
+      }
+    }
+
+    setupVisibilityClasses() {
+      // Add classes for browsers that don't support :has() selector
+      const content = this.element.querySelector('.sticky-add-to-cart__content');
+      if (!content) return;
+
+      // Check which elements are present and add appropriate classes
+      if (!content.querySelector('.sticky-add-to-cart__image')) {
+        content.classList.add('no-image');
+      }
+      if (!content.querySelector('.sticky-add-to-cart__title')) {
+        content.classList.add('no-title');
+      }
+      if (!content.querySelector('.sticky-add-to-cart__variants')) {
+        content.classList.add('no-variants');
+      }
+      if (!content.querySelector('.sticky-add-to-cart__price')) {
+        content.classList.add('no-price');
+      }
+    }
+
+    setupThemeEditorUpdates() {
+      // Also listen for any changes to the section element (when section is updated in-place)
+      const observer = new MutationObserver((mutations) => {
+        if (this.destroyed) return;
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && 
+              (mutation.attributeName === 'data-section-settings' || 
+               mutation.attributeName === 'data-shopify-editor-section')) {
+            this.updateVisibilityFromSettings();
+          }
+        });
+      });
+
+      observer.observe(this.element, {
+        attributes: true,
+        attributeFilter: ['data-section-settings', 'data-shopify-editor-section']
+      });
+      this.observers.push(observer);
+
+      // Poll for changes as a fallback
+      const pollId = setInterval(() => {
+        if (this.destroyed) return;
+        this.updateVisibilityFromSettings();
+      }, 1000);
+      this.intervals.push(pollId);
+    }
+
+    updateVisibilityFromSettings() {
+      if (this.destroyed || !this.element || !document.contains(this.element)) return;
+      const content = this.element.querySelector('.sticky-add-to-cart__content');
+      if (!content) return;
+
+      // Get current settings from the section
+      const sectionSettings = this.getSectionSettings();
+      
+      // Update image visibility
+      const imageElement = content.querySelector('.sticky-add-to-cart__image');
+      if (imageElement) {
+        // Remove existing mobile visibility classes
+        imageElement.classList.remove('sticky-add-to-cart__image--hide-mobile');
+        
+        // Add mobile hide class if needed
+        if (sectionSettings.show_image && !sectionSettings.show_image_mobile) {
+          imageElement.classList.add('sticky-add-to-cart__image--hide-mobile');
+        }
+        
+        // Overall image visibility
+        imageElement.style.display = sectionSettings.show_image ? 'block' : 'none';
+      }
+
+      // Update title visibility
+      const titleElement = content.querySelector('.sticky-add-to-cart__title');
+      if (titleElement) {
+        // Remove existing visibility classes
+        titleElement.classList.remove('sticky-add-to-cart__title--hide-desktop', 'sticky-add-to-cart__title--hide-mobile');
+        
+        // Add appropriate classes based on settings
+        if (!sectionSettings.show_title_desktop) {
+          titleElement.classList.add('sticky-add-to-cart__title--hide-desktop');
+        }
+        if (!sectionSettings.show_title_mobile) {
+          titleElement.classList.add('sticky-add-to-cart__title--hide-mobile');
+        }
+      }
+
+      // Update variants visibility
+      const variantsElement = content.querySelector('.sticky-add-to-cart__variants');
+      if (variantsElement) {
+        variantsElement.style.display = sectionSettings.show_variants ? 'block' : 'none';
+        // Also update the variants display to refresh the change text
+        if (sectionSettings.show_variants) {
+          this.updateVariantsDisplay();
+        }
+      }
+
+      // Update price visibility
+      const priceElement = content.querySelector('.sticky-add-to-cart__price');
+      if (priceElement) {
+        priceElement.style.display = sectionSettings.show_price ? 'block' : 'none';
+      }
+
+      // Update image border radius
+      this.updateImageBorderRadius(sectionSettings.image_border_radius);
+
+      // Update layout classes
+      this.updateLayoutClasses();
+      
+      // Update compact class
+      this.updateCompactClass();
+    }
+
+    getSectionSettings() {
+      // Try to get settings from various sources
+      let settings = {};
+
+      // Try to get from data attributes
+      const settingsAttr = this.element.getAttribute('data-section-settings');
+      if (settingsAttr) {
+        try {
+          settings = JSON.parse(settingsAttr);
+        } catch (e) {
+          // Fallback to default settings
+        }
+      }
+
+      // Try to get from Shopify section data
+      if (window.Shopify && window.Shopify.sections && this.element.dataset.sectionId) {
+        const sectionData = window.Shopify.sections[this.element.dataset.sectionId];
+        if (sectionData && sectionData.settings) {
+          settings = { ...settings, ...sectionData.settings };
+        }
+      }
+
+      // Default values
+      return {
+        show_image: settings.show_image !== false,
+        show_image_mobile: settings.show_image_mobile !== false,
+        show_title_desktop: settings.show_title_desktop !== false,
+        show_title_mobile: settings.show_title_mobile !== false,
+        show_variants: settings.show_variants !== false,
+        show_price: settings.show_price !== false,
+        show_on_desktop: settings.show_on_desktop !== false,
+        show_on_mobile: settings.show_on_mobile !== false,
+        show_at_top: settings.show_at_top || false,
+        mobile_only_button: settings.mobile_only_button || false,
+        mobile_no_padding: settings.mobile_no_padding || false,
+        image_border_radius: settings.image_border_radius || 4,
+        change_variant_text: settings.change_variant_text || 'Change',
+        change_variant_link_enabled: settings.change_variant_link_enabled !== false,
+        change_variant_link_style: settings.change_variant_link_style || (settings.change_variant_use_svg ? 'icon' : 'text'),
+        compact: settings.compact || false,
+        ...settings
+      };
+    }
+
+    getChangeVariantText() {
+      const settings = this.getSectionSettings();
+      return settings.change_variant_text || 'Change';
+    }
+
+    updateLayoutClasses() {
+      const content = this.element.querySelector('.sticky-add-to-cart__content');
+      if (!content) return;
+
+      const settings = this.getSectionSettings();
+
+      // Update classes based on current visibility
+      // For no-image class, consider both show_image and show_image_mobile
+      // The CSS will handle the actual hiding, but we need to track if image should be considered "not present" for layout purposes
+      const isMobile = window.innerWidth < 750;
+      const imageVisibleOnCurrentDevice = settings.show_image && (isMobile ? settings.show_image_mobile : true);
+      content.classList.toggle('no-image', !imageVisibleOnCurrentDevice);
+      content.classList.toggle('no-title', !settings.show_title_desktop && !settings.show_title_mobile);
+      content.classList.toggle('no-variants', !settings.show_variants);
+      content.classList.toggle('no-price', !settings.show_price);
+      
+      // Add class for when title mobile is hidden (for fallback CSS)
+      content.classList.toggle('has-title-mobile-hidden', !settings.show_title_mobile);
+      
+      // Add class for when all elements are hidden (for fallback CSS)
+      const allElementsHidden = !imageVisibleOnCurrentDevice && !settings.show_title_desktop && !settings.show_title_mobile && !settings.show_variants && !settings.show_price;
+      content.classList.toggle('all-elements-hidden', allElementsHidden);
+
+    // Note: Full width button styling is now handled by CSS using :has() selector
+
+      // Update desktop/mobile visibility classes
+      this.element.classList.toggle('sticky-add-to-cart--hide-desktop', !settings.show_on_desktop);
+      this.element.classList.toggle('sticky-add-to-cart--hide-mobile', !settings.show_on_mobile);
+      this.element.classList.toggle('sticky-add-to-cart--mobile-only-button', settings.mobile_only_button);
+      this.element.classList.toggle('sticky-add-to-cart--mobile-no-padding', settings.mobile_no_padding);
+    }
+
+    updateCompactClass() {
+      const settings = this.getSectionSettings();
+      
+      // Toggle compact class based on setting
+      this.element.classList.toggle('atc-compact', settings.compact);
+    }
+
+    updateImageBorderRadius(borderRadius) {
+      const imageContainer = this.element.querySelector('.sticky-add-to-cart__image');
+      const imageElement = this.element.querySelector('.sticky-add-to-cart__image img');
+      
+      if (imageContainer) {
+        imageContainer.style.borderRadius = `${borderRadius || 4}px`;
+      }
+      
+      if (imageElement) {
+        imageElement.style.borderRadius = `${borderRadius || 4}px`;
+      }
+    }
+
+    getChangeVariantSvg() {
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" class="sticky-add-to-cart__change-icon" aria-hidden="true"><path d="M12 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V12M9 15V12.5L17.75 3.75C18.4404 3.05964 19.5596 3.05964 20.25 3.75V3.75C20.9404 4.44036 20.9404 5.55964 20.25 6.25L15.5 11L11.5 15H9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+
+    updateVariantsDisplay() {
+      const variantsElement = this.element.querySelector('[data-sticky-variants]');
+      if (!variantsElement) return;
+
+      // Get selected variants from the page
+      const selectedVariants = this.getSelectedVariants();
+      const settings = this.getSectionSettings();
+      
+      if (selectedVariants.length > 0) {
+        const variantsHTML = selectedVariants.map(variant => variant.value).join(' / ');
+        const linkEnabled = settings.change_variant_link_enabled;
+        const useIcon = settings.change_variant_link_style === 'icon';
+        
+        if (linkEnabled) {
+          const changeContent = useIcon ? this.getChangeVariantSvg() : this.getChangeVariantText();
+          const linkTitle = useIcon ? ` title="${(this.getChangeVariantText()).replace(/"/g, '&quot;')}"` : '';
+          variantsElement.innerHTML = `${variantsHTML} <a href="#" class="sticky-add-to-cart__variant-link" data-scroll-to-variants${linkTitle}>${changeContent}</a>`;
+        } else {
+          variantsElement.innerHTML = variantsHTML;
+        }
+      } else {
+        variantsElement.innerHTML = '';
+      }
+
+      // Also update the image
+      this.updateImage();
+    }
+
+    updateImageFromVariant(variant) {
+      const imageElement = this.element.querySelector('[data-sticky-image] img');
+      if (!imageElement) return;
+
+      if (variant && variant.featured_media) {
+        const section = document.querySelector('[data-sticky-add-to-cart]');
+        const aspectRatio = section?.dataset.thumbnailAspectRatio || 'square';
+        
+        let dimensions;
+        if (aspectRatio === 'adaptive') {
+          dimensions = this.getAdaptiveImageDimensions(variant.featured_media);
+        } else {
+          dimensions = this.getThumbnailDimensions();
+        }
+        
+        const imageUrl = this.getImageUrl(variant.featured_media, dimensions.width, dimensions.height);
+        if (imageUrl) {
+          imageElement.src = imageUrl;
+          imageElement.alt = variant.featured_media.alt || `Variant ${variant.title} image`;
+          imageElement.setAttribute('data-variant-image', variant.id || '');
+          imageElement.removeAttribute('data-fallback-image');
+          return;
+        }
+      }
+
+      // Fallback to regular updateImage method
+      this.updateImage();
+    }
+
+    updateImage() {
+      if (this.destroyed || !this.element || !document.contains(this.element)) return;
+      const imageElement = this.element.querySelector('[data-sticky-image] img');
+      if (!imageElement) return;
+
+      // Try to get the selected variant image first
+      const selectedVariantImage = this.getSelectedVariantImage();
+      
+      if (selectedVariantImage) {
+        imageElement.src = selectedVariantImage.url;
+        imageElement.alt = selectedVariantImage.alt || 'Selected variant image';
+        imageElement.setAttribute('data-variant-image', selectedVariantImage.variantId || '');
+        imageElement.removeAttribute('data-fallback-image');
+      } else {
+        // Fallback to featured image
+        const featuredImage = this.getFeaturedImage();
+        if (featuredImage) {
+          imageElement.src = featuredImage.url;
+          imageElement.alt = featuredImage.alt || 'Product featured image';
+          imageElement.setAttribute('data-fallback-image', 'true');
+          imageElement.removeAttribute('data-variant-image');
+        }
+      }
+    }
+
+    getSelectedVariantImage() {
+      // First try to get the currently selected variant from the form
+      const form = document.querySelector('form[data-type="add-to-cart-form"]');
+      
+      if (form) {
+        const variantIdInput = form.querySelector('input[name="id"]');
+        
+        if (variantIdInput && variantIdInput.value) {
+          const variantId = variantIdInput.value;
+          
+          // Try multiple sources for variant data
+          let variantData = window.productVariants || window.product?.variants;
+          
+          // Try to get from form data
+          if (!variantData && form.dataset.variants) {
+            try {
+              variantData = JSON.parse(form.dataset.variants);
+            } catch (e) {
+              // Could not parse form variant data
+            }
+          }
+          
+          // Try to get from product form component
+          if (!variantData) {
+            const productForm = document.querySelector('product-form-component');
+            if (productForm && productForm.dataset.variants) {
+              try {
+                variantData = JSON.parse(productForm.dataset.variants);
+              } catch (e) {
+                // Could not parse product form variant data
+              }
+            }
+          }
+          
+          if (variantData && Array.isArray(variantData)) {
+            const variant = variantData.find(v => v.id == variantId);
+            
+            if (variant && variant.featured_media) {
+              const section = document.querySelector('[data-sticky-add-to-cart]');
+              const aspectRatio = section?.dataset.thumbnailAspectRatio || 'square';
+              
+              let dimensions;
+              if (aspectRatio === 'adaptive') {
+                dimensions = this.getAdaptiveImageDimensions(variant.featured_media);
+              } else {
+                dimensions = this.getThumbnailDimensions();
+              }
+              
+              return {
+                url: this.getImageUrl(variant.featured_media, dimensions.width, dimensions.height),
+                alt: variant.featured_media.alt || `Variant ${variant.title} image`,
+                variantId: variantId
+              };
+            }
+          }
+        }
+      }
+
+      // Fallback: check variant pickers
+      const variantPickers = document.querySelectorAll('variant-picker');
+      
+      for (const picker of variantPickers) {
+        const selectedInput = picker.querySelector('input:checked, select option:checked, select');
+        
+        if (selectedInput) {
+          const variantId = selectedInput.dataset.variantId;
+          if (variantId) {
+            // Try to get variant data
+            const variantData = window.productVariants || window.product?.variants;
+            if (variantData) {
+              const variant = variantData.find(v => v.id == variantId);
+              if (variant && variant.featured_media) {
+                const section = document.querySelector('[data-sticky-add-to-cart]');
+                const aspectRatio = section?.dataset.thumbnailAspectRatio || 'square';
+                
+                let dimensions;
+                if (aspectRatio === 'adaptive') {
+                  dimensions = this.getAdaptiveImageDimensions(variant.featured_media);
+                } else {
+                  dimensions = this.getThumbnailDimensions();
+                }
+                
+                return {
+                  url: this.getImageUrl(variant.featured_media, dimensions.width, dimensions.height),
+                  alt: variant.featured_media.alt || `Variant ${variant.title} image`,
+                  variantId: variantId
+                };
+              }
+            }
+          }
+        }
+      }
+
+      // Additional fallback: check for any selected variant options and try to find the corresponding variant
+      const selectedOptions = this.getSelectedVariants();
+      if (selectedOptions.length > 0) {
+        const variantData = window.productVariants || window.product?.variants;
+        if (variantData) {
+          // Try to find a variant that matches the selected options
+          const matchingVariant = variantData.find(variant => {
+            return selectedOptions.every(option => {
+              const optionName = option.name.toLowerCase();
+              const optionValue = option.value.toLowerCase();
+              
+              // Check if this variant has the selected option
+              if (optionName.includes('color') && variant.option1 && variant.option1.toLowerCase() === optionValue) return true;
+              if (optionName.includes('size') && variant.option2 && variant.option2.toLowerCase() === optionValue) return true;
+              if (optionName.includes('style') && variant.option3 && variant.option3.toLowerCase() === optionValue) return true;
+              
+              return false;
+            });
+          });
+          
+          if (matchingVariant && matchingVariant.featured_media) {
+            const section = document.querySelector('[data-sticky-add-to-cart]');
+            const aspectRatio = section?.dataset.thumbnailAspectRatio || 'square';
+            
+            let dimensions;
+            if (aspectRatio === 'adaptive') {
+              dimensions = this.getAdaptiveImageDimensions(matchingVariant.featured_media);
+            } else {
+              dimensions = this.getThumbnailDimensions();
+            }
+            
+            return {
+              url: this.getImageUrl(matchingVariant.featured_media, dimensions.width, dimensions.height),
+              alt: matchingVariant.featured_media.alt || `Variant ${matchingVariant.title} image`,
+              variantId: matchingVariant.id
+            };
+          }
+        }
+      }
+
+      // Additional fallback: try to get image from main product display
+      const mainImage = this.getCurrentMainImage();
+      if (mainImage) {
+        return mainImage;
+      }
+
+      return null;
+    }
+
+    getCurrentMainImage() {
+      // Try to get the currently displayed image from the main product page
+      const mainImageSelectors = [
+        '.product-media img[data-variant-image]',
+        '.media-gallery img[data-variant-image]',
+        '.product-images img[data-variant-image]',
+        '.product-media img:not([data-fallback-image])',
+        '.media-gallery img:not([data-fallback-image])',
+        '.product-images img:not([data-fallback-image])'
+      ];
+
+      for (const selector of mainImageSelectors) {
+        const img = document.querySelector(selector);
+        if (img && img.src) {
+          return {
+            url: img.src,
+            alt: img.alt || 'Product image',
+            variantId: img.dataset.variantImage || ''
+          };
+        }
+      }
+
+      return null;
+    }
+
+    getFeaturedImage() {
+      // Get the product's featured image
+      const productData = window.product || this.getProductFromPage();
+      if (productData && productData.featured_media) {
+        const section = document.querySelector('[data-sticky-add-to-cart]');
+        const aspectRatio = section?.dataset.thumbnailAspectRatio || 'square';
+        
+        let dimensions;
+        if (aspectRatio === 'adaptive') {
+          dimensions = this.getAdaptiveImageDimensions(productData.featured_media);
+        } else {
+          dimensions = this.getThumbnailDimensions();
+        }
+        
+        return {
+          url: this.getImageUrl(productData.featured_media, dimensions.width, dimensions.height),
+          alt: productData.featured_media.alt || 'Product featured image'
+        };
+      }
+
+      return null;
+    }
+
+    getProductFromPage() {
+      // Try to extract product data from the page
+      const productForm = document.querySelector('form[data-type="add-to-cart-form"]');
+      if (productForm && productForm.dataset.product) {
+        try {
+          return JSON.parse(productForm.dataset.product);
+        } catch (e) {
+          // Could not parse product data
+        }
+      }
+
+      return null;
+    }
+
+    getImageUrl(media, width, height) {
+      if (!media) return null;
+      
+      let imageUrl = null;
+      
+      // Handle different media types
+      if (media.preview_image) {
+        // Generate image URL with Shopify's image transformation
+        const baseUrl = media.preview_image.src || media.preview_image;
+        
+        if (baseUrl) {
+          // Use Shopify's image transformation API
+          const params = new URLSearchParams({
+            width: width.toString(),
+            height: height.toString(),
+            crop: 'center'
+          });
+          imageUrl = `${baseUrl}?${params.toString()}`;
+        }
+      } else if (media.src) {
+        imageUrl = media.src;
+      } else if (typeof media === 'string') {
+        imageUrl = media;
+      } else if (media.url) {
+        imageUrl = media.url;
+      }
+      
+      return imageUrl;
+    }
+
+    getThumbnailDimensions() {
+      // Get thumbnail dimensions from the section settings
+      const section = document.querySelector('[data-sticky-add-to-cart]');
+      if (!section) return { width: 40, height: 40 };
+      
+      const size = parseInt(section.dataset.thumbnailSize) || 40;
+      const aspectRatio = section.dataset.thumbnailAspectRatio || 'square';
+      
+      let width, height;
+      switch (aspectRatio) {
+        case 'portrait':
+          width = size;
+          height = Math.round(size * 1.33);
+          break;
+        case 'landscape':
+          width = Math.round(size * 1.33);
+          height = size;
+          break;
+        case 'wide':
+          width = Math.round(size * 1.78);
+          height = size;
+          break;
+        case 'adaptive':
+          // For adaptive mode, we use a square container but let the image maintain its aspect ratio
+          width = size;
+          height = size;
+          break;
+        default: // square
+          width = size;
+          height = size;
+      }
+      
+      return { width, height };
+    }
+
+    getAdaptiveImageDimensions(media) {
+      // For adaptive mode, try to get the original image dimensions
+      if (!media) return this.getThumbnailDimensions();
+      
+      const section = document.querySelector('[data-sticky-add-to-cart]');
+      const maxSize = parseInt(section?.dataset.thumbnailSize) || 40;
+      
+      // Try to get original dimensions from the media object
+      let originalWidth = null;
+      let originalHeight = null;
+      
+      if (media.preview_image) {
+        originalWidth = media.preview_image.width;
+        originalHeight = media.preview_image.height;
+      } else if (media.width && media.height) {
+        originalWidth = media.width;
+        originalHeight = media.height;
+      }
+      
+      if (originalWidth && originalHeight) {
+        // Calculate dimensions that fit within the max size while maintaining aspect ratio
+        const aspectRatio = originalWidth / originalHeight;
+        
+        let width, height;
+        if (aspectRatio > 1) {
+          // Landscape image
+          width = maxSize;
+          height = Math.round(maxSize / aspectRatio);
+        } else {
+          // Portrait or square image
+          height = maxSize;
+          width = Math.round(maxSize * aspectRatio);
+        }
+        
+        return { width, height };
+      }
+      
+      // Fallback to square if we can't determine dimensions
+      return { width: maxSize, height: maxSize };
+    }
+
+    getSelectedVariants() {
+      const variants = [];
+      const addedOptions = new Set(); // Track added options to prevent duplicates
+      
+      // Find all variant pickers on the page
+      const variantPickers = document.querySelectorAll('variant-picker');
+      
+      variantPickers.forEach(picker => {
+        // Look for all checked inputs within this picker
+        const checkedInputs = picker.querySelectorAll('input:checked, select option:checked');
+        
+        checkedInputs.forEach(selectedInput => {
+          const optionName = picker.dataset.optionName || this.getOptionNameFromInput(selectedInput);
+          const optionValue = selectedInput.value || selectedInput.textContent;
+          
+          if (optionName && optionValue) {
+            const optionKey = `${optionName}:${optionValue}`.toLowerCase();
+            if (!addedOptions.has(optionKey)) {
+              variants.push({
+                name: optionName,
+                value: optionValue
+              });
+              addedOptions.add(optionKey);
+            }
+          }
+        });
+      });
+
+      // Also check for form inputs
+      const formInputs = document.querySelectorAll('form[data-type="add-to-cart-form"] input[name^="options"]');
+      formInputs.forEach(input => {
+        if (input.checked || input.type === 'hidden') {
+          const optionName = input.name.replace('options[', '').replace(']', '');
+          const optionValue = input.value;
+          
+          if (optionName && optionValue) {
+            const optionKey = `${optionName}:${optionValue}`.toLowerCase();
+            if (!addedOptions.has(optionKey)) {
+              variants.push({
+                name: optionName,
+                value: optionValue
+              });
+              addedOptions.add(optionKey);
+            }
+          }
+        }
+      });
+
+      // Additional fallback: look for any selected variant options in the DOM
+      const allCheckedInputs = document.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked, select option:checked');
+      allCheckedInputs.forEach(input => {
+        // Skip if we already processed this input
+        if (input.closest('variant-picker') || (input.name && input.name.startsWith('options['))) {
+          return;
+        }
+        
+        const optionName = this.getOptionNameFromInput(input);
+        const optionValue = input.value || input.textContent;
+        
+        if (optionName && optionValue && optionName !== 'Option') {
+          const optionKey = `${optionName}:${optionValue}`.toLowerCase();
+          if (!addedOptions.has(optionKey)) {
+            variants.push({
+              name: optionName,
+              value: optionValue
+            });
+            addedOptions.add(optionKey);
+          }
+        }
+      });
+
+      return variants;
+    }
+
+    getOptionNameFromInput(input) {
+      // Try to get option name from various sources
+      const label = input.closest('label');
+      if (label) {
+        const labelText = label.textContent.trim();
+        const colonIndex = labelText.indexOf(':');
+        if (colonIndex > 0) {
+          return labelText.substring(0, colonIndex).trim();
+        }
+      }
+
+      // Try to get from parent element
+      const parent = input.closest('[data-option-name]');
+      if (parent) {
+        return parent.dataset.optionName;
+      }
+
+      // Try to get from fieldset legend
+      const fieldset = input.closest('fieldset');
+      if (fieldset) {
+        const legend = fieldset.querySelector('legend');
+        if (legend) {
+          return legend.textContent.trim();
+        }
+      }
+
+      return 'Option';
+    }
+
+    updatePriceFromVariantId(variantId) {
+      // Try multiple ways to get variant data
+      let variantData = window.productVariants || window.product?.variants;
+      
+      // If not found, try to get from the product form
+      if (!variantData) {
+        const productForm = document.querySelector('form[data-type="add-to-cart-form"]');
+        if (productForm) {
+          variantData = JSON.parse(productForm.dataset.variants || '[]');
+        }
+      }
+
+      // If still not found, try to get from the product information section
+      if (!variantData) {
+        const productInfo = document.querySelector('[data-testid="product-information-details"]');
+        if (productInfo) {
+          variantData = JSON.parse(productInfo.dataset.variants || '[]');
+        }
+      }
+
+      if (!variantData) return;
+
+      const variant = variantData.find(v => v.id == variantId);
+      if (variant) {
+        this.updatePrice(variant);
+        this.updateVariantsDisplay();
+      } else {
+        this.updateVariantsDisplay();
+      }
+    }
+
+    updatePriceFromVariantData(variantData) {
+      if (variantData && variantData.variant) {
+        this.updatePrice(variantData.variant);
+      }
+    }
+
+    updatePriceFromForm(variantId) {
+      // Find the variant data from the page
+      const variantData = window.productVariants || window.product?.variants;
+      if (!variantData) return;
+
+      const variant = variantData.find(v => v.id == variantId);
+      if (variant) {
+        this.updatePrice(variant);
+      }
+    }
+
+    updatePrice(variant) {
+      if (this.destroyed || !this.element || !document.contains(this.element)) return;
+      const priceElement = this.element.querySelector('[data-sticky-price]');
+      if (!priceElement) return;
+
+      // Check if quantity breaks block is present and has an active card
+      // If so, use price from quantity breaks instead of variant price (only if override is enabled in sticky-add-to-cart)
+      const stickyOverrideEnabled = this.element.dataset.overrideProductPrice === 'true';
+      if (stickyOverrideEnabled) {
+        const quantityBreaksComponent = document.querySelector('[data-quantity-breaks-component]');
+        if (quantityBreaksComponent) {
+          const activeCard = quantityBreaksComponent.querySelector('.quantity-breaks__card--active');
+          if (activeCard) {
+            // Defer so quantity-breaks.js has updated its prices first (same variant:update event)
+            setTimeout(() => this.updatePriceFromQuantityBreaks(), 0);
+            return;
+          }
+        }
+      }
+
+      if (variant) {
+        // When override is disabled, copy from main price (server-rendered, correct currency/format)
+        // Defer so product-price.js has updated the main price from variant response first
+        setTimeout(() => this.copyPriceFromMain(), 0);
+      } else {
+        this.copyPriceFromMain();
+      }
+    }
+
+    copyPriceFromMain() {
+      if (this.destroyed || !this.element || !document.contains(this.element)) return;
+      const priceElement = this.element.querySelector('[data-sticky-price]');
+      if (!priceElement) return;
+
+      // First check if quantity breaks price is available (only if override is enabled in sticky-add-to-cart)
+      const stickyOverrideEnabled = this.element.dataset.overrideProductPrice === 'true';
+      if (stickyOverrideEnabled) {
+        const quantityBreaksComponent = document.querySelector('[data-quantity-breaks-component]');
+        if (quantityBreaksComponent) {
+          const activeCard = quantityBreaksComponent.querySelector('.quantity-breaks__card--active');
+          if (activeCard) {
+            this.updatePriceFromQuantityBreaks();
+            return;
+          }
+        }
+      }
+
+      // Copy from main product price container (server-rendered, correct currency/format)
+      // Main price is in product-information (or similar), not in this section
+      const mainPriceContainer = document.querySelector('product-price [ref="priceContainer"]');
+      if (mainPriceContainer) {
+        const stickyPriceContainer = priceElement.querySelector('[ref="priceContainer"]') || priceElement;
+        stickyPriceContainer.innerHTML = mainPriceContainer.innerHTML;
+        // show_sale_badge: false — remove sale badge from sticky bar
+        stickyPriceContainer.querySelector('.sale-badge')?.remove();
+        this.updateVariantsDisplay();
+        return;
+      }
+
+      // Fallback: try legacy selectors for single .price element
+      const mainPriceSelectors = [
+        '.product-details .price',
+        '[data-testid="product-information-details"] .price',
+        '.buy-buttons-block .price',
+        'product-form-component .price'
+      ];
+      for (const selector of mainPriceSelectors) {
+        const mainPrice = document.querySelector(selector);
+        if (mainPrice) {
+          priceElement.innerHTML = mainPrice.innerHTML;
+          // show_sale_badge: false — remove sale badge from sticky bar
+          priceElement.querySelector('.sale-badge')?.remove();
+          this.updateVariantsDisplay();
+          return;
+        }
+      }
+    }
+
+    setupPriceObserver() {
+      // Watch for changes in the main price display
+      const mainPriceSelectors = [
+        '.product-details .price',
+        '[data-testid="product-information-details"] .price',
+        '.buy-buttons-block .price',
+        'product-form-component .price'
+      ];
+
+      mainPriceSelectors.forEach(selector => {
+        const mainPrice = document.querySelector(selector);
+        if (mainPrice) {
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                this.copyPriceFromMain();
+              }
+            });
+          });
+
+          observer.observe(mainPrice, {
+            childList: true,
+            subtree: true,
+            characterData: true
+          });
+
+        }
+      });
+    }
+
+    updatePriceDisplay(priceData) {
+      const priceElement = this.element.querySelector('[data-sticky-price]');
+      if (!priceElement || !priceData) return;
+
+      // Update with the provided price data
+      priceElement.innerHTML = priceData.html || priceData;
+    }
+
+    formatPrice(variant) {
+      if (!variant) return '';
+
+      const price = variant.price;
+      const compareAtPrice = variant.compare_at_price;
+      const priceEl = this.element?.querySelector('[data-sticky-price]');
+      const showSaleFirst = !priceEl || priceEl.dataset.showSalePriceFirst !== 'false';
+      const fmt = (c) =>
+        typeof Theme !== 'undefined' && Theme.formatPriceSplitHTML
+          ? Theme.formatPriceSplitHTML(c, false, 'upsells')
+          : this.formatMoney(c);
+
+      const sale = `<span class="price">${fmt(price)}</span>`;
+      if (compareAtPrice && compareAtPrice > price) {
+        const cmp = `<span class="compare-at-price price--compare">${fmt(compareAtPrice)}</span>`;
+        return showSaleFirst ? `${sale}${cmp}` : `${cmp}${sale}`;
+      }
+      return sale;
+    }
+
+    formatMoney(cents) {
+      if (!this.element) return '';
+      const amount = cents / 100;
+      const moneyFormat = this.element.dataset.moneyFormat ||
+        (typeof window.Theme !== 'undefined' && window.Theme.moneyFormat);
+      const currency = this.element.dataset.currency ||
+        (typeof window.Theme !== 'undefined' && window.Theme.currency) || 'USD';
+      if (moneyFormat) {
+        const formatted = amount.toFixed(2);
+        const rounded = String(Math.round(amount));
+        const withComma = amount.toFixed(2).replace('.', ',');
+        let result = moneyFormat
+          .replace(/\{\{\s*amount\s*\}\}/g, formatted)
+          .replace(/\{\{\s*amount_no_decimals\s*\}\}/g, rounded)
+          .replace(/\{\{\s*amount_with_comma_separator\s*\}\}/g, withComma)
+          .replace(/\{\{\s*amount_no_decimals_with_comma_separator\s*\}\}/g, rounded)
+          .replace(/\{\{\s*amount_with_space_separator\s*\}\}/g, withComma)
+          .replace(/\{\{\s*amount_with_apostrophe_separator\s*\}\}/g, formatted.replace('.', "'"))
+          .replace(/\{\{\s*amount_no_decimals_with_space_separator\s*\}\}/g, rounded)
+          .replace(/\{\{\s*amount_with_period_and_space_separator\s*\}\}/g, formatted);
+        return result.replace(/<[^>]+>/g, '').trim();
+      }
+      return new Intl.NumberFormat(document.documentElement.lang || 'en', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(amount);
+    }
+
+    updateVisibility() {
+      if (this.destroyed || !this.element || !document.contains(this.element)) return;
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Get section settings to check if it's positioned at top
+      const settings = this.getSectionSettings();
+      const isAtTop = settings.show_at_top;
+      
+      // Check scroll position based on sticky cart position
+      if (isAtTop) {
+        // If positioned at top, hide when scrolled to top
+        const isAtTopOfPage = scrollY <= 10; // 10px tolerance
+        if (isAtTopOfPage) {
+          this.element.classList.remove('sticky-add-to-cart--visible');
+          return;
+        }
+        
+        // If positioned at top, show when scrolled to bottom
+        const isAtBottom = (scrollY + windowHeight) >= (documentHeight - 10); // 10px tolerance
+        if (isAtBottom) {
+          this.element.classList.add('sticky-add-to-cart--visible');
+          return;
+        }
+      } else {
+        // If positioned at bottom, hide when scrolled to bottom
+        const isAtBottom = (scrollY + windowHeight) >= (documentHeight - 10); // 10px tolerance
+        if (isAtBottom) {
+          this.element.classList.remove('sticky-add-to-cart--visible');
+          return;
+        }
+      }
+
+      // Check if main add to cart button is visible
+      const mainButtonVisible = this.isMainAddToCartVisible();
+      
+      // Show sticky add to cart when:
+      // 1. Main button is NOT visible (when main button exists)
+      // 2. No main button found at all (fallback)
+      if ((!mainButtonVisible && this.mainAddToCartButton) || !this.mainAddToCartButton) {
+        this.element.classList.add('sticky-add-to-cart--visible');
+      } else {
+        this.element.classList.remove('sticky-add-to-cart--visible');
+      }
+    }
+
+    setupScrollListener() {
+      let ticking = false;
+      
+      const updateVisibility = () => {
+        this.updateVisibility();
+        ticking = false;
+      };
+
+      const requestTick = () => {
+        if (!ticking) {
+          requestAnimationFrame(updateVisibility);
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', requestTick, { passive: true });
+      
+      // Also check on resize in case viewport changes
+      window.addEventListener('resize', () => {
+        requestTick();
+        // Update layout classes on resize to handle mobile/desktop image visibility
+        this.updateLayoutClasses();
+      }, { passive: true });
+      
+      // Re-scan for main button periodically in case it loads dynamically
+      const scanId = setInterval(() => {
+        if (this.destroyed) return;
+        const newMainButton = this.findMainAddToCartButton();
+        if (newMainButton !== this.mainAddToCartButton) {
+          // Clean up old animation observer
+          if (this.animationObserver) {
+            this.animationObserver.disconnect();
+          }
+          
+          this.mainAddToCartButton = newMainButton;
+          // Sync state when main button changes
+          this.syncButtonState();
+          // Re-setup animation sync for new button
+          this.setupAnimationSync();
+        }
+      }, 2000);
+      this.intervals.push(scanId);
+    }
+  }
+
+  // Make StickyAddToCart available globally for morph callbacks
+  window.StickyAddToCart = StickyAddToCart;
+
+  function initStickyAddToCart() {
+    if (window.stickyAddToCartInstance) {
+      window.stickyAddToCartInstance.destroy();
+    }
+    window.stickyAddToCartInstance = new StickyAddToCart();
+  }
+
+  function isStickyAddToCartSection(target) {
+    return target && target.querySelector && target.querySelector('[data-sticky-add-to-cart]');
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => initStickyAddToCart());
+  } else {
+    initStickyAddToCart();
+  }
+
+  // Re-initialize when section is replaced in theme editor (e.g. after settings change)
+  document.addEventListener('shopify:section:load', (event) => {
+    if (isStickyAddToCartSection(event.target)) {
+      initStickyAddToCart();
+    }
+  });
+  document.addEventListener('shopify:theme:section:load', (event) => {
+    if (isStickyAddToCartSection(event.target)) {
+      initStickyAddToCart();
+    }
+  });
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "t:sections.sticky-add-to-cart.name",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_on_desktop",
+      "label": "t:sections.sticky-add-to-cart.show_on_desktop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_mobile",
+      "label": "t:sections.sticky-add-to-cart.show_on_mobile",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.sticky-add-to-cart.appearance"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.sticky-add-to-cart.color_scheme",
+      "default": "scheme-1",
+      "info": "t:sections.sticky-add-to-cart.color_scheme_info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.sticky-add-to-cart.thumbnail_settings"
+    },
+    {
+      "type": "range",
+      "id": "thumbnail_size",
+      "label": "t:sections.sticky-add-to-cart.thumbnail_size",
+      "min": 30,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "select",
+      "id": "thumbnail_aspect_ratio",
+      "label": "t:sections.sticky-add-to-cart.thumbnail_aspect_ratio",
+      "options": [
+        {
+          "value": "square",
+          "label": "t:sections.sticky-add-to-cart.thumbnail_aspect_ratio_options.square"
+        },
+        {
+          "value": "portrait",
+          "label": "t:sections.sticky-add-to-cart.thumbnail_aspect_ratio_options.portrait"
+        },
+        {
+          "value": "landscape",
+          "label": "t:sections.sticky-add-to-cart.thumbnail_aspect_ratio_options.landscape"
+        },
+        {
+          "value": "wide",
+          "label": "t:sections.sticky-add-to-cart.thumbnail_aspect_ratio_options.wide"
+        },
+        {
+          "value": "adaptive",
+          "label": "t:sections.sticky-add-to-cart.thumbnail_aspect_ratio_options.adaptive"
+        }
+      ],
+      "default": "adaptive"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "t:sections.sticky-add-to-cart.image_border_radius",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 4,
+      "info": "t:sections.sticky-add-to-cart.image_border_radius_info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.sticky-add-to-cart.display_options"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "t:sections.sticky-add-to-cart.show_image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image_mobile",
+      "label": "t:sections.sticky-add-to-cart.show_image_mobile",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title_desktop",
+      "label": "t:sections.sticky-add-to-cart.show_title_desktop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title_mobile",
+      "label": "t:sections.sticky-add-to-cart.show_title_mobile",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_at_top",
+      "label": "t:sections.sticky-add-to-cart.show_at_top",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_only_button",
+      "label": "t:sections.sticky-add-to-cart.mobile_only_button",
+      "default": false,
+      "info": "t:sections.sticky-add-to-cart.mobile_only_button_info"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_no_padding",
+      "label": "t:sections.sticky-add-to-cart.mobile_no_padding",
+      "default": false,
+      "info": "t:sections.sticky-add-to-cart.mobile_no_padding_info",
+      "visible_if": "{{ section.settings.mobile_only_button }}" 
+    },
+    {
+      "type": "checkbox",
+      "id": "compact",
+      "label": "t:sections.sticky-add-to-cart.compact_on_desktop",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "compact_radius",
+      "label": "t:settings.corner_radius",
+      "default": 4,
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "info": "t:sections.sticky-add-to-cart.compact_radius_info",
+      "visible_if": "{{ section.settings.compact }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.sticky-add-to-cart.price_settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "t:sections.sticky-add-to-cart.show_price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "edit_price_color",
+      "label": "t:sections.sticky-add-to-cart.edit_price_color",
+      "default": false,
+      "info": "t:sections.sticky-add-to-cart.edit_price_color_info",
+      "visible_if": "{{ section.settings.show_price }}"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "t:sections.sticky-add-to-cart.price_color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.edit_price_color }}"
+    },
+    {
+      "type": "color",
+      "id": "compare_price_color",
+      "label": "t:sections.sticky-add-to-cart.compare_price_color",
+      "default": "#6b6b6b",
+      "visible_if": "{{ section.settings.edit_price_color }}"
+    },
+    {
+        "type": "select",
+        "id": "sticky_price_font",
+        "label": "t:settings.font_price",
+        "visible_if": "{{ section.settings.show_price }}",
+        "options": [
+          {
+            "value": "body",
+            "label": "t:options.body"
+          },
+          {
+            "value": "subheading",
+            "label": "t:options.subheading"
+          },
+          {
+            "value": "heading",
+            "label": "t:options.heading"
+          },
+          {
+            "value": "accent",
+            "label": "t:options.accent"
+          }
+        ],
+        "default": "heading"
+      },
+    {
+      "type": "checkbox",
+      "id": "show_sale_price_first",
+      "label": "t:sections.sticky-add-to-cart.show_sale_price_first",
+      "default": true,
+      "visible_if": "{{ section.settings.show_price }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "override_product_price",
+      "label": "t:sections.sticky-add-to-cart.override_product_price",
+      "default": true,
+      "info": "t:sections.sticky-add-to-cart.override_product_price_info",
+      "visible_if": "{{ section.settings.show_price }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.sticky-add-to-cart.variant_settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variants",
+      "label": "t:sections.sticky-add-to-cart.show_variants",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "change_variant_link_enabled",
+      "label": "t:sections.sticky-add-to-cart.change_variant_link_enabled",
+      "default": true,
+      "info": "t:sections.sticky-add-to-cart.change_variant_link_enabled_info"
+    },
+    {
+      "type": "select",
+      "id": "change_variant_link_style",
+      "label": "t:sections.sticky-add-to-cart.change_variant_link_style",
+      "options": [
+        {
+          "value": "text",
+          "label": "t:sections.sticky-add-to-cart.change_variant_link_style_text"
+        },
+        {
+          "value": "icon",
+          "label": "t:sections.sticky-add-to-cart.change_variant_link_style_icon"
+        }
+      ],
+      "default": "icon"
+    },
+    {
+      "type": "text",
+      "id": "change_variant_text",
+      "label": "t:sections.sticky-add-to-cart.change_variant_text",
+      "default": "Change",
+      "visible_if": "{{ section.settings.change_variant_link_style == 'text' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.sticky-add-to-cart.text_settings"
+    },
+    {
+      "type": "select",
+      "id": "title_text_size",
+      "label": "t:sections.sticky-add-to-cart.title_text_size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "S"
+        },
+        {
+          "value": "sm",
+          "label": "M"
+        },
+        {
+          "value": "md",
+          "label": "L"
+        },
+        {
+          "value": "lg",
+          "label": "XL"
+        },
+        {
+          "value": "xl",
+          "label": "XXL"
+        }
+      ],
+      "default": "sm"
+    },
+    {
+      "type": "select",
+      "id": "variants_text_size",
+      "label": "t:sections.sticky-add-to-cart.variants_text_size",
+      "options": [
+        {
+          "value": "2xs",
+          "label": "XS"
+        },
+        {
+          "value": "xs",
+          "label": "S"
+        },
+        {
+          "value": "sm",
+          "label": "M"
+        },
+        {
+          "value": "md",
+          "label": "L"
+        },
+        {
+          "value": "lg",
+          "label": "XL"
+        }
+      ],
+      "default": "xs"
+    },
+    {
+      "type": "select",
+      "id": "price_text_size",
+      "label": "t:sections.sticky-add-to-cart.price_text_size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "S"
+        },
+        {
+          "value": "sm",
+          "label": "M"
+        },
+        {
+          "value": "md",
+          "label": "L"
+        },
+        {
+          "value": "lg",
+          "label": "XL"
+        },
+        {
+          "value": "xl",
+          "label": "XXL"
+        }
+      ],
+      "default": "sm"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.sticky-add-to-cart.presets.name",
+      "category": "t:sections.sticky-add-to-cart.presets.category"
+    }
+  ]
+}
+{% endschema %}

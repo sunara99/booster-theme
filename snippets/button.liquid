@@ -1,0 +1,83 @@
+{%- doc -%}
+  Intended for use in a block similar to the button block.
+
+  @param {string} link - link to render
+  @param {object} [block] - The block
+
+  @example
+  {% render 'button', link: '/collections/all' %}
+{%- enddoc -%}
+
+{% assign block_settings = block.settings %}
+{% liquid
+  assign sticky_scroll_class = ''
+  case block_settings.sticky_on_scroll
+    when 'both', 'all'
+      assign sticky_scroll_class = 'button-link--sticky-bottom'
+    when 'mobile'
+      assign sticky_scroll_class = 'button-link--sticky-bottom-mobile'
+    when 'desktop'
+      assign sticky_scroll_class = 'button-link--sticky-bottom-desktop'
+  endcase
+%}
+
+<a
+  {% if link == blank %}
+    role="link"
+    aria-disabled="true"
+  {% else %}
+    href="{{ link }}"
+  {% endif %}
+  class="
+    size-style
+    {{ sticky_scroll_class }}
+    {{ block_settings.style_class }}
+    {{ block_settings.style_class }}--{{ block.id }}
+  "
+  style="{% render 'size-style', settings: block_settings %}"
+  {%- if block_settings.open_in_new_tab -%}
+    target="_blank"
+    rel="noopener noreferrer"
+  {%- endif -%}
+  {{ block.shopify_attributes }}
+>
+  {{ block_settings.label }}
+</a>
+
+{% stylesheet %}
+  .link {
+    text-decoration: none;
+    text-decoration-color: currentcolor;
+
+    &:hover {
+      color: var(--color-primary-hover);
+      text-decoration-color: transparent;
+    }
+  }
+
+  .button-link--sticky-bottom {
+    position: sticky;
+    bottom: env(safe-area-inset-bottom, 0px);
+    z-index: var(--layer-flat);
+  }
+
+  .button-link--sticky-bottom-mobile {
+    position: sticky;
+    bottom: env(safe-area-inset-bottom, 0px);
+    z-index: var(--layer-flat);
+  }
+
+  @media screen and (min-width: 750px) {
+    .button-link--sticky-bottom-mobile {
+      position: static;
+      bottom: auto;
+      z-index: auto;
+    }
+
+    .button-link--sticky-bottom-desktop {
+      position: sticky;
+      bottom: env(safe-area-inset-bottom, 0px);
+      z-index: var(--layer-flat);
+    }
+  }
+{% endstylesheet %}

@@ -1,0 +1,53 @@
+{% liquid
+  assign name_id = 'ContactForm-name-' | append: block.id
+  assign email_id = 'ContactForm-email-' | append: block.id
+%}
+<div class="contact-form__form-row" {{ block.shopify_attributes }}>
+  <label
+    class="visually-hidden"
+    for="{{ name_id }}"
+  >
+    {{- 'blocks.contact_form.name' | t -}}
+  </label>
+  <input
+    type="text"
+    id="{{ name_id }}"
+    class="contact-form__input"
+    autocomplete="name"
+    name="contact[name]"
+    value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+    placeholder="{{ 'blocks.contact_form.name' | t }}"
+  >
+
+  <label
+    class="visually-hidden"
+    for="{{ email_id }}"
+  >
+    {{- 'blocks.contact_form.email' | t -}}
+    <span aria-hidden="true">*</span>
+  </label>
+  <input
+    type="email"
+    id="{{ email_id }}"
+    class="contact-form__input"
+    autocomplete="email"
+    name="contact[email]"
+    spellcheck="false"
+    autocapitalize="off"
+    value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+    aria-required="true"
+    {% if form.errors contains 'email' %}
+      aria-invalid="true"
+    {% endif %}
+    placeholder="{{ 'blocks.contact_form.email' | t }}"
+  >
+</div>
+
+{% schema %}
+{
+  "name": "t:names.contact_form_name_email", 
+  "tag": null,
+  "settings": [],
+  "presets": []
+}
+{% endschema %}

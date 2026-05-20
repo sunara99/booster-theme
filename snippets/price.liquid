@@ -1,0 +1,151 @@
+{%- doc -%}
+  This snippet is used to render a product card.
+  It is used in the product block,featured product block, and the product card block.
+
+  @param {product} product_resource - The product to render
+  @param {boolean} [show_unit_price] - Whether to show the unit price
+  @param {boolean} [show_sale_price_first] - Whether to show the sale price first
+  @param {boolean} [show_sale_badge] - Whether to show the sale badge
+  @param {string} [sale_badge_type] - 'percentage' or 'amount'
+  @param {string} [sale_badge_text] - Editable label for the badge (e.g. "Save")
+{%- enddoc -%}
+
+{%- liquid
+  assign show_unit_price = show_unit_price | default: false
+  assign show_sale_price_first = show_sale_price_first | default: false
+  assign show_sale_badge = show_sale_badge | default: false
+  assign sale_badge_type = sale_badge_type | default: 'percentage'
+  assign sale_badge_text = sale_badge_text | default: 'Save'
+  assign selected_variant = product_resource.selected_or_first_available_variant
+  assign price_cents = selected_variant.price
+  assign compare_at_cents = selected_variant.compare_at_price
+
+  assign show_compare_price = false
+  if compare_at_cents > price_cents
+    assign show_compare_price = true
+  endif
+
+  if product_resource == blank
+    assign price_cents = 1999
+  endif
+
+  assign savings_amount_raw = 0
+  assign savings_percent_raw = 0
+  if show_sale_badge and show_compare_price and product_resource != blank
+    assign savings_amount_raw = selected_variant.compare_at_price | minus: selected_variant.price
+    assign savings_percent_raw = savings_amount_raw | times: 100 | divided_by: selected_variant.compare_at_price
+  endif
+
+  assign has_volume_pricing = null
+  assign price_min_cents = null
+  assign price_max_cents = null
+
+  assign is_product_card = false
+  if template.name != 'product'
+    assign is_product_card = true
+  endif
+
+  if is_product_card
+    assign price_min_cents = product_resource.price_min
+    assign price_max_cents = product_resource.price_max
+    assign has_volume_pricing = product_resource.quantity_price_breaks_configured? | default: false
+  else
+    if selected_variant.quantity_price_breaks.size > 0
+      assign has_volume_pricing = true
+      assign price_min_cents = selected_variant.quantity_price_breaks.last.price
+      assign price_max_cents = selected_variant.price
+    endif
+  endif
+
+  assign use_currency = false
+  if product.handle == product_resource.handle
+    if settings.currency_code_enabled_product_pages
+      assign use_currency = true
+    endif
+  elsif settings.currency_code_enabled_product_cards
+    assign use_currency = true
+  endif
+
+  assign price_split_context = 'product_cards'
+  if template.name == 'product'
+    assign price_split_context = 'product_page'
+  endif
+-%}
+
+<div ref="priceContainer">
+  {% if has_volume_pricing %}
+    {% comment %} Volume pricing display {% endcomment %}
+    {% if show_compare_price %}
+      <span role="group">
+        <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+        <span class="compare-at-price">
+          {%- render 'price-split', context: price_split_context, cents: compare_at_cents, use_currency: use_currency -%}
+        </span>
+      </span>
+    {% endif %}
+    <span role="group">
+      <span class="visually-hidden">{{ 'content.price_range' | t }}&nbsp;</span>
+      <span class="price price-range price--large">
+        {%- render 'price-split', context: price_split_context, cents: price_min_cents, use_currency: use_currency -%}
+        -
+        {%- render 'price-split', context: price_split_context, cents: price_max_cents, use_currency: use_currency -%}
+      </span>
+    </span>
+  {% else %}
+    {% comment %} Standard pricing display {% endcomment %}
+    {% if show_sale_price_first == false and show_compare_price %}
+      <span role="group">
+        <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+        <span class="compare-at-price">
+          {%- render 'price-split', context: price_split_context, cents: compare_at_cents, use_currency: use_currency -%}
+        </span>
+      </span>
+    {% endif %}
+
+    {% if show_compare_price %}
+      <span role="group">
+        <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
+        <span class="price">
+          {%- render 'price-split', context: price_split_context, cents: price_cents, use_currency: use_currency -%}
+        </span>
+      </span>
+    {% else %}
+      <span class="price">
+        {%- render 'price-split', context: price_split_context, cents: price_cents, use_currency: use_currency -%}
+      </span>
+    {% endif %}
+
+    {% if show_sale_price_first == true and show_compare_price %}
+      <span role="group">
+        <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+        <span class="compare-at-price">
+          {%- render 'price-split', context: price_split_context, cents: compare_at_cents, use_currency: use_currency -%}
+        </span>
+      </span>
+    {% endif %}
+
+    {% if show_sale_badge and show_compare_price %}
+      <span class="sale-badge color-{{ settings.badge_sale_color_scheme }}" role="status">
+        {% if sale_badge_type == 'amount' %}
+          {{ 'content.product_badge_savings' | t -}}
+          {% render 'price-split', context: price_split_context, cents: savings_amount_raw, use_currency: use_currency %}
+        {% else %}
+          {{ 'content.product_badge_savings' | t }} {{ savings_percent_raw }}%
+        {% endif %}
+      </span>
+    {% endif %}
+  {% endif %}
+  {%- if selected_variant.unit_price and show_unit_price %}
+    {%- liquid
+      if use_currency
+        assign unit_price = selected_variant.unit_price | money_with_currency
+      else
+        assign unit_price = selected_variant.unit_price | money
+      endif
+    -%}
+    {% render 'unit-price', price: unit_price, measurement: selected_variant.unit_price_measurement %}
+  {%- endif -%}
+</div>
+{%- if has_volume_pricing -%}
+  <small class="volume-pricing-note">{{ 'content.volume_pricing_available' | t }}</small>
+{%- endif -%}

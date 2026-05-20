@@ -1,0 +1,149 @@
+{%- doc -%}
+  Emits @font-face rules for text block custom fonts (base + bold/italic variants via font_modify).
+  Deduplication uses an md5 signature per (family, weight, style) to avoid `contains` false positives.
+
+  @param {object} block_settings - block.settings from the text block
+{%- enddoc -%}
+
+{%- if block_settings.type_preset == 'custom' -%}
+  {%- assign rendered_key_markers = ',' -%}
+
+  {%- if block_settings.font == 'custom_font' and block_settings.custom_typography_font != blank -%}
+    {%- unless block_settings.custom_typography_font.system? -%}
+      {%- liquid
+        assign tf = block_settings.custom_typography_font
+        assign tf_bold = tf | font_modify: 'weight', 'bold'
+        assign tf_italic = tf | font_modify: 'style', 'italic'
+        assign tf_bold_italic = tf_bold | font_modify: 'style', 'italic'
+      -%}
+
+      {%- assign face_dedup_sig = 'tf|' | append: tf.family | append: '|' | append: tf.weight | append: '|' | append: tf.style -%}
+      {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+      {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+      {%- unless rendered_key_markers contains face_dedup_marker -%}
+        {{- tf | font_face: font_display: 'swap' -}}
+        {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+      {%- endunless -%}
+
+      {%- if tf_bold -%}
+        {%- assign face_dedup_sig = 'tf|' | append: tf_bold.family | append: '|' | append: tf_bold.weight | append: '|' | append: tf_bold.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- tf_bold | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+      {%- if tf_italic -%}
+        {%- assign face_dedup_sig = 'tf|' | append: tf_italic.family | append: '|' | append: tf_italic.weight | append: '|' | append: tf_italic.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- tf_italic | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+      {%- if tf_bold_italic -%}
+        {%- assign face_dedup_sig = 'tf|' | append: tf_bold_italic.family | append: '|' | append: tf_bold_italic.weight | append: '|' | append: tf_bold_italic.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- tf_bold_italic | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endif -%}
+
+  {%- if block_settings.enable_bold_typography_font and block_settings.bold_typography_font != blank -%}
+    {%- unless block_settings.bold_typography_font.system? -%}
+      {%- liquid
+        assign bf = block_settings.bold_typography_font
+        assign bf_bold = bf | font_modify: 'weight', 'bold'
+        assign bf_italic = bf | font_modify: 'style', 'italic'
+        assign bf_bold_italic = bf_bold | font_modify: 'style', 'italic'
+      -%}
+
+      {%- assign face_dedup_sig = 'bf|' | append: bf.family | append: '|' | append: bf.weight | append: '|' | append: bf.style -%}
+      {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+      {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+      {%- unless rendered_key_markers contains face_dedup_marker -%}
+        {{- bf | font_face: font_display: 'swap' -}}
+        {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+      {%- endunless -%}
+      {%- if bf_bold -%}
+        {%- assign face_dedup_sig = 'bf|' | append: bf_bold.family | append: '|' | append: bf_bold.weight | append: '|' | append: bf_bold.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- bf_bold | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+      {%- if bf_italic -%}
+        {%- assign face_dedup_sig = 'bf|' | append: bf_italic.family | append: '|' | append: bf_italic.weight | append: '|' | append: bf_italic.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- bf_italic | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+      {%- if bf_bold_italic -%}
+        {%- assign face_dedup_sig = 'bf|' | append: bf_bold_italic.family | append: '|' | append: bf_bold_italic.weight | append: '|' | append: bf_bold_italic.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- bf_bold_italic | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endif -%}
+
+  {%- if block_settings.enable_italic_typography_font and block_settings.italic_typography_font != blank -%}
+    {%- unless block_settings.italic_typography_font.system? -%}
+      {%- liquid
+        assign ifnt = block_settings.italic_typography_font
+        assign ifnt_bold = ifnt | font_modify: 'weight', 'bold'
+        assign ifnt_italic = ifnt | font_modify: 'style', 'italic'
+        assign ifnt_bold_italic = ifnt_bold | font_modify: 'style', 'italic'
+      -%}
+
+      {%- assign face_dedup_sig = 'if|' | append: ifnt.family | append: '|' | append: ifnt.weight | append: '|' | append: ifnt.style -%}
+      {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+      {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+      {%- unless rendered_key_markers contains face_dedup_marker -%}
+        {{- ifnt | font_face: font_display: 'swap' -}}
+        {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+      {%- endunless -%}
+      {%- if ifnt_bold -%}
+        {%- assign face_dedup_sig = 'if|' | append: ifnt_bold.family | append: '|' | append: ifnt_bold.weight | append: '|' | append: ifnt_bold.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- ifnt_bold | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+      {%- if ifnt_italic -%}
+        {%- assign face_dedup_sig = 'if|' | append: ifnt_italic.family | append: '|' | append: ifnt_italic.weight | append: '|' | append: ifnt_italic.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- ifnt_italic | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+      {%- if ifnt_bold_italic -%}
+        {%- assign face_dedup_sig = 'if|' | append: ifnt_bold_italic.family | append: '|' | append: ifnt_bold_italic.weight | append: '|' | append: ifnt_bold_italic.style -%}
+        {%- assign face_dedup_hash = face_dedup_sig | md5 -%}
+        {%- assign face_dedup_marker = ',' | append: face_dedup_hash | append: ',' -%}
+        {%- unless rendered_key_markers contains face_dedup_marker -%}
+          {{- ifnt_bold_italic | font_face: font_display: 'swap' -}}
+          {%- assign rendered_key_markers = rendered_key_markers | append: face_dedup_hash | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endif -%}
+{%- endif -%}

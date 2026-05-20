@@ -1,0 +1,104 @@
+{%- comment -%}
+  Renders a single benefit block for the product-benefits section.
+  @param {object} block - The benefit block
+{%- endcomment -%}
+
+{% liquid
+  assign icon = block.settings.icon | default: 'starburst'
+  assign image = block.settings.image
+  assign icon_size = block.settings.icon_size | default: 32
+  assign title = block.settings.title
+  assign description = block.settings.description
+  assign icon_for_snippet = icon
+  if icon == 'arrow'
+    assign icon_for_snippet = 'arrow_root'
+  endif
+  assign show_icon = false
+  if image == blank and icon != blank and icon != 'none'
+    assign show_icon = true
+  endif
+  assign icon_bg_enabled = block.settings.icon_background_enabled
+  assign icon_bg_color = block.settings.icon_background_color | default: '#E8F4F8'
+  assign icon_bg_opacity = block.settings.icon_background_opacity | default: 80 | divided_by: 100.0
+  assign icon_bg_shape = block.settings.icon_background_shape | default: 'organic'
+  assign icon_bg_scale = block.settings.icon_background_scale | default: 150 | divided_by: 100.0
+  assign icon_bg_type = block.settings.icon_background_type | default: 'solid'
+  assign icon_bg_gradient_color = block.settings.icon_background_gradient_color | default: '#E8E0F4'
+  assign icon_bg_gradient_angle = block.settings.icon_background_gradient_angle | default: 135
+  assign icon_color_mode = block.settings.icon_color_mode | default: 'default'
+  assign icon_color = block.settings.icon_color | default: '#000000'
+  assign has_media = false
+  if image != blank
+    assign has_media = true
+  elsif show_icon
+    assign has_media = true
+  endif
+%}
+
+<div class="product-benefit{% if icon_color_mode == 'custom' %} product-benefit--icon-color-custom{% endif %}" {{ block.shopify_attributes }} style="--product-benefit-icon-size: {{ icon_size }}px;{% if icon_bg_enabled and has_media %}--product-benefit-icon-bg-color: {{ icon_bg_color }};--product-benefit-icon-bg-opacity: {{ icon_bg_opacity }};--product-benefit-icon-bg-scale: {{ icon_bg_scale }};{% if icon_bg_type == 'gradient' %}--product-benefit-icon-bg-gradient: linear-gradient({{ icon_bg_gradient_angle }}deg, {{ icon_bg_color }}, {{ icon_bg_gradient_color }});{% endif %}{% endif %}{% if icon_color_mode == 'custom' %}--product-benefit-icon-color: {{ icon_color }};{% endif %}">
+  <div class="product-benefit__media{% if icon_bg_enabled and has_media %} product-benefit__media--has-bg{% endif %}" aria-hidden="true">
+    {% if icon_bg_enabled and has_media %}
+      <div class="product-benefit__icon-bg product-benefit__icon-bg--{{ icon_bg_shape }}{% if icon_bg_type == 'gradient' %} product-benefit__icon-bg--gradient{% endif %}">
+        {% if image != blank %}
+          {{
+            image
+            | image_url: width: 120
+            | image_tag:
+              loading: 'lazy',
+              alt: image.alt | default: title | default: 'Benefit',
+              class: 'product-benefit__image',
+              widths: '60, 80, 120',
+              sizes: '2rem'
+          }}
+          {% elsif show_icon %}
+            <svg
+            class="product-benefit__icon-svg icon-default"
+            aria-hidden="true"
+            focusable="false"
+            xmlns="http://www.w3.org/2000/svg"
+            width="{{ width }}"
+            height="{{ width }}"
+            viewBox="0 0 20 20"
+            {% if attributes %}
+              {{ attributes }}
+            {% endif %}
+          >   {%- render 'icon', icon: icon_for_snippet -%}
+            </svg>
+        {% endif %}
+      </div>
+    {% else %}
+      {% if image != blank %}
+        {{
+          image
+          | image_url: width: 120
+          | image_tag:
+            loading: 'lazy',
+            alt: image.alt | default: title | default: 'Benefit',
+            class: 'product-benefit__image',
+            widths: '60, 80, 120',
+            sizes: '2rem'
+        }}
+        {% elsif show_icon %}
+          <svg
+          class="product-benefit__icon-svg icon-default"
+          aria-hidden="true"
+          focusable="false"
+          xmlns="http://www.w3.org/2000/svg"
+          width="{{ width }}"
+          height="{{ width }}"
+          viewBox="0 0 20 20"
+          {% if attributes %}
+            {{ attributes }}
+          {% endif %}
+        >   {%- render 'icon', icon: icon_for_snippet-%}
+          </svg>
+      {% endif %}
+    {% endif %}
+  </div>
+  {% if title != blank %}
+    <h3 class="product-benefit__title">{{ title }}</h3>
+  {% endif %}
+  {% if description != blank %}
+    <p class="product-benefit__description">{{ description }}</p>
+  {% endif %}
+</div>

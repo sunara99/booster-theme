@@ -1,0 +1,190 @@
+{%- doc -%}
+  Renders a popup modal for variant selection in cart upsell products.
+{%- enddoc -%}
+
+<dialog
+  id="cart-upsell-variant-popup"
+  class="cart-upsell-variant-popup dialog-modal"
+  scroll-lock
+>
+  <div class="cart-upsell-variant-popup__content">
+    <button
+      type="button"
+      class="button button-unstyled close-button cart-upsell-variant-popup__close"
+      aria-label="{{ 'accessibility.close_dialog' | t | default: 'Close' }}"
+      data-popup-close
+    >
+      <span class="svg-wrapper">
+        {{- 'icon-close.svg' | inline_asset_content -}}
+      </span>
+    </button>
+    
+    <div class="cart-upsell-variant-popup__header">
+      <h3 class="cart-upsell-variant-popup__title" data-popup-title></h3>
+      <div class="cart-upsell-variant-popup__price" data-popup-price></div>
+    </div>
+    
+    <div class="cart-upsell-variant-popup__body" data-popup-body>
+      <!-- Variant selector will be inserted here -->
+    </div>
+    
+    <div class="cart-upsell-variant-popup__footer">
+      <button
+        type="button"
+        class="button cart-upsell-variant-popup__add-button"
+        data-popup-add-button
+      >
+        <span class="svg-wrapper">
+          {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
+        </span>
+        <span>{{ 'actions.add_to_cart' | t | default: 'Add to cart' }}</span>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+{% stylesheet %}
+  .cart-upsell-variant-popup {
+    padding: 0;
+    border: var(--style-border-popover);
+    border-radius: var(--style-border-radius-popover);
+    max-width: 480px;
+    width: 90%;
+    height: fit-content;
+    max-height: 90vh;
+    box-shadow: 0 5px 30px rgb(0 0 0 / var(--opacity-15));
+  }
+
+  .cart-upsell-variant-popup[open] {
+    display: flex;
+    animation: modalSlideInTop var(--animation-speed) var(--animation-easing) forwards;
+    border-radius: var(--style-border-radius-popover);
+  }
+
+  .cart-upsell-variant-popup.dialog-closing {
+    animation: modalSlideOutTop var(--animation-speed) var(--animation-easing) forwards;
+  }
+
+  .cart-upsell-variant-popup__content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: var(--padding-xl);
+    gap: var(--gap-lg);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .cart-upsell-variant-popup__close {
+    position: absolute;
+    top: var(--padding-md);
+    right: var(--padding-md);
+    z-index: var(--layer-raised);
+    padding: var(--padding-2xs);
+  }
+
+  .cart-upsell-variant-popup__header {
+    padding-right: var(--padding-3xl);
+  }
+
+  .cart-upsell-variant-popup__title {
+    font-size: var(--font-size--lg);
+    font-weight: var(--font-weight-semibold, 600);
+    margin-bottom: var(--margin-xs);
+    line-height: 1.3;
+  }
+
+  .cart-upsell-variant-popup__price {
+    font-size: var(--font-size--md);
+    font-weight: var(--font-weight-medium, 600);
+  }
+
+  .cart-upsell-variant-popup__body {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .cart-upsell-variant-popup__variants {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+  }
+
+  .cart-upsell-variant-popup__option {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+  }
+
+  .cart-upsell-variant-popup__option-label {
+    font-size: var(--font-size--sm);
+    font-weight: var(--font-weight-medium, 500);
+    color: var(--color-foreground-subdued);
+  }
+
+  .cart-upsell-variant-popup__option-select {
+    font-size: var(--font-size--sm);
+    padding: var(--padding-sm);
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--style-border-radius-inputs);
+    background-color: var(--color-input-background);
+    color: var(--color-input-text);
+    width: 100%;
+    min-height: 44px;
+    cursor: pointer;
+  }
+
+  .cart-upsell-variant-popup__option-select:focus {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  .cart-upsell-variant-popup__price-current {
+    font-weight: var(--font-weight-medium, 600);
+    color: var(--color-foreground);
+  }
+
+  .cart-upsell-variant-popup__price-compare {
+    font-size: var(--font-size--sm);
+    color: var(--color-foreground-subdued);
+    text-decoration: none;
+    margin-left: var(--margin-xs);
+  }
+
+  .cart-upsell-variant-popup__footer {
+    margin-top: auto;
+    padding-top: var(--padding-md);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .cart-upsell-variant-popup__add-button {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-2xs);
+  }
+
+  @keyframes modalSlideInTop {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes modalSlideOutTop {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+{% endstylesheet %}
+

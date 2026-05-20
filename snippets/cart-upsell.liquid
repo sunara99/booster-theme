@@ -1,0 +1,360 @@
+{%- doc -%}
+  Renders upsell products in the cart drawer.
+
+  @param {string} [heading] - The heading for the upsell section
+  @param {number} [max_products] - Maximum number of products to show
+{%- enddoc -%}
+
+{%- liquid
+  assign heading = heading | default: settings.cart_upsell_heading
+  assign max_products = max_products | default: settings.cart_upsell_max_products | default: 4
+  assign show_upsells = false
+  
+  # Determine which products to show
+  assign upsell_products = null
+  
+  if settings.cart_upsell_source == 'complementary' and cart.items.size > 0
+    # Use complementary products API for first cart item
+    assign first_item = cart.items.first
+    assign product_id = first_item.product.id
+    
+    # We'll fetch complementary products via JavaScript
+    assign show_upsells = true
+  elsif settings.cart_upsell_source == 'manual' and settings.cart_upsell_products != blank
+    # Use manually selected products (product_list returns an array of products)
+    assign upsell_products = settings.cart_upsell_products
+    assign show_upsells = true
+  elsif settings.cart_upsell_source == 'related' and cart.items.size > 0
+    # Use related products (similar to product recommendations)
+    assign first_item = cart.items.first
+    assign product_id = first_item.product.id
+    assign show_upsells = true
+  endif
+-%}
+
+{%- if settings.show_cart_upsell and show_upsells and cart.items.size > 0 -%}
+  {%- liquid
+    assign slider_enabled = settings.cart_upsell_slider | default: false
+    assign layout_class = settings.cart_upsell_layout | default: 'horizontal'
+    if slider_enabled
+      assign layout_class = layout_class | append: ' cart-upsell--slider'
+    endif
+  -%}
+  <cart-upsell-component
+    class="cart-upsell cart-upsell--{{ layout_class }}{% if settings.cart_upsell_show_full_title %} cart-upsell--full-title{% endif %}"
+    style="--color-upsell-background: {{ settings.cart_upsell_background_color | default: '#faf9f6' }};
+     --upsell-image-radius:{{settings.cart_upsell_image_radius}}px;
+     --cart-upsell-border-width:{{settings.cart_upsell_border_width}}px;
+     --cart-upsell-border-color:{{settings.cart_upsell_border_color}};
+     --cart-upsell-border-radius:{{settings.cart_upsell_border_radius}}px;
+     --cart-upsell-text-color:{{settings.cart_upsell_text_color}};
+     --cart-upsell-button-color:{{settings.cart_upsell_button_color}};
+     --cart-upsell-button-text-color:{{settings.cart_upsell_button_text_color}};
+     "
+    {% if section.id %}
+      data-section-id="{{ section.id }}"
+    {% endif %}
+    {% if settings.cart_upsell_source == 'complementary' or settings.cart_upsell_source == 'related' %}
+      data-product-id="{{ product_id }}"
+      data-intent="{{ settings.cart_upsell_source }}"
+      data-max-products="{{ max_products }}"
+    {% endif %}
+    {% if settings.cart_upsell_source == 'manual' and upsell_products != blank %}
+      data-manual-products="{% for product in upsell_products %}{{ product.id }}{% unless forloop.last %},{% endunless %}{% endfor %}"
+      data-max-products="{{ max_products }}"
+    {% endif %}
+    {% if slider_enabled %}
+      data-slider-enabled="true"
+    {% endif %}
+    data-image-ratio="{{ settings.cart_upsell_image_ratio | default: 'square' }}"
+  >
+    {%- if slider_enabled -%}
+      <div class="cart-upsell__header">
+        {%- if heading != blank -%}
+          <h3 class="cart-upsell__heading h4">
+            {{ heading }}
+          </h3>
+        {%- endif -%}
+        <div class="cart-upsell__arrows-wrapper" data-slider-arrows>
+          <button
+            type="button"
+            class="slideshow-control slideshow-control--previous slideshow-control--style-arrow button button-unstyled button-unstyled--transparent flip-x"
+            aria-label="Previous slide"
+            ref="previous"
+            data-slider-nav="previous"
+          >
+            <span class="svg-wrapper icon-arrow">
+              {{- 'icon-arrow.svg' | inline_asset_content -}}
+            </span>
+          </button>
+          <button
+            type="button"
+            class="slideshow-control slideshow-control--next slideshow-control--style-arrow button button-unstyled button-unstyled--transparent"
+            aria-label="Next slide"
+            ref="next"
+            data-slider-nav="next"
+          >
+            <span class="svg-wrapper icon-arrow">
+              {{- 'icon-arrow.svg' | inline_asset_content -}}
+            </span>
+          </button>
+        </div>
+      </div>
+      
+      {%- liquid
+        assign product_count = 0
+        if settings.cart_upsell_source == 'manual' and upsell_products != blank
+          for upsell_product in upsell_products limit: max_products
+            if upsell_product != blank
+              assign is_in_cart = false
+              for item in cart.items
+                if item.product.id == upsell_product.id
+                  assign is_in_cart = true
+                  break
+                endif
+              endfor
+              unless is_in_cart
+                assign product_count = product_count | plus: 1
+              endunless
+            endif
+          endfor
+        endif
+      -%}
+      
+      {%- capture slides -%}
+        {%- if settings.cart_upsell_source == 'manual' and upsell_products != blank -%}
+          {%- assign slide_index = 0 -%}
+          {%- for upsell_product in upsell_products limit: max_products -%}
+            {%- if upsell_product != blank -%}
+              {%- assign is_in_cart = false -%}
+              {%- for item in cart.items -%}
+                {%- if item.product.id == upsell_product.id -%}
+                  {%- assign is_in_cart = true -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+              
+              {%- unless is_in_cart -%}
+                <div class="swiper-slide cart-upsell__slide">
+                  <div class="cart-upsell__product">
+                    {% render 'cart-upsell-product-card', product: upsell_product, product_index: forloop.index %}
+                  </div>
+                </div>
+                {%- assign slide_index = slide_index | plus: 1 -%}
+              {%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endcapture -%}
+      
+      {%- if settings.cart_upsell_source == 'manual' and product_count > 0 -%}
+        <div class="swiper cart-upsell-swiper" data-cart-upsell-swiper>
+          <div class="swiper-wrapper">
+            {{ slides }}
+          </div>
+        </div>
+      {%- elsif settings.cart_upsell_source == 'related' or settings.cart_upsell_source == 'complementary' -%}
+        <div class="swiper cart-upsell-swiper" data-cart-upsell-swiper>
+          <div class="swiper-wrapper"></div>
+        </div>
+      {%- endif -%}
+    {%- else -%}
+      {%- if heading != blank -%}
+        <h3 class="cart-upsell__heading h4">
+          {{ heading }}
+        </h3>
+      {%- endif -%}
+      
+      <div class="cart-upsell__products" ref="productsContainer">
+        {%- if settings.cart_upsell_source == 'manual' and upsell_products != blank -%}
+          {%- for upsell_product in upsell_products limit: max_products -%}
+            {%- if upsell_product != blank -%}
+              {%- assign is_in_cart = false -%}
+              {%- for item in cart.items -%}
+                {%- if item.product.id == upsell_product.id -%}
+                  {%- assign is_in_cart = true -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+              
+              {%- unless is_in_cart -%}
+                <div class="cart-upsell__product">
+                  {% render 'cart-upsell-product-card', product: upsell_product, product_index: forloop.index %}
+                </div>
+              {%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- else -%}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </cart-upsell-component>
+{%- endif -%}
+
+{% if settings.cart_upsell_show_full_title == false %}
+  <style>
+     .cart-upsell-product-card__title {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+  {% endif %}
+
+{% stylesheet %}
+  cart-upsell-component[hidden],
+  cart-upsell-component.cart-upsell--hidden,
+  cart-upsell-component[style*="display: none"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .cart-upsell {
+    padding: var(--padding-lg) 0;
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--margin-md);
+  }
+
+  @media screen and (min-width: 750px) {
+    .cart-upsell {
+      padding: var(--padding-lg) 0;
+    }
+  }
+
+  .cart-upsell__heading {
+    margin-bottom: var(--margin-md);
+    font-size: var(--cart-font-size--md);
+    color: var(--cart-upsell-text-color);
+  }
+
+  /* Slider header layout */
+  .cart-upsell--slider .cart-upsell__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--margin-md);
+  }
+
+  .cart-upsell--slider .cart-upsell__heading {
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  .cart-upsell__arrows-wrapper {
+    display: flex;
+    gap: var(--gap-xs);
+    align-items: center;
+  }
+
+  .cart-upsell__arrows-wrapper .slideshow-control {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--color-border);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 0;
+  }
+
+  .cart-upsell__arrows-wrapper .slideshow-control:hover {
+    background-color: var(--color-border-hover);
+  }
+
+  .cart-upsell__arrows-wrapper .slideshow-control .svg-wrapper {
+    width: 20px;
+    height: 20px;
+    color: var(--color-foreground);
+  }
+
+  .cart-upsell__arrows-wrapper .slideshow-control svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .cart-upsell__products {
+    display: grid;
+    gap: var(--gap-md);
+    width: 100%;
+    align-items: stretch;
+  }
+
+  /* Horizontal layout (default) */
+  .cart-upsell--horizontal .cart-upsell__products {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    align-items: stretch;
+  }
+
+  /* Vertical layout */
+  .cart-upsell--vertical .cart-upsell__products {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-upsell__product {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  /* Vertical layout specific styling */
+  .cart-upsell--vertical .cart-upsell__product {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--gap-md);
+  }
+
+  .cart-upsell__loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--padding-lg);
+    color: var(--cart-upsell-text-color);
+  }
+
+  .cart-upsell__loading-text {
+    font-size: var(--cart-font-size--sm);
+  }
+
+  .cart-upsell__products:empty {
+    display: none;
+  }
+
+  /* Slider mode styles - Swiper */
+  .cart-upsell--slider .cart-upsell-swiper {
+    width: 100%;
+    overflow: hidden;
+    padding-bottom: var(--padding-md);
+  }
+
+  .cart-upsell--slider .swiper-wrapper {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .cart-upsell--slider .swiper-slide {
+    width: min(294px, calc(100% - var(--gap-md) * 2));
+    min-width: min(280px, calc(100% - var(--gap-md) * 2));
+    flex-shrink: 0;
+    height: auto;
+  }
+
+  /* Horizontal layout with slider: smaller slide width */
+  .cart-upsell--slider.cart-upsell--horizontal .swiper-slide {
+    width: min(130px, calc(100% - var(--gap-md) * 2));
+    min-width: min(130px, calc(100% - var(--gap-md) * 2));
+  }
+
+  .cart-upsell--slider .cart-upsell__product {
+    width: 100%;
+    height: 100%;
+  }
+{% endstylesheet %}
+

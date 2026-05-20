@@ -1,0 +1,54 @@
+{%- doc -%}
+  Single comment row: avatar, name, body, actions (Like, Reply, like count, time).
+
+  @param {object} settings - Block settings with author_image, author_name, body, like_count, time_ago, like_label, reply_label, show_reply_link, avatar_size
+  @param {string} shopify_attributes - Editor attributes
+{%- enddoc -%}
+{%- liquid
+  assign s = settings
+  assign avatar_px = s.avatar_size | default: 40
+  assign show_avatar = false
+  if s.author_image != blank
+    assign show_avatar = true
+  endif
+-%}
+<div
+  class="comment-thread-row"
+  style="{% if show_avatar %}--ctr-avatar: {{ avatar_px }}px;{% endif %}"
+  {{ shopify_attributes }}
+>
+  {%- if show_avatar -%}
+    <div class="comment-thread-row__avatar">
+      {{ s.author_image | image_url: width: 120 | image_tag: loading: 'lazy', alt: s.author_name, class: 'comment-thread-row__avatar-img' }}
+    </div>
+  {%- endif -%}
+  <div class="comment-thread-row__main">
+    {%- if s.author_name != blank -%}
+      <div class="comment-thread-row__name">{{ s.author_name }}</div>
+    {%- endif -%}
+    {%- if s.body != blank -%}
+      <div class="comment-thread-row__text">{{ s.body }}</div>
+    {%- endif -%}
+    <div class="comment-thread-row__actions">
+      <span class="comment-thread-row__links">
+        {%- if s.like_label != blank -%}
+          <span class="comment-thread-row__link">{{ s.like_label }}</span>
+        {%- endif -%}
+        {%- if s.show_reply_link and s.reply_label != blank -%}
+          <span class="comment-thread-row__link">{{ s.reply_label }}</span>
+        {%- endif -%}
+      </span>
+      {%- if s.like_count != blank -%}
+        <span class="comment-thread-row__likes">
+          <span class="comment-thread-row__like-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+          </span>
+          <span class="comment-thread-row__like-num">{{- s.like_count -}}</span>
+        </span>
+      {%- endif -%}
+      {%- if s.time_ago != blank -%}
+        <span class="comment-thread-row__time">{{ s.time_ago }}</span>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

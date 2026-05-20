@@ -1,0 +1,1249 @@
+
+{% assign block_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .lumin-countdown-timer-{{ block_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    min-width: fit-content;
+    margin: auto;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    {% if block.settings.background_type == 'gradient' %}
+      background: linear-gradient({{ block.settings.background_gradient_angle }}deg, {{ block.settings.background_color }}, {{ block.settings.background_gradient_color }});
+    {% else %}
+      background-color: {{ block.settings.background_color }};
+    {% endif %}
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .lumin-countdown-timer-{{ block_id }} a{
+    text-decoration-color: var(--color, var(--color-primary));
+  }
+
+  .lumin-countdown-timer__wrapper-{{ block_id }} {
+    display: flex;
+    {% if block.settings.desktop_layout == 'horizontal' %}
+      flex-direction: row;
+      align-items: {{ block.settings.text_alignment }};
+      justify-content: {{ block.settings.wrapper_justify_content }};
+      gap: {{ block.settings.spacing }}px;
+      flex-wrap: wrap;
+    {% else %}
+      flex-direction: column;
+      align-items: {{ block.settings.text_alignment }};
+      gap: {{ block.settings.spacing }}px;
+    {% endif %}
+  }
+
+  .lumin-countdown-timer__content-{{ block_id }} {
+    {% if block.settings.desktop_layout == 'horizontal' %}
+      flex-shrink: 0;
+      text-align: {{ block.settings.text_alignment }};
+    {% else %}
+      text-align: {{ block.settings.text_alignment }};
+      width: 100%;
+    {% endif %}
+  }
+
+  .lumin-countdown-timer__heading-{{ block_id }} {
+    color: {{ block.settings.heading_color }};
+    font-size: {{ block.settings.heading_size_desktop }}px;
+    margin: 0;
+    {% if block.settings.desktop_layout == 'horizontal' and block.settings.subtext != blank %}
+      margin-bottom: 1px;
+    {% endif %}
+  }
+
+  .lumin-countdown-timer__subtext-{{ block_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size_desktop }}px;
+    margin: 0;
+  }
+
+  .lumin-countdown-timer__display-{{ block_id }} {
+    display: flex;
+    flex-direction: row;
+    {% if block.settings.desktop_layout == 'horizontal' %}
+      justify-content: flex-end;
+      flex-shrink: 0;
+    {% else %}
+      justify-content: {{ block.settings.text_alignment }};
+      width: 100%;
+    {% endif %}
+    gap: {{ block.settings.unit_spacing }}px;
+    flex-wrap: wrap;
+  }
+
+  .lumin-countdown-timer__unit-{{ block_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: {{ block.settings.unit_min_width }}px;
+  }
+
+  .lumin-countdown-timer__number-{{ block_id }} {
+    color: {{ block.settings.number_color }};
+    font-size: {{ block.settings.number_size_desktop }}px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0px;
+  }
+
+  .lumin-countdown-timer__label-{{ block_id }} {
+    color: {{ block.settings.label_color }};
+    font-size: {{ block.settings.label_size_desktop }}px;
+    text-transform: {{ block.settings.label_case }};
+    font-weight: {% if block.settings.label_weight == 'bold' %}700{% else %}400{% endif %};
+  }
+
+  .lumin-countdown-timer__separator-{{ block_id }} {
+    color: {{ block.settings.number_color }};
+    font-size: {{ block.settings.number_size_desktop }}px;
+    font-weight: 700;
+    line-height: 1;
+    align-self: flex-start;
+    padding-top: 0;
+  }
+
+  .lumin-countdown-timer__expired-{{ block_id }} {
+    color: {{ block.settings.expired_text_color }};
+    font-size: {{ block.settings.text_size_desktop }}px;
+    display: none;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .lumin-countdown-timer__expired-{{ block_id }}.active {
+    display: block;
+  }
+
+  .lumin-countdown-timer__unit-{{ block_id }}.hidden {
+    display: none;
+  }
+
+  .lumin-countdown-timer__unit-{{ block_id }} [data-days-hundreds-card].hidden {
+    display: none;
+  }
+
+  .lumin-countdown-timer__digit-group-{{ block_id }} {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .lumin-countdown-timer__flip-card-{{ block_id }} {
+    perspective: 200px;
+    min-width: {{ block.settings.unit_min_width }}px;
+    height: calc({{ block.settings.number_size_desktop }}px + 8px + {{ block.settings.label_size_desktop }}px + 8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .lumin-countdown-timer__digit-group-{{ block_id }} .lumin-countdown-timer__flip-card-{{ block_id }} {
+    width: {{ block.settings.number_size_desktop }}px;
+    min-width: {{ block.settings.number_size_desktop }}px;
+    height: {{ block.settings.number_size_desktop }}px;
+  }
+
+  .lumin-countdown-timer__flip-card-inner-{{ block_id }} {
+    position: relative;
+    width: 100%;
+    height: calc({{ block.settings.number_size_desktop }}px + 6px);
+    flex-shrink: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.4s ease-in-out;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+  }
+
+  .lumin-countdown-timer__flip-card-inner-{{ block_id }}::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.12);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .lumin-countdown-timer__flip-card-inner-{{ block_id }}.flip {
+    transform: rotateX(-180deg);
+  }
+
+  .lumin-countdown-timer__flip-card-front-{{ block_id }},
+  .lumin-countdown-timer__flip-card-back-{{ block_id }} {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    border-radius: 4px;
+    background: {{ block.settings.flip_card_background_color }};
+  }
+
+  .lumin-countdown-timer__flip-card-front-{{ block_id }} {
+    transform: rotateX(0deg);
+  }
+
+  .lumin-countdown-timer__flip-card-back-{{ block_id }} {
+    transform: rotateX(180deg);
+  }
+
+  .lumin-countdown-timer--flip-cards .lumin-countdown-timer__unit-{{ block_id }} .lumin-countdown-timer__number-{{ block_id }} {
+    margin-bottom: 0;
+    font-weight: 700;
+  }
+
+  .lumin-countdown-timer--flip-cards .lumin-countdown-timer__unit-{{ block_id }} .lumin-countdown-timer__label-{{ block_id }} {
+    margin-top: 10px;
+    font-weight: {% if block.settings.label_weight == 'bold' %}700{% else %}400{% endif %};
+  }
+
+  @media screen and (max-width: 749px) {
+    .lumin-countdown-timer-{{ block_id }} {
+      width: 100%;
+      padding: {{ block.settings.padding_vertical_mobile }}px {{ block.settings.padding_horizontal_mobile }}px;
+    }
+
+    .lumin-countdown-timer__wrapper-{{ block_id }} {
+      {% if block.settings.mobile_layout == 'horizontal' %}
+        flex-direction: row;
+        align-items: center;
+        justify-content: {{ block.settings.wrapper_justify_content }};
+      {% else %}
+        flex-direction: column;
+        align-items: {{ block.settings.text_alignment }};
+      {% endif %}
+    }
+
+    .lumin-countdown-timer__content-{{ block_id }} {
+      text-align: {{ block.settings.text_alignment }};
+      {% if block.settings.mobile_layout == 'horizontal' %}
+        flex-shrink: 0;
+      {% else %}
+        width: 100%;
+      {% endif %}
+    }
+
+    .lumin-countdown-timer__heading-{{ block_id }} {
+      font-size: {{ block.settings.heading_size_mobile }}px;
+    }
+
+    .lumin-countdown-timer__subtext-{{ block_id }} {
+      font-size: {{ block.settings.text_size_mobile }}px;
+    }
+
+    .lumin-countdown-timer__display-{{ block_id }} {
+      {% if block.settings.mobile_layout == 'horizontal' %}
+        justify-content: flex-end;
+        flex-shrink: 1;
+        gap: 2px;
+      {% else %}
+        justify-content: {{ block.settings.text_alignment }};
+        width: 100%;
+      {% endif %}
+    }
+
+    .lumin-countdown-timer__number-{{ block_id }} {
+      font-size: {{ block.settings.number_size_mobile }}px;
+      margin-bottom: 0px;
+    }
+
+    .lumin-countdown-timer__label-{{ block_id }} {
+      font-size: {{ block.settings.label_size_mobile }}px;
+    }
+
+    .lumin-countdown-timer__separator-{{ block_id }} {
+      font-size: {{ block.settings.number_size_mobile }}px;
+    }
+
+    .lumin-countdown-timer__expired-{{ block_id }} {
+      font-size: {{ block.settings.text_size_mobile }}px;
+    }
+
+    .lumin-countdown-timer__flip-card-{{ block_id }} {
+      height: calc({{ block.settings.number_size_mobile }}px + 2px + {{ block.settings.label_size_mobile }}px + 2px);
+    }
+
+    .lumin-countdown-timer__digit-group-{{ block_id }} .lumin-countdown-timer__flip-card-{{ block_id }} {
+      width: {{ block.settings.number_size_mobile }}px;
+      min-width: {{ block.settings.number_size_mobile }}px;
+      height: {{ block.settings.number_size_mobile }}px;
+    }
+
+    .lumin-countdown-timer__flip-card-inner-{{ block_id }} {
+      height: calc({{ block.settings.number_size_mobile }}px + 4px);
+    }
+
+    .lumin-countdown-timer--flip-cards .lumin-countdown-timer__unit-{{ block_id }} .lumin-countdown-timer__label-{{ block_id }} {
+      margin-top: 6px;
+    }
+  }
+{% endstyle %}
+
+{% liquid
+  assign in_announcement_bar = false
+  if section.type == 'header-announcements' or section.id contains 'header_announcements'
+    assign in_announcement_bar = true
+    assign block_index = section.blocks | find_index: 'id', block.id
+  endif
+-%}
+{% if in_announcement_bar %}
+<style> 
+   .announcement-bar__slides {
+    display: grid;
+    grid: [stack] auto / [stack] auto;
+    {% if show_arrows %}
+      width: calc(100% - var(--button-size) * 2);
+    {% else %}
+      width: 100%;
+    {% endif %}
+    max-width: var(--wide-page-width);
+    margin-inline: auto;
+  }
+  @media screen and (max-width: 749px) {
+    .announcement-bar__slides {
+     
+    {% if show_arrows %}
+      width: calc(100% - var(--button-size) * 2);
+    {% else %}
+      width: calc(100% - 30px);;
+    {% endif %}
+  }
+    }
+</style>
+{% endif %}
+
+{% if in_announcement_bar %}
+  <slideshow-slide
+    ref="slides[]"
+    class="announcement-bar__slide"
+    aria-hidden="{% if block_index == 0 %}false{% else %}true{% endif %}"
+  >
+{% endif %}
+
+<countdown-timer-{{ block_id }}
+  class="lumin-countdown-timer-{{ block_id }}{% if block.settings.show_flip_cards %} lumin-countdown-timer--flip-cards{% endif %}"
+  data-end-date="{{ block.settings.end_date }}"
+  data-end-time="{{ block.settings.end_time }}"
+  data-hide-days-when-zero="{{ block.settings.hide_days_when_zero }}"
+  data-days-as-zero="{{ block.settings.show_days_as_zero }}"
+  data-expired-behavior="{{ block.settings.expired_behavior }}"
+  data-flip-cards="{{ block.settings.show_flip_cards }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="lumin-countdown-timer__wrapper-{{ block_id }}">
+    {% if block.settings.heading != blank or block.settings.subtext != blank %}
+      <div class="lumin-countdown-timer__content-{{ block_id }}">
+        {% if block.settings.heading != blank %}
+          <h3 class="lumin-countdown-timer__heading-{{ block_id }}">{{ block.settings.heading }}</h3>
+        {% endif %}
+
+        {% if block.settings.subtext != blank %}
+          <div class="lumin-countdown-timer__subtext-{{ block_id }}">{{ block.settings.subtext }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="lumin-countdown-timer__display-{{ block_id }}" data-countdown-display>
+      {% if block.settings.show_days %}
+        <div class="lumin-countdown-timer__unit-{{ block_id }}" data-days-unit>
+          {% if block.settings.show_flip_cards %}
+            <div class="lumin-countdown-timer__digit-group-{{ block_id }}">
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }} lumin-countdown-timer__days-hundreds-{{ block_id }}" data-flip-card data-days-hundreds-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-days-hundreds>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-days-hundreds-next>0</span>
+                  </div>
+                </div>
+              </div>
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }}" data-flip-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-days-tens>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-days-tens-next>0</span>
+                  </div>
+                </div>
+              </div>
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }}" data-flip-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-days-ones>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-days-ones-next>0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="lumin-countdown-timer__number-{{ block_id }}" data-days>00</div>
+          {% endif %}
+          <div class="lumin-countdown-timer__label-{{ block_id }}">{{ block.settings.days_label }}</div>
+        </div>
+        {% if block.settings.show_separator %}
+          <div class="lumin-countdown-timer__separator-{{ block_id }}" data-days-separator>{{ block.settings.separator_text }}</div>
+        {% endif %}
+      {% endif %}
+
+      {% if block.settings.show_hours %}
+        <div class="lumin-countdown-timer__unit-{{ block_id }}">
+          {% if block.settings.show_flip_cards %}
+            <div class="lumin-countdown-timer__digit-group-{{ block_id }}">
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }}" data-flip-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-hours-tens>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-hours-tens-next>0</span>
+                  </div>
+                </div>
+              </div>
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }}" data-flip-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-hours-ones>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-hours-ones-next>0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="lumin-countdown-timer__number-{{ block_id }}" data-hours>00</div>
+          {% endif %}
+          <div class="lumin-countdown-timer__label-{{ block_id }}">{{ block.settings.hours_label }}</div>
+        </div>
+        {% if block.settings.show_separator %}
+          <div class="lumin-countdown-timer__separator-{{ block_id }}">{{ block.settings.separator_text }}</div>
+        {% endif %}
+      {% endif %}
+
+      {% if block.settings.show_minutes %}
+        <div class="lumin-countdown-timer__unit-{{ block_id }}">
+          {% if block.settings.show_flip_cards %}
+            <div class="lumin-countdown-timer__digit-group-{{ block_id }}">
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }}" data-flip-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-minutes-tens>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-minutes-tens-next>0</span>
+                  </div>
+                </div>
+              </div>
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }}" data-flip-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-minutes-ones>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-minutes-ones-next>0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="lumin-countdown-timer__number-{{ block_id }}" data-minutes>00</div>
+          {% endif %}
+          <div class="lumin-countdown-timer__label-{{ block_id }}">{{ block.settings.minutes_label }}</div>
+        </div>
+        {% if block.settings.show_separator %}
+          <div class="lumin-countdown-timer__separator-{{ block_id }}">{{ block.settings.separator_text }}</div>
+        {% endif %}
+      {% endif %}
+
+      {% if block.settings.show_seconds %}
+        <div class="lumin-countdown-timer__unit-{{ block_id }}">
+          {% if block.settings.show_flip_cards %}
+            <div class="lumin-countdown-timer__digit-group-{{ block_id }}">
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }}" data-flip-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-seconds-tens>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-seconds-tens-next>0</span>
+                  </div>
+                </div>
+              </div>
+              <div class="lumin-countdown-timer__flip-card-{{ block_id }}" data-flip-card>
+                <div class="lumin-countdown-timer__flip-card-inner-{{ block_id }}" data-flip-inner>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-front-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-seconds-ones>0</span>
+                  </div>
+                  <div class="lumin-countdown-timer__flip-card-face lumin-countdown-timer__flip-card-back-{{ block_id }}">
+                    <span class="lumin-countdown-timer__number-{{ block_id }}" data-seconds-ones-next>0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="lumin-countdown-timer__number-{{ block_id }}" data-seconds>00</div>
+          {% endif %}
+          <div class="lumin-countdown-timer__label-{{ block_id }}">{{ block.settings.seconds_label }}</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="lumin-countdown-timer__expired-{{ block_id }}" data-expired-message>
+    {{ block.settings.expired_message }}
+  </div>
+</countdown-timer-{{ block_id }}>
+
+{% if in_announcement_bar %}
+  </slideshow-slide>
+{% endif %}
+
+<script>
+  (function() {
+    class CountdownTimer{{ block_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.endDate = this.dataset.endDate;
+        this.endTime = this.dataset.endTime;
+        this.hideDaysWhenZero = this.dataset.hideDaysWhenZero === 'true';
+        this.daysAsZero = this.dataset.daysAsZero === 'true';
+        this.flipCards = this.dataset.flipCards === 'true';
+        this.interval = null;
+        this.prevDays = null;
+        this.prevHours = null;
+        this.prevMinutes = null;
+        this.prevSeconds = null;
+      }
+
+      connectedCallback() {
+        if (!this.endDate || !this.endTime) {
+          this.showExpiredMessage();
+          return;
+        }
+
+        this.daysUnit = this.querySelector('[data-days-unit]');
+        this.daysSeparator = this.querySelector('[data-days-separator]');
+        this.displayElement = this.querySelector('[data-countdown-display]');
+        this.expiredElement = this.querySelector('[data-expired-message]');
+
+        if (this.flipCards) {
+          this.daysHundredsEl = this.querySelector('[data-days-hundreds]');
+          this.daysHundredsCard = this.querySelector('[data-days-hundreds-card]');
+          this.daysTensEl = this.querySelector('[data-days-tens]');
+          this.daysOnesEl = this.querySelector('[data-days-ones]');
+          this.hoursTensEl = this.querySelector('[data-hours-tens]');
+          this.hoursOnesEl = this.querySelector('[data-hours-ones]');
+          this.minutesTensEl = this.querySelector('[data-minutes-tens]');
+          this.minutesOnesEl = this.querySelector('[data-minutes-ones]');
+          this.secondsTensEl = this.querySelector('[data-seconds-tens]');
+          this.secondsOnesEl = this.querySelector('[data-seconds-ones]');
+        } else {
+          this.daysElement = this.querySelector('[data-days]');
+          this.hoursElement = this.querySelector('[data-hours]');
+          this.minutesElement = this.querySelector('[data-minutes]');
+          this.secondsElement = this.querySelector('[data-seconds]');
+        }
+
+        this.startCountdown();
+      }
+
+      disconnectedCallback() {
+        if (this.interval) {
+          clearInterval(this.interval);
+        }
+      }
+
+      startCountdown() {
+        this.updateCountdown();
+        this.interval = setInterval(() => this.updateCountdown(), 1000);
+      }
+
+      updateCountdown() {
+        const endDateTime = new Date(this.endDate + 'T' + this.endTime).getTime();
+        const now = new Date().getTime();
+        const distance = endDateTime - now;
+
+        if (distance < 0) {
+          this.showExpiredMessage();
+          if (this.interval) {
+            clearInterval(this.interval);
+          }
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        const displayDays = this.daysAsZero ? 0 : days;
+
+        if (this.flipCards) {
+          this.updateDaysDigits(displayDays);
+          this.updateUnitDigits(hours, 'hours', this.hoursTensEl, this.hoursOnesEl);
+          this.updateUnitDigits(minutes, 'minutes', this.minutesTensEl, this.minutesOnesEl);
+          this.updateUnitDigits(seconds, 'seconds', this.secondsTensEl, this.secondsOnesEl);
+        } else {
+          if (this.daysElement) {
+            this.updateUnitValue(this.daysElement, displayDays);
+          }
+          if (this.hoursElement) {
+            this.updateUnitValue(this.hoursElement, hours);
+          }
+          if (this.minutesElement) {
+            this.updateUnitValue(this.minutesElement, minutes);
+          }
+          if (this.secondsElement) {
+            this.updateUnitValue(this.secondsElement, seconds);
+          }
+        }
+
+        if (this.daysUnit) {
+          if (this.hideDaysWhenZero && days === 0) {
+            this.daysUnit.classList.add('hidden');
+            if (this.daysSeparator) this.daysSeparator.classList.add('hidden');
+          } else {
+            this.daysUnit.classList.remove('hidden');
+            if (this.daysSeparator) this.daysSeparator.classList.remove('hidden');
+          }
+        }
+      }
+
+      updateDaysDigits(days) {
+        if (this.daysHundredsCard) {
+          if (days >= 100) {
+            this.daysHundredsCard.classList.remove('hidden');
+          } else {
+            this.daysHundredsCard.classList.add('hidden');
+          }
+        }
+        const hundreds = String(Math.floor(days / 100) % 10);
+        const tens = String(Math.floor(days / 10) % 10);
+        const ones = String(days % 10);
+        const prev = this.prevDays;
+        this.prevDays = days;
+        const prevHundreds = prev !== null ? String(Math.floor(prev / 100) % 10) : null;
+        const prevTens = prev !== null ? String(Math.floor(prev / 10) % 10) : null;
+        const prevOnes = prev !== null ? String(prev % 10) : null;
+
+        if (this.daysHundredsEl) {
+          this.updateDigitValue(this.daysHundredsEl, this.querySelector('[data-days-hundreds-next]'), hundreds, prevHundreds);
+        }
+        if (this.daysTensEl) {
+          this.updateDigitValue(this.daysTensEl, this.querySelector('[data-days-tens-next]'), tens, prevTens);
+        }
+        if (this.daysOnesEl) {
+          this.updateDigitValue(this.daysOnesEl, this.querySelector('[data-days-ones-next]'), ones, prevOnes);
+        }
+      }
+
+      updateUnitDigits(value, unitKey, tensEl, onesEl) {
+        const str = String(value).padStart(2, '0');
+        const tens = str[0];
+        const ones = str[1];
+        const prevKey = 'prev' + unitKey.charAt(0).toUpperCase() + unitKey.slice(1);
+        const prev = this[prevKey];
+        this[prevKey] = value;
+        const prevStr = prev !== null ? String(prev).padStart(2, '0') : null;
+        const prevTens = prevStr ? prevStr[0] : null;
+        const prevOnes = prevStr ? prevStr[1] : null;
+
+        if (tensEl) {
+          this.updateDigitValue(tensEl, this.querySelector('[data-' + unitKey + '-tens-next]'), tens, prevTens);
+        }
+        if (onesEl) {
+          this.updateDigitValue(onesEl, this.querySelector('[data-' + unitKey + '-ones-next]'), ones, prevOnes);
+        }
+      }
+
+      updateDigitValue(currentEl, nextEl, digitValue, prevDigit) {
+        if (!currentEl) return;
+        if (nextEl && prevDigit !== null && prevDigit !== digitValue) {
+          nextEl.textContent = digitValue;
+          const card = currentEl.closest('[data-flip-card]');
+          const inner = card ? card.querySelector('[data-flip-inner]') : null;
+          if (inner) {
+            inner.classList.add('flip');
+            setTimeout(() => {
+              currentEl.textContent = digitValue;
+              nextEl.textContent = digitValue;
+              inner.classList.remove('flip');
+            }, 400);
+          } else {
+            currentEl.textContent = digitValue;
+            nextEl.textContent = digitValue;
+          }
+        } else {
+          currentEl.textContent = digitValue;
+          if (nextEl) nextEl.textContent = digitValue;
+        }
+      }
+
+      updateUnitValue(element, value) {
+        if (!element) return;
+        element.textContent = String(value).padStart(2, '0');
+      }
+
+      showExpiredMessage() {
+        const behavior = this.dataset.expiredBehavior || 'show_text';
+        if (behavior === 'hide') {
+          this.style.display = 'none';
+          return;
+        }
+        if (this.displayElement) {
+          this.displayElement.style.display = 'none';
+        }
+        if (this.expiredElement) {
+          this.expiredElement.classList.add('active');
+        }
+      }
+    }
+
+    customElements.define('countdown-timer-{{ block_id }}', CountdownTimer{{ block_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.timer.name",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "t:sections.timer.end_date",
+      "info": "t:sections.timer.end_date_info",
+      "default": "2026-12-31"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "t:sections.timer.end_time",
+      "info": "t:sections.timer.end_time_info",
+      "default": "23:59:59"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.timer.content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "t:sections.timer.heading",
+      "default": "Limited time offer"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "subtext",
+      "label": "t:sections.timer.subtext",
+      "default": "Hurry! Sale ends soon"
+    },
+    {
+      "type": "select",
+      "id": "expired_behavior",
+      "label": "t:sections.timer.expired_behavior",
+      "options": [
+        {
+          "value": "show_text",
+          "label": "t:sections.timer.expired_behavior_show_text"
+        },
+        {
+          "value": "hide",
+          "label": "t:sections.timer.expired_behavior_hide"
+        }
+      ],
+      "default": "show_text"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "expired_message",
+      "label": "t:sections.timer.expired_message",
+      "info": "t:sections.timer.expired_message_info",
+      "default": "This offer has ended",
+      "visible_if": "{{ block.settings.expired_behavior == 'show_text' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.timer.display_units"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_days",
+      "label": "t:sections.timer.show_days",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_days_when_zero",
+      "label": "t:sections.timer.hide_days_when_zero",
+      "info": "Automatically hide the days unit when it reaches 0",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_days_as_zero",
+      "label": "t:sections.timer.show_days_as_zero",
+      "info": "t:sections.timer.show_days_as_zero_info",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_flip_cards",
+      "label": "t:sections.timer.show_flip_cards",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "flip_card_background_color",
+      "label": "t:sections.timer.flip_card_background_color",
+      "default": "#ffffff",
+      "visible_if": "{{ block.settings.show_flip_cards }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.timer.layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "t:sections.timer.desktop_width_percent",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "desktop_layout",
+      "label": "t:sections.timer.desktop_layout",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:sections.timer.desktop_layout_horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "t:sections.timer.desktop_layout_vertical"
+        }
+      ],
+      "default": "horizontal"
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "t:sections.timer.mobile_layout",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:sections.timer.mobile_layout_horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "t:sections.timer.mobile_layout_vertical"
+        }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "select",
+      "id": "wrapper_justify_content",
+      "label": "t:sections.timer.wrapper_justify_content",
+      "info": "Applies when layout is horizontal",
+      "options": [
+        {
+          "value": "center",
+          "label": "t:sections.timer.wrapper_justify_content_center"
+        },
+        {
+          "value": "space-evenly",
+          "label": "t:sections.timer.wrapper_justify_content_space_evenly"
+        },
+        {
+          "value": "space-around",
+          "label": "t:sections.timer.wrapper_justify_content_space_around"
+        },
+        {
+          "value": "space-between",
+          "label": "t:sections.timer.wrapper_justify_content_space_between"
+        }
+      ],
+      "default": "space-evenly"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "t:sections.timer.text_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.timer.text_alignment_left"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.timer.text_alignment_center"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.timer.text_alignment_right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "t:sections.timer.padding_vertical",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "t:sections.timer.padding_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical_mobile",
+      "label": "t:sections.timer.padding_vertical_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_mobile",
+      "label": "t:sections.timer.padding_horizontal_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "spacing",
+      "label": "t:sections.timer.spacing",
+      "min": 2,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "unit_spacing",
+      "label": "t:sections.timer.unit_spacing",
+      "min": 2,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "unit_min_width",
+      "label": "t:sections.timer.unit_min_width",
+      "min": 10,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:sections.timer.border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "t:names.colors"
+    },
+    {
+      "type": "select",
+      "id": "background_type",
+      "label": "t:sections.timer.background_type",
+      "options": [
+        {
+          "value": "solid",
+          "label": "t:options.solid"
+        },
+        {
+          "value": "gradient",
+          "label": "t:options.gradient"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:settings.background",
+      "info": "Main background color (or first gradient color)",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "background_gradient_color",
+      "label": "t:sections.lumin_general.gradient_end_color",
+      "info": "Second color when background type is Gradient",
+      "default": "#e0e0e0",
+      "visible_if": "{{ block.settings.background_type == 'gradient' }}"
+    },
+    {
+      "type": "range",
+      "id": "background_gradient_angle",
+      "label": "t:settings.gradient_direction",
+      "info": "Direction of the gradient in degrees",
+      "min": 0,
+      "max": 360,
+      "step": 15,
+      "unit": "deg",
+      "default": 135,
+      "visible_if": "{{ block.settings.background_type == 'gradient' }}"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "t:settings.headings",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:settings.text",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "t:options.numbers",
+      "default": "#000F9F"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "t:settings.label",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "expired_text_color",
+      "label": "t:sections.timer.expired_message",
+      "default": "#D82C0D"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.timer.desktop_typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "label": "t:sections.timer.heading_size",
+      "min": 10,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "text_size_desktop",
+      "label": "t:sections.timer.text_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "number_size_desktop",
+      "label": "t:sections.timer.number_size",
+      "min": 10,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "label_size_desktop",
+      "label": "t:sections.timer.label_size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "t:sections.timer.mobile_typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "label": "t:sections.timer.heading_size",
+      "min": 10,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "text_size_mobile",
+      "label": "t:sections.timer.text_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "number_size_mobile",
+      "label": "t:sections.timer.number_size",
+      "min": 10,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "label_size_mobile",
+      "label": "t:sections.timer.label_size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "t:sections.timer.labels"
+    },
+    {
+      "type": "select",
+      "id": "label_case",
+      "label": "t:sections.timer.label_case",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "select",
+      "id": "label_weight",
+      "label": "t:sections.timer.label_weight",
+      "options": [
+        {
+          "value": "normal",
+          "label": "t:options.normal"
+        },
+        {
+          "value": "bold",
+          "label": "t:options.bold"
+        }
+      ],
+      "default": "bold"
+    },
+    {
+      "type": "text",
+      "id": "days_label",
+      "label": "t:sections.timer.days_label",
+      "default": "Days"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_hours",
+      "label": "t:sections.timer.show_hours",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "hours_label",
+      "label": "t:sections.timer.hours_label",
+      "default": "Hours"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_minutes",
+      "label": "t:sections.timer.show_minutes",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "minutes_label",
+      "label": "t:sections.timer.minutes_label",
+      "default": "Minutes"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_seconds",
+      "label": "t:sections.timer.show_seconds",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "seconds_label",
+      "label": "t:sections.timer.seconds_label",
+      "default": "Seconds"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_separator",
+      "label": "t:sections.timer.show_separator",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "separator_text",
+      "label": "t:sections.timer.separator_text",
+      "default": ":"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.timer.name"
+    }
+  ]
+}
+{% endschema %}

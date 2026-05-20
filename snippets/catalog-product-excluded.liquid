@@ -1,0 +1,74 @@
+{%- doc -%}
+  Outputs 1 only when excluded (via echo — safe for capture). Matches picker, GID strings, numeric id strings, and textarea handles.
+{%- enddoc -%}
+{%- liquid
+  assign hidden = false
+
+  unless product == blank
+    assign pid = product.id | times: 1
+    assign ph = product.handle | strip | downcase
+
+    assign raw_handles = settings.catalog_excluded_product_handles_raw | default: '' | strip
+    if raw_handles != blank
+      assign handle_segments = raw_handles | split: ','
+      for seg in handle_segments
+        assign candidate = seg | strip | downcase
+        if candidate != blank and candidate == ph
+          assign hidden = true
+          break
+        endif
+      endfor
+    endif
+
+    if hidden == false and settings.catalog_excluded_products != blank
+      assign excluded_by_id = settings.catalog_excluded_products | where: 'id', product.id
+      assign excluded_by_handle = settings.catalog_excluded_products | where: 'handle', product.handle
+      if excluded_by_id.size > 0 or excluded_by_handle.size > 0
+        assign hidden = true
+      else
+        for ep in settings.catalog_excluded_products
+          if ep == blank
+            continue
+          endif
+
+          if ep.handle != blank
+            assign eph = ep.handle | strip | downcase
+            if ph != blank and eph == ph
+              assign hidden = true
+              break
+            endif
+            assign eid = ep.id | times: 1
+            if eid == pid and pid != 0
+              assign hidden = true
+              break
+            endif
+          else
+            assign raw_ref = ep | append: '' | strip
+            if raw_ref contains 'gid://shopify/Product/'
+              assign tail = raw_ref | split: '/' | last | split: '?' | first | times: 1
+              if tail == pid and pid != 0
+                assign hidden = true
+                break
+              endif
+            else
+              assign maybe_num = raw_ref | times: 1
+              if maybe_num == pid and pid != 0 and raw_ref != blank
+                assign hidden = true
+                break
+              endif
+              assign maybe_h = raw_ref | downcase
+              if ph != blank and maybe_h == ph
+                assign hidden = true
+                break
+              endif
+            endif
+          endif
+        endfor
+      endif
+    endif
+  endunless
+
+  if hidden
+    echo '1'
+  endif
+%}

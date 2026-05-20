@@ -1,0 +1,762 @@
+{%- comment -%}
+  Section divider: Creative dividers between content sections.
+  Styles: curved (gentle upward curve), wavy (multi-layer waves), angular (diagonal cut).
+{%- endcomment -%}
+
+{% liquid
+  assign style = section.settings.style | default: 'wavy'
+  assign flip_classes = ''
+  assign animation_class = ''
+  if section.settings.flip_horizontal
+    assign flip_classes = flip_classes | append: ' section-divider--flip-h'
+  endif
+  if section.settings.flip_vertical
+    assign flip_classes = flip_classes | append: ' section-divider--flip-v'
+  endif
+  if section.settings.animation != 'none'
+    assign animation_class = ' section-divider--animate-' | append: section.settings.animation
+  endif
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="section section--full-width section-divider section-divider--{{ style }} spacing-style color-{{ section.settings.color_scheme }}{{ flip_classes }}{{ animation_class }}"
+  data-testid="section-divider-{{ section.id }}"
+  style="
+    {% render 'spacing-style-divider', settings: section.settings %}
+    --section-divider-height: {{ section.settings.height }}px;
+    --section-divider-color-start: {{ section.settings.gradient_color_start | default: '#4DD0E1' }};
+    --section-divider-color-end: {{ section.settings.gradient_color_end | default: '#00BCD4' }};
+    --section-divider-angle: {{ section.settings.angle }}deg;
+    --section-divider-gradient-angle: {{ section.settings.gradient_angle | default: 135 }}deg;
+    --section-divider-animation-duration: {{ section.settings.animation_duration | default: 8 }}s;
+  "
+>
+  {%- case style -%}
+    {%- when 'curved' -%}
+      <div class="section-divider__curved" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1000 100" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="section-divider-curved-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+          <path d="M1000 100C500 100 500 4 0 4V0h1000v100Z" fill="url(#section-divider-curved-{{ section.id }})"/>
+        </svg>
+      </div>
+
+    {%- when 'wavy' -%}
+      <div class="section-divider__wavy" aria-hidden="true">
+        <div class="section-divider__wavy-inner">
+          <svg class="section-divider__svg" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="section-divider-wavy-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)">
+                <stop offset="20%" style="stop-color: var(--section-divider-color-start)"/>
+                <stop offset="80%" style="stop-color: var(--section-divider-color-end)"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="shape-fill" fill="url(#section-divider-wavy-{{ section.id }})"/>
+            <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="shape-fill" fill="url(#section-divider-wavy-{{ section.id }})"/>
+            <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="shape-fill" fill="url(#section-divider-wavy-{{ section.id }})"/>
+          </svg>
+        </div>
+      </div>
+
+    {%- when 'angular' -%}
+      {%- liquid
+        assign angle_deg = section.settings.angle | default: 5
+        assign rise = angle_deg | times: 17453 | divided_by: 1000
+        assign angular_y = 100 | minus: rise
+      -%}
+      <div class="section-divider__angular" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1000 100" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="section-divider-angular-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+          <path d="M0 100V0h1000L1000 {{ angular_y }}L0 100z" fill="url(#section-divider-angular-{{ section.id }})"/>
+        </svg>
+      </div>
+
+    {%- when 'droplet' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="section-divider-droplet-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+          <path d="M0,60 Q180,0 360,50 T720,40 T1080,55 T1440,45 L1440,120 L0,120 Z" fill="url(#section-divider-droplet-{{ section.id }})"/>
+          <path d="M120,50 Q130,90 120,120 M240,55 Q250,95 240,120 M400,45 Q410,85 400,120 M560,50 Q570,95 560,120 M720,40 Q730,88 720,120 M880,52 Q890,92 880,120 M1040,48 Q1050,90 1040,120 M1200,52 Q1210,94 1200,120" stroke="url(#section-divider-droplet-{{ section.id }})" stroke-width="16" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+
+    {%- when 'abstract' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,80 Q360,20 720,70 T1440,60 L1440,120 L0,120 Z" fill="url(#section-divider-gradient-{{ section.id }})"/>
+          <ellipse cx="200" cy="50" rx="60" ry="35" fill="url(#section-divider-gradient-{{ section.id }})" fill-opacity="0.5"/>
+          <ellipse cx="1100" cy="45" rx="80" ry="40" fill="url(#section-divider-gradient-{{ section.id }})" fill-opacity="0.4"/>
+          <defs><linearGradient id="section-divider-gradient-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+        </svg>
+      </div>
+
+    {%- when 'splash' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,80 L0,120 L120,120 L180,90 L240,100 L300,75 L360,95 L420,70 L480,85 L540,65 L600,80 L660,60 L720,90 L780,55 L840,75 L900,68 L960,88 L1020,62 L1080,82 L1140,70 L1200,78 L1260,65 L1320,85 L1380,72 L1440,80 L1440,120 L0,120 Z" fill="url(#section-divider-gradient-{{ section.id }})"/>
+          <defs><linearGradient id="section-divider-gradient-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+        </svg>
+      </div>
+
+    {%- when 'cross-line' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,120 L0,60 L40,120 L80,40 L120,120 L160,50 L200,120 L240,35 L280,120 L320,55 L360,120 L400,45 L440,120 L480,60 L520,120 L560,40 L600,120 L640,50 L680,120 L720,35 L760,120 L800,55 L840,120 L880,45 L920,120 L960,50 L1000,120 L1040,40 L1080,120 L1120,60 L1160,120 L1200,45 L1240,120 L1280,55 L1320,120 L1360,40 L1400,120 L1440,50 L1440,120 Z" fill="url(#section-divider-gradient-{{ section.id }})"/>
+          <defs><linearGradient id="section-divider-gradient-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+        </svg>
+      </div>
+
+    {%- when 'splash-2' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,90 Q180,50 360,75 T720,65 T1080,80 T1440,70 L1440,120 L0,120 Z" fill="url(#section-divider-gradient-{{ section.id }})"/>
+          <circle cx="350" cy="70" r="25" fill="url(#section-divider-gradient-{{ section.id }})" fill-opacity="0.6"/>
+          <circle cx="1050" cy="65" r="20" fill="url(#section-divider-gradient-{{ section.id }})" fill-opacity="0.5"/>
+          <defs><linearGradient id="section-divider-gradient-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+        </svg>
+      </div>
+
+    {%- when 'frame' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,120 L0,80 L60,40 L120,80 L180,40 L240,80 L300,40 L360,80 L420,40 L480,80 L540,40 L600,80 L660,40 L720,80 L780,40 L840,80 L900,40 L960,80 L1020,40 L1080,80 L1140,40 L1200,80 L1260,40 L1320,80 L1380,40 L1440,80 L1440,120 Z" fill="url(#section-divider-gradient-{{ section.id }})"/>
+          <defs><linearGradient id="section-divider-gradient-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+        </svg>
+      </div>
+
+    {%- when 'multi-cloud' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,120 L0,80 Q80,60 120,80 Q160,50 220,70 Q260,40 320,75 Q380,55 420,90 L480,75 Q530,50 580,80 Q640,45 700,75 Q760,55 820,90 L880,70 Q940,45 1000,75 Q1060,50 1120,80 Q1180,55 1240,85 L1320,70 Q1380,45 1440,80 L1440,120 Z" fill="url(#section-divider-gradient-{{ section.id }})"/>
+          <defs><linearGradient id="section-divider-gradient-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+        </svg>
+      </div>
+
+    {%- when 'flame' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,120 L0,80 L60,100 L120,70 L180,95 L240,65 L300,90 L360,60 L420,85 L480,70 L540,95 L600,65 L660,88 L720,62 L780,92 L840,68 L900,90 L960,64 L1020,88 L1080,70 L1140,92 L1200,66 L1260,88 L1320,72 L1380,90 L1440,75 L1440,120 Z" fill="url(#section-divider-gradient-{{ section.id }})"/>
+          <defs><linearGradient id="section-divider-gradient-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+        </svg>
+      </div>
+
+    {%- when 'torn-paper' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M0,90 L20,95 L40,88 L65,98 L90,85 L115,96 L140,82 L170,94 L200,86 L235,97 L270,84 L310,95 L350,87 L395,96 L440,83 L490,94 L540,86 L595,95 L650,84 L710,93 L770,85 L835,94 L900,83 L970,93 L1040,86 L1115,95 L1190,83 L1270,92 L1350,85 L1440,90 L1440,120 L0,120 Z" fill="url(#section-divider-gradient-{{ section.id }})"/>
+          <defs><linearGradient id="section-divider-gradient-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+        </svg>
+      </div>
+
+    {%- when 'multi-wave' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <div class="section-divider__multi-wave-inner">
+          <svg class="section-divider__svg" viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <defs><linearGradient id="section-divider-multiwave-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="20%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+            <path d="M0,80 Q360,40 720,70 T1440,60 L1440,120 L0,120 Z" fill="url(#section-divider-multiwave-{{ section.id }})" fill-opacity="0.9"/>
+            <path d="M0,90 Q240,55 480,80 T960,70 T1440,85 L1440,120 L0,120 Z" fill="url(#section-divider-multiwave-{{ section.id }})" fill-opacity="0.7"/>
+            <path d="M0,95 Q360,65 720,85 T1440,75 L1440,120 L0,120 Z" fill="url(#section-divider-multiwave-{{ section.id }})"/>
+          </svg>
+        </div>
+      </div>
+
+    {%- when 'grunge' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" viewBox="0 0 1000 100" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="section-divider-grunge-{{ section.id }}" x1="20%" y1="20%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="0%" style="stop-color: var(--section-divider-color-start)"/><stop offset="80%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+          <path d="M0 0v47.6l5-2c1 0 11 3 12 0 2 3 6-3 6 0 0-4 12 3 12 0 0 3 15-1 17 0 2-2 5-1 6 0 0-2 6 2 6 0s2 4 4 0c5 2 12-3 16 0 2-2 4-3 4 0 0 2 6-1 6 0 1 4 15-2 17 0h7c0 1 3-3 6 0h17c2 2 3 1 6 0h6c1-2 21-1 24 0 2 1 4 2 6 0 0-1 22 4 24 0 0 0 5-3 5 0 2-2 10 2 12 0 2 2 6 1 6 0 2 3 4-2 6 0 1 0 25-2 25 1l10-1c3 1 6 6 7 0 1 5 4-2 6 0 2-2 4 3 5 0h12c6 1 36 2 36 0 0 2 3 0 6 0h6c5-2 7 4 11 0 2 0 15 2 17 0h13c3-4 5 1 7 0h29c0-3 6 0 6 0h5c0 2 16-1 18 0 1 4 9-1 12 0s6-2 6 0c8-2 3 4 13 0h10c3 4 19 1 19 0 2 0 21 1 23-1 1 4 3-1 6 1 1 2 11-1 12-1 3 3 9 0 12 1 3-4 6 1 6 0h6c0-3 5 1 6-1 0 3 2 1 4 1 3 4 10-1 13 0 3-2 6-1 6 0 2 2 2 0 6 0 1-2 6 2 6 0 2 0 4 5 6 0h18c2 3 4 1 6 0l6-1c3 2 12 3 17 1 14 3 18 1 24 0 2-1 3 3 5 0 6 2 10-1 16 0 1 3 6 0 9 0 0-2 3 2 5 0 6-6 8 7 13 0 0-2 5 2 5 0 3 3 10 0 10 0 1 2 5-2 8 0 3-1 8 3 12 0h6c2 1 10 4 12 0h6c1-1 5 2 6 0 1 2 4-1 6 0 0-2 5 3 6-1 2 1 6 5 5 1 1 1 3-2 6 0 2-1 5 3 6 0 0 1 6 2 6 0 2 3 4-4 6 0 0-2 3 2 6 0 3 0 6 3 6 0 5 3 8-1 13 0 3-4 6 1 6 0h5c0-1 9 2 12 0 1-1 9 3 11 0h6c2 2 4 4 7 0 3 2 5-4 5-1 10 4 15-2 18 2 0-1 6 2 6-2 0 0 6-2 6 1 1 6 12 2 12 0 1 3 4-3 7 2 2-2 5 2 5 0 1 5 4-5 6 0 2-1 4 2 6 0 1 3 1 0 5 0V0H0Z" fill="url(#section-divider-grunge-{{ section.id }})"/>
+        </svg>
+      </div>
+
+    {%- when 'arrow' -%}
+      <div class="section-divider__shape" aria-hidden="true">
+        <svg class="section-divider__svg" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" fill="none" preserveAspectRatio="none">
+          <defs><linearGradient id="section-divider-arrow-{{ section.id }}" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate({{ section.settings.gradient_angle | default: 135 | minus: 135 }} 0.5 0.5)"><stop offset="0%" style="stop-color: var(--section-divider-color-start)"/><stop offset="100%" style="stop-color: var(--section-divider-color-end)"/></linearGradient></defs>
+          <path d="M649.97 0L599.91 54.12 550.03 0 0 0 0 120 1200 120 1200 0 649.97 0z" fill="url(#section-divider-arrow-{{ section.id }})"/>
+        </svg>
+      </div>
+  {%- endcase -%}
+</div>
+
+{% stylesheet %}
+  .section-divider {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-divider__svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    vertical-align: middle;
+  }
+
+  /* Curved style */
+  .section-divider__curved {
+    height: var(--section-divider-height, 120px);
+    background: var(--color-background);
+  }
+
+  .section-divider__curved .section-divider__svg {
+    height: 100%;
+    width: 100%;
+  }
+
+  /* Wavy style */
+  .section-divider__wavy {
+    position: relative;
+    min-height: var(--section-divider-height, 200px);
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .section-divider__wavy-inner {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg);
+    pointer-events: none;
+  }
+
+  .section-divider__wavy .section-divider__svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: var(--section-divider-height, 120px);
+  }
+
+  /* Angular style */
+  .section-divider__angular {
+    height: var(--section-divider-height, 150px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .section-divider__angular .section-divider__svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Shape-based styles (droplet, abstract, splash, etc.) */
+  .section-divider__shape {
+    position: relative;
+    height: var(--section-divider-height, 150px);
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .section-divider__shape .section-divider__svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .section-divider__multi-wave-inner {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+  }
+
+  .section-divider__multi-wave-inner .section-divider__svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Flip transforms - use > child selector for shape SVG to avoid double-flip on multi-wave (SVG inside multi-wave-inner) */
+  .section-divider--flip-h .section-divider__curved .section-divider__svg,
+  .section-divider--flip-h .section-divider__wavy-inner,
+  .section-divider--flip-h .section-divider__angular .section-divider__svg,
+  .section-divider--flip-h .section-divider__shape > .section-divider__svg,
+  .section-divider--flip-h .section-divider__multi-wave-inner {
+    transform: scaleX(-1);
+  }
+
+  .section-divider--flip-h .section-divider__wavy-inner {
+    transform: rotate(180deg) scaleX(-1);
+  }
+
+  .section-divider--flip-v .section-divider__curved .section-divider__svg,
+  .section-divider--flip-v .section-divider__wavy-inner,
+  .section-divider--flip-v .section-divider__angular .section-divider__svg,
+  .section-divider--flip-v .section-divider__shape > .section-divider__svg,
+  .section-divider--flip-v .section-divider__multi-wave-inner {
+    transform: scaleY(-1);
+  }
+
+  .section-divider--flip-v .section-divider__wavy-inner {
+    transform: rotate(180deg) scaleY(-1);
+  }
+
+  .section-divider--flip-h.section-divider--flip-v .section-divider__curved .section-divider__svg,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__wavy-inner,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__angular .section-divider__svg,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__shape > .section-divider__svg,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__multi-wave-inner {
+    transform: scale(-1);
+  }
+
+  .section-divider--flip-h.section-divider--flip-v .section-divider__wavy-inner {
+    transform: rotate(180deg) scale(-1);
+  }
+
+  .section-divider--flip-h .section-divider__curved .section-divider__svg,
+  .section-divider--flip-h .section-divider__wavy-inner,
+  .section-divider--flip-h .section-divider__angular .section-divider__svg,
+  .section-divider--flip-h .section-divider__shape > .section-divider__svg,
+  .section-divider--flip-h .section-divider__multi-wave-inner,
+  .section-divider--flip-v .section-divider__curved .section-divider__svg,
+  .section-divider--flip-v .section-divider__wavy-inner,
+  .section-divider--flip-v .section-divider__angular .section-divider__svg,
+  .section-divider--flip-v .section-divider__shape > .section-divider__svg,
+  .section-divider--flip-v .section-divider__multi-wave-inner,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__curved .section-divider__svg,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__wavy-inner,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__angular .section-divider__svg,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__shape > .section-divider__svg,
+  .section-divider--flip-h.section-divider--flip-v .section-divider__multi-wave-inner {
+    transform-origin: center center;
+  }
+
+  /* Wave: container translate with large overflow buffer to avoid white space */
+  @keyframes section-divider-wave {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(4%); }
+    50% { transform: translateX(-4%); }
+    75% { transform: translateX(4%); }
+  }
+
+  @keyframes section-divider-wave-wavy {
+    0%, 100% { transform: translateX(0) rotate(180deg); }
+    25% { transform: translateX(4%) rotate(180deg); }
+    50% { transform: translateX(-4%) rotate(180deg); }
+    75% { transform: translateX(4%) rotate(180deg); }
+  }
+
+  @keyframes section-divider-wave-flip-h {
+    0%, 100% { transform: translateX(0) scaleX(-1); }
+    25% { transform: translateX(-4%) scaleX(-1); }
+    50% { transform: translateX(4%) scaleX(-1); }
+    75% { transform: translateX(-4%) scaleX(-1); }
+  }
+
+  @keyframes section-divider-wave-wavy-flip-h {
+    0%, 100% { transform: translateX(0) rotate(180deg) scaleX(-1); }
+    25% { transform: translateX(-4%) rotate(180deg) scaleX(-1); }
+    50% { transform: translateX(4%) rotate(180deg) scaleX(-1); }
+    75% { transform: translateX(-4%) rotate(180deg) scaleX(-1); }
+  }
+
+  @keyframes section-divider-wave-flip-v {
+    0%, 100% { transform: translateX(0) scaleY(-1); }
+    25% { transform: translateX(4%) scaleY(-1); }
+    50% { transform: translateX(-4%) scaleY(-1); }
+    75% { transform: translateX(4%) scaleY(-1); }
+  }
+
+  @keyframes section-divider-wave-wavy-flip-v {
+    0%, 100% { transform: translateX(0) rotate(180deg) scaleY(-1); }
+    25% { transform: translateX(4%) rotate(180deg) scaleY(-1); }
+    50% { transform: translateX(-4%) rotate(180deg) scaleY(-1); }
+    75% { transform: translateX(4%) rotate(180deg) scaleY(-1); }
+  }
+
+  @keyframes section-divider-wave-flip-both {
+    0%, 100% { transform: translateX(0) scaleX(-1) scaleY(-1); }
+    25% { transform: translateX(-4%) scaleX(-1) scaleY(-1); }
+    50% { transform: translateX(4%) scaleX(-1) scaleY(-1); }
+    75% { transform: translateX(-4%) scaleX(-1) scaleY(-1); }
+  }
+
+  @keyframes section-divider-wave-wavy-flip-both {
+    0%, 100% { transform: translateX(0) rotate(180deg) scaleX(-1) scaleY(-1); }
+    25% { transform: translateX(-4%) rotate(180deg) scaleX(-1) scaleY(-1); }
+    50% { transform: translateX(4%) rotate(180deg) scaleX(-1) scaleY(-1); }
+    75% { transform: translateX(-4%) rotate(180deg) scaleX(-1) scaleY(-1); }
+  }
+
+  @keyframes section-divider-wave-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2%); }
+  }
+
+  @keyframes section-divider-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  @keyframes section-divider-float-wavy {
+    0%, 100% { transform: translateY(0) rotate(180deg); }
+    50% { transform: translateY(-15px) rotate(180deg); }
+  }
+
+  @keyframes section-divider-float-wavy-flip-h {
+    0%, 100% { transform: translateY(0) rotate(180deg) scaleX(-1); }
+    50% { transform: translateY(-15px) rotate(180deg) scaleX(-1); }
+  }
+
+  @keyframes section-divider-float-wavy-flip-v {
+    0%, 100% { transform: translateY(0) rotate(180deg) scaleY(-1); }
+    50% { transform: translateY(-15px) rotate(180deg) scaleY(-1); }
+  }
+
+  @keyframes section-divider-float-wavy-flip-both {
+    0%, 100% { transform: translateY(0) rotate(180deg) scale(-1); }
+    50% { transform: translateY(-15px) rotate(180deg) scale(-1); }
+  }
+
+  @keyframes section-divider-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.88; transform: scale(1.06); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Buffer for vertical animations: extend content so translateY doesn't reveal white space */
+    .section-divider--animate-float .section-divider__curved {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-divider--animate-float .section-divider__curved .section-divider__svg,
+    .section-divider--animate-float .section-divider__wavy-inner,
+    .section-divider--animate-float .section-divider__angular .section-divider__svg,
+    .section-divider--animate-float .section-divider__shape .section-divider__svg,
+    .section-divider--animate-float .section-divider__multi-wave-inner {
+      height: calc(100% + 30px);
+      top: -15px;
+      bottom: auto;
+      position: absolute;
+      left: 0;
+      width: 100%;
+    }
+
+    .section-divider--animate-wave .section-divider__shape .section-divider__svg {
+      height: calc(100% + 10px);
+      top: -3px;
+      bottom: auto;
+    }
+
+    /* Wave: wide container + translate; 25% buffer prevents white space (4% move on 150% = 6% of parent) */
+    .section-divider--animate-wave .section-divider__wavy-inner {
+      width: 150%;
+      left: -25%;
+      right: auto;
+      animation: section-divider-wave-wavy var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-wave.section-divider--flip-h .section-divider__wavy-inner {
+      animation: section-divider-wave-wavy-flip-h var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-wave.section-divider--flip-v .section-divider__wavy-inner {
+      animation: section-divider-wave-wavy-flip-v var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-wave.section-divider--flip-h.section-divider--flip-v .section-divider__wavy-inner {
+      animation: section-divider-wave-wavy-flip-both var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-wave .section-divider__multi-wave-inner {
+      width: 150%;
+      left: -25%;
+      right: auto;
+      animation: section-divider-wave var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-wave.section-divider--flip-h .section-divider__multi-wave-inner {
+      animation: section-divider-wave-flip-h var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-wave.section-divider--flip-v .section-divider__multi-wave-inner {
+      animation: section-divider-wave-flip-v var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-wave.section-divider--flip-h.section-divider--flip-v .section-divider__multi-wave-inner {
+      animation: section-divider-wave-flip-both var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-wave .section-divider__shape .section-divider__svg path {
+      animation: section-divider-wave-float var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-float .section-divider__curved .section-divider__svg,
+    .section-divider--animate-float .section-divider__angular .section-divider__svg,
+    .section-divider--animate-float .section-divider__shape .section-divider__svg,
+    .section-divider--animate-float .section-divider__multi-wave-inner {
+      animation: section-divider-float var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-float .section-divider__wavy-inner {
+      animation: section-divider-float-wavy var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-float.section-divider--flip-h .section-divider__wavy-inner {
+      animation: section-divider-float-wavy-flip-h var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-float.section-divider--flip-v .section-divider__wavy-inner {
+      animation: section-divider-float-wavy-flip-v var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-float.section-divider--flip-h.section-divider--flip-v .section-divider__wavy-inner {
+      animation: section-divider-float-wavy-flip-both var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+
+    .section-divider--animate-pulse .section-divider__curved,
+    .section-divider--animate-pulse .section-divider__wavy,
+    .section-divider--animate-pulse .section-divider__angular,
+    .section-divider--animate-pulse .section-divider__shape {
+      animation: section-divider-pulse var(--section-divider-animation-duration, 8s) ease-in-out infinite;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.section-divider.name",
+  "tag": "section",
+  "class": "section-divider-section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "style",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "curved",
+          "label": "t:sections.section-divider.options.curved"
+        },
+        {
+          "value": "wavy",
+          "label": "t:sections.section-divider.options.wavy"
+        },
+        {
+          "value": "angular",
+          "label": "t:sections.section-divider.options.angular"
+        },
+        {
+          "value": "droplet",
+          "label": "t:sections.section-divider.options.droplet"
+        },
+        {
+          "value": "abstract",
+          "label": "t:sections.section-divider.options.abstract"
+        },
+        {
+          "value": "splash",
+          "label": "t:sections.section-divider.options.splash"
+        },
+        {
+          "value": "cross-line",
+          "label": "t:sections.section-divider.options.cross_line"
+        },
+        {
+          "value": "splash-2",
+          "label": "t:sections.section-divider.options.splash_2"
+        },
+        {
+          "value": "frame",
+          "label": "t:sections.section-divider.options.frame"
+        },
+        {
+          "value": "multi-cloud",
+          "label": "t:sections.section-divider.options.multi_cloud"
+        },
+        {
+          "value": "flame",
+          "label": "t:sections.section-divider.options.flame"
+        },
+        {
+          "value": "torn-paper",
+          "label": "t:sections.section-divider.options.torn_paper"
+        },
+        {
+          "value": "multi-wave",
+          "label": "t:sections.section-divider.options.multi_wave"
+        },
+        {
+          "value": "grunge",
+          "label": "t:sections.section-divider.options.grunge"
+        },
+        {
+          "value": "arrow",
+          "label": "t:sections.section-divider.options.arrow"
+        }
+      ],
+      "default": "wavy"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_start",
+      "label": "t:sections.section-divider.settings.gradient_start",
+      "default": "#4DD0E1"
+    },
+    {
+      "type": "color",
+      "id": "gradient_color_end",
+      "label": "t:sections.section-divider.settings.gradient_end",
+      "default": "#00BCD4"
+    },
+    {
+      "type": "range",
+      "id": "gradient_angle",
+      "label": "t:sections.section-divider.settings.gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 15,
+      "unit": "deg",
+      "default": 135
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "label": "t:sections.section-divider.settings.height",
+      "min": 80,
+      "max": 400,
+      "step": 20,
+      "unit": "px",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "angle",
+      "label": "t:sections.section-divider.settings.angle",
+      "min": 1,
+      "max": 15,
+      "step": 1,
+      "unit": "deg",
+      "default": 5,
+      "info": "t:sections.section-divider.settings.angle_info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.section-divider.settings.animation_header"
+    },
+    {
+      "type": "select",
+      "id": "animation",
+      "label": "t:sections.section-divider.settings.animation",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:sections.section-divider.options.animation_none"
+        },
+        {
+          "value": "wave",
+          "label": "t:sections.section-divider.options.animation_wave"
+        },
+        {
+          "value": "float",
+          "label": "t:sections.section-divider.options.animation_float"
+        },
+        {
+          "value": "pulse",
+          "label": "t:sections.section-divider.options.animation_pulse"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "t:sections.section-divider.settings.animation_duration",
+      "min": 1,
+      "max": 15,
+      "step": 1,
+      "unit": "s",
+      "default": 8,
+      "info": "t:sections.section-divider.settings.animation_duration_info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.section-divider.settings.orientation_header"
+    },
+    {
+      "type": "checkbox",
+      "id": "flip_horizontal",
+      "label": "t:sections.section-divider.settings.flip_horizontal",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "flip_vertical",
+      "label": "t:sections.section-divider.settings.flip_vertical",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.margin"
+    },
+    {
+      "type": "range",
+      "id": "margin-block-start",
+      "label": "t:settings.top",
+      "min": -100,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin-block-end",
+      "label": "t:settings.bottom",
+      "min": -100,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.section-divider.name",
+      "category": "t:categories.layout"
+    }
+  ]
+}
+{% endschema %}
