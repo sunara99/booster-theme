@@ -1,1 +1,466 @@
-{"type":"footer","name":"Footer","sections":{"section_trHnqQ":{"type":"section","blocks":{"group_dmwdRq":{"type":"group","name":"t:names.group","settings":{"content_direction":"row","vertical_on_mobile":true,"horizontal_alignment":"flex-start","vertical_alignment":"center","align_baseline":false,"horizontal_alignment_flex_direction_column":"flex-start","vertical_alignment_flex_direction_column":"center","gap":0,"width":"fill","custom_width":100,"width_mobile":"fill","custom_width_mobile":100,"height":"fill","custom_height":100,"inherit_color_scheme":false,"color_scheme":"scheme-6","background_media":"image","video_position":"cover","background_image_position":"cover","border":"none","border_width":1,"border_opacity":100,"border_color_mode":"default","border_color":"#000000","border_radius":16,"toggle_overlay":true,"overlay_color":"#1615155c","overlay_style":"gradient","gradient_direction":"to top","link":"","open_in_new_tab":false,"placeholder":"","padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{"group_t7QjkB":{"type":"group","settings":{"content_direction":"column","vertical_on_mobile":true,"horizontal_alignment":"flex-start","vertical_alignment":"center","align_baseline":false,"horizontal_alignment_flex_direction_column":"flex-start","vertical_alignment_flex_direction_column":"center","gap":6,"width":"fill","custom_width":100,"width_mobile":"fill","custom_width_mobile":100,"height":"fit","custom_height":100,"inherit_color_scheme":true,"color_scheme":"scheme-1","background_media":"none","video_position":"cover","background_image_position":"cover","border":"none","border_width":1,"border_opacity":25,"border_color_mode":"default","border_color":"#000000","border_radius":0,"toggle_overlay":false,"overlay_color":"#1e1e1e","overlay_style":"solid","gradient_direction":"to top","link":"","open_in_new_tab":false,"placeholder":"","padding-block-start":16,"padding-block-end":16,"padding-inline-start":28,"padding-inline-end":0,"ancher_id":""},"blocks":{"text_pRCaW6":{"type":"text","settings":{"text":"<h2>Join our email list<\/h2>","enable_text_truncation":false,"truncate_lines":3,"truncate_view_more_label":"View more","truncate_view_less_label":"View less","width":"100%","max_width":"normal","alignment":"left","type_preset":"h4","font":"var(--font-body--family)","custom_typography_font":"work_sans_n4","enable_bold_typography_font":false,"bold_typography_font":"work_sans_n7","enable_italic_typography_font":false,"italic_typography_font":"work_sans_i4","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color_mode":"default","color":"var(--color-foreground)","custom_color_style":"solid","custom_text_color":"#000000","custom_gradient_color_start":"#000000","custom_gradient_color_end":"#666666","custom_gradient_direction":"to right","custom_color_bold":"#000000","custom_color_italic":"#000000","custom_color_underline":"#000000","custom_color_background_bold":"rgba(0,0,0,0)","custom_color_background_italic":"rgba(0,0,0,0)","custom_color_background_underline":"rgba(0,0,0,0)","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{}},"text_TBG6R3":{"type":"text","settings":{"text":"<p>Get exclusive deals and early access to new products.<\/p>","enable_text_truncation":false,"truncate_lines":3,"truncate_view_more_label":"View more","truncate_view_less_label":"View less","width":"100%","max_width":"normal","alignment":"left","type_preset":"rte","font":"var(--font-body--family)","custom_typography_font":"work_sans_n4","enable_bold_typography_font":false,"bold_typography_font":"work_sans_n7","enable_italic_typography_font":false,"italic_typography_font":"work_sans_i4","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color_mode":"default","color":"var(--color-foreground)","custom_color_style":"solid","custom_text_color":"#000000","custom_gradient_color_start":"#000000","custom_gradient_color_end":"#666666","custom_gradient_direction":"to right","custom_color_bold":"#000000","custom_color_italic":"#000000","custom_color_underline":"#000000","custom_color_background_bold":"rgba(0,0,0,0)","custom_color_background_italic":"rgba(0,0,0,0)","custom_color_background_underline":"rgba(0,0,0,0)","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{}}},"block_order":["text_pRCaW6","text_TBG6R3"]},"email_signup_KcLjLQ":{"type":"email-signup","settings":{"width":"custom","custom_width":44,"inherit_color_scheme":false,"color_scheme":"scheme-58084d4c-a86e-4d0a-855e-a0966e5043f7","heading":"","heading_preset":"h3","border_style":"all","border_width":0,"border_radius":100,"input_type_preset":"paragraph","style_class":"button","display_type":"text","label":"Sign up","integrated_button":true,"button_type_preset":"paragraph","padding-block-start":16,"padding-block-end":16,"padding-inline-start":16,"padding-inline-end":16},"blocks":{}}},"block_order":["group_t7QjkB","email_signup_KcLjLQ"]}},"block_order":["group_dmwdRq"],"name":"t:names.custom_section","settings":{"content_direction":"column","vertical_on_mobile":true,"horizontal_alignment":"flex-start","vertical_alignment":"center","align_baseline":false,"horizontal_alignment_flex_direction_column":"flex-start","vertical_alignment_flex_direction_column":"center","gap":12,"section_width":"page-width","section_height":"","section_height_custom":50,"color_scheme":"scheme-1","background_media":"none","video_position":"cover","background_image_position":"cover","border":"none","border_width":1,"border_opacity":100,"border_radius":0,"toggle_overlay":false,"overlay_color":"#00000026","overlay_style":"solid","gradient_direction":"to top","padding-block-start":20,"padding-block-end":20}},"footer_m9NzUG":{"type":"footer","blocks":{"group_WdffzD":{"type":"group","name":"t:names.group","settings":{"content_direction":"column","vertical_on_mobile":true,"horizontal_alignment":"flex-start","vertical_alignment":"center","align_baseline":false,"horizontal_alignment_flex_direction_column":"flex-start","vertical_alignment_flex_direction_column":"center","gap":47,"width":"fill","custom_width":100,"width_mobile":"fill","custom_width_mobile":100,"height":"fit","custom_height":100,"inherit_color_scheme":true,"color_scheme":"","background_media":"none","video_position":"cover","background_image_position":"cover","border":"none","border_width":1,"border_opacity":100,"border_color_mode":"default","border_color":"#000000","border_radius":0,"toggle_overlay":false,"overlay_color":"#00000026","overlay_style":"solid","gradient_direction":"to top","link":"","open_in_new_tab":false,"placeholder":"","padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{"group_EgtK7y":{"type":"group","name":"t:names.group","settings":{"content_direction":"row","vertical_on_mobile":true,"horizontal_alignment":"flex-start","vertical_alignment":"center","align_baseline":false,"horizontal_alignment_flex_direction_column":"flex-start","vertical_alignment_flex_direction_column":"center","gap":12,"width":"custom","custom_width":100,"width_mobile":"fill","custom_width_mobile":100,"height":"fill","custom_height":100,"inherit_color_scheme":true,"color_scheme":"","background_media":"none","video_position":"cover","background_image_position":"cover","border":"none","border_width":1,"border_opacity":100,"border_color_mode":"default","border_color":"#000000","border_radius":0,"toggle_overlay":false,"overlay_color":"#00000026","overlay_style":"solid","gradient_direction":"to top","link":"","open_in_new_tab":false,"placeholder":"","padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{"menu_zWQJQq":{"type":"menu","name":"t:names.menu","settings":{"menu":"main-menu","heading":"Shop","menu_spacing":12,"show_as_accordion":false,"accordion_icon":"plus","accordion_dividers":false,"inherit_color_scheme":true,"color_scheme":"","heading_preset":"h3","link_preset":"paragraph","padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"menu_waqcbJ":{"type":"menu","name":"t:names.menu","settings":{"menu":"footer","heading":"Legal","menu_spacing":12,"show_as_accordion":true,"accordion_icon":"plus","accordion_dividers":true,"inherit_color_scheme":true,"color_scheme":"","heading_preset":"h3","link_preset":"paragraph","padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"menu_jUdDEi":{"type":"menu","name":"t:names.menu","settings":{"menu":"main-menu","heading":"New Product","menu_spacing":12,"show_as_accordion":true,"accordion_icon":"plus","accordion_dividers":false,"inherit_color_scheme":true,"color_scheme":"","heading_preset":"h3","link_preset":"paragraph","padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"group_VTgNK3":{"type":"group","name":"t:names.group","settings":{"content_direction":"column","vertical_on_mobile":true,"horizontal_alignment":"flex-start","vertical_alignment":"center","align_baseline":false,"horizontal_alignment_flex_direction_column":"flex-start","vertical_alignment_flex_direction_column":"center","gap":12,"width":"fit-content","custom_width":30,"width_mobile":"fill","custom_width_mobile":100,"height":"fill","custom_height":100,"inherit_color_scheme":true,"color_scheme":"","background_media":"none","video_position":"cover","background_image_position":"cover","border":"none","border_width":1,"border_opacity":100,"border_color_mode":"default","border_color":"#000000","border_radius":15,"toggle_overlay":true,"overlay_color":"#1e1e1e","overlay_style":"solid","gradient_direction":"to top","link":"","open_in_new_tab":false,"placeholder":"","padding-block-start":20,"padding-block-end":20,"padding-inline-start":20,"padding-inline-end":20,"ancher_id":""},"blocks":{"logo_bXcfkc":{"type":"logo","name":"t:names.logo","settings":{"inverse":true,"font":"heading","unit":"pixel","percent_width":100,"pixel_height":48,"custom_mobile_size":false,"unit_mobile":"percent","percent_width_mobile":100,"pixel_height_mobile":120,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0},"blocks":{}},"icon_AXTppx":{"type":"icon","name":"t:names.icon","settings":{"icon":"chat_bubble","image_corner_radius":0,"width":44,"link":"","open_in_new_tab":false},"blocks":{}},"text_btXhgn":{"type":"text","name":"t:names.heading","settings":{"text":"<h2>Need Help?<\/h2>","enable_text_truncation":false,"truncate_lines":3,"truncate_view_more_label":"View more","truncate_view_less_label":"View less","width":"fit-content","max_width":"normal","alignment":"left","type_preset":"rte","font":"var(--font-body--family)","custom_typography_font":"work_sans_n4","enable_bold_typography_font":false,"bold_typography_font":"work_sans_n7","enable_italic_typography_font":false,"italic_typography_font":"work_sans_i4","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color_mode":"default","color":"var(--color-foreground)","custom_color_style":"solid","custom_text_color":"#000000","custom_gradient_color_start":"#000000","custom_gradient_color_end":"#666666","custom_gradient_direction":"to right","custom_color_bold":"#000000","custom_color_italic":"#000000","custom_color_underline":"#000000","custom_color_background_bold":"rgba(0,0,0,0)","custom_color_background_italic":"rgba(0,0,0,0)","custom_color_background_underline":"rgba(0,0,0,0)","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{}},"text_m9krNq":{"type":"text","name":"t:names.text","settings":{"text":"<p>We make things that work better and last longer. Our products solve real problems with clean design and honest materials.<\/p>","enable_text_truncation":false,"truncate_lines":3,"truncate_view_more_label":"View more","truncate_view_less_label":"View less","width":"fit-content","max_width":"normal","alignment":"left","type_preset":"rte","font":"var(--font-body--family)","custom_typography_font":"work_sans_n4","enable_bold_typography_font":false,"bold_typography_font":"work_sans_n7","enable_italic_typography_font":false,"italic_typography_font":"work_sans_i4","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color_mode":"default","color":"var(--color-foreground)","custom_color_style":"solid","custom_text_color":"#000000","custom_gradient_color_start":"#000000","custom_gradient_color_end":"#666666","custom_gradient_direction":"to right","custom_color_bold":"#000000","custom_color_italic":"#000000","custom_color_underline":"#000000","custom_color_background_bold":"rgba(0,0,0,0)","custom_color_background_italic":"rgba(0,0,0,0)","custom_color_background_underline":"rgba(0,0,0,0)","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{}}},"block_order":["logo_bXcfkc","icon_AXTppx","text_btXhgn","text_m9krNq"]}},"block_order":["menu_zWQJQq","menu_waqcbJ","menu_jUdDEi","group_VTgNK3"]},"jumbo_text_DJBQ6P":{"type":"jumbo-text","name":"t:names.jumbo_text","settings":{"text":"Booster","font":"heading","alignment":"left","line_height":"0.8","letter_spacing":"-0.03em","case":"none","text_effect":"reveal","animation_repeat":true},"blocks":{}}},"block_order":["group_EgtK7y","jumbo_text_DJBQ6P"]}},"block_order":["group_WdffzD"],"name":"t:names.footer","settings":{"section_width":"page-width","gap":20,"color_scheme":"scheme-5","padding-block-start":30,"padding-block-end":30}},"footer_utilities_jLGE8U":{"type":"footer-utilities","blocks":{"footer_copyright_jweRK8":{"type":"footer-copyright","settings":{"show_powered_by":true,"copyright_info":"","font_size":"0.75rem","case":"none"},"blocks":{}},"footer_policy_list_VCdnpa":{"type":"footer-policy-list","settings":{"font_size":"0.75rem","case":"uppercase"},"blocks":{}},"social_links_Ew63Kq":{"type":"social-links","settings":{"facebook_url":"https:\/\/www.facebook.com\/","instagram_url":"https:\/\/www.instagram.com\/","youtube_url":"https:\/\/www.youtube.com\/","tiktok_url":"https:\/\/www.tiktok.com\/","twitter_url":"https:\/\/x.com\/","threads_url":"","linkedin_url":"","bluesky_url":"","snapchat_url":"","pinterest_url":"","tumblr_url":"","vimeo_url":"","custom_url":""},"blocks":{}}},"block_order":["footer_copyright_jweRK8","footer_policy_list_VCdnpa","social_links_Ew63Kq"],"name":"t:names.utilities","settings":{"section_width":"page-width","gap":24,"divider_thickness":1.5,"color_scheme":"scheme-5","padding-block-start":20,"padding-block-end":48}},"email_popup_zMyDT3":{"type":"email-popup","blocks":{"text_JT4Hpd":{"type":"text","settings":{"text":"<p>Take 10% off your first order<\/p>","enable_text_truncation":false,"truncate_lines":3,"truncate_view_more_label":"View more","truncate_view_less_label":"View less","width":"100%","max_width":"normal","alignment":"left","type_preset":"h3","font":"var(--font-body--family)","custom_typography_font":"work_sans_n4","enable_bold_typography_font":false,"bold_typography_font":"work_sans_n7","enable_italic_typography_font":false,"italic_typography_font":"work_sans_i4","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color_mode":"default","color":"var(--color-foreground)","custom_color_style":"solid","custom_text_color":"#000000","custom_gradient_color_start":"#000000","custom_gradient_color_end":"#666666","custom_gradient_direction":"to right","custom_color_bold":"#000000","custom_color_italic":"#000000","custom_color_underline":"#000000","custom_color_background_bold":"rgba(0,0,0,0)","custom_color_background_italic":"rgba(0,0,0,0)","custom_color_background_underline":"rgba(0,0,0,0)","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{}},"text_zzF9JU":{"type":"text","settings":{"text":"<p>Become a subscriber to instantly get 10% off your first purchase.<\/p>","enable_text_truncation":false,"truncate_lines":3,"truncate_view_more_label":"View more","truncate_view_less_label":"View less","width":"100%","max_width":"normal","alignment":"left","type_preset":"rte","font":"var(--font-body--family)","custom_typography_font":"work_sans_n4","enable_bold_typography_font":false,"bold_typography_font":"work_sans_n7","enable_italic_typography_font":false,"italic_typography_font":"work_sans_i4","font_size":"1rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color_mode":"default","color":"var(--color-foreground)","custom_color_style":"solid","custom_text_color":"#000000","custom_gradient_color_start":"#000000","custom_gradient_color_end":"#666666","custom_gradient_direction":"to right","custom_color_bold":"#000000","custom_color_italic":"#000000","custom_color_underline":"#000000","custom_color_background_bold":"rgba(0,0,0,0)","custom_color_background_italic":"rgba(0,0,0,0)","custom_color_background_underline":"rgba(0,0,0,0)","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{}},"email_popup_input_jDktzk":{"type":"_email-popup-input","settings":{"placeholder":"Email address","button_text":"SUBMIT"},"blocks":{}},"text_WFntdU":{"type":"text","settings":{"text":"<p>*Join the 2.0 movement. Unsubscribe at any time.<\/p>","enable_text_truncation":false,"truncate_lines":3,"truncate_view_more_label":"View more","truncate_view_less_label":"View less","width":"100%","max_width":"normal","alignment":"left","type_preset":"custom","font":"var(--font-body--family)","custom_typography_font":"work_sans_n4","enable_bold_typography_font":false,"bold_typography_font":"work_sans_n7","enable_italic_typography_font":false,"italic_typography_font":"work_sans_i4","font_size":"0.75rem","line_height":"normal","letter_spacing":"normal","case":"none","wrap":"pretty","color_mode":"custom","color":"var(--color-foreground)","custom_color_style":"solid","custom_text_color":"#666666","custom_gradient_color_start":"#000000","custom_gradient_color_end":"#666666","custom_gradient_direction":"to right","custom_color_bold":"#000000","custom_color_italic":"#000000","custom_color_underline":"#000000","custom_color_background_bold":"rgba(0,0,0,0)","custom_color_background_italic":"rgba(0,0,0,0)","custom_color_background_underline":"rgba(0,0,0,0)","background":false,"background_color":"#00000026","corner_radius":0,"padding-block-start":0,"padding-block-end":0,"padding-inline-start":0,"padding-inline-end":0,"ancher_id":""},"blocks":{}},"social_links_erNJwm":{"type":"social-links","name":"t:names.social_media_links","settings":{"facebook_url":"#","instagram_url":"#","youtube_url":"","tiktok_url":"#","twitter_url":"#","threads_url":"#","linkedin_url":"","bluesky_url":"","snapchat_url":"","pinterest_url":"#","tumblr_url":"","vimeo_url":"","custom_url":""},"blocks":{}}},"block_order":["text_JT4Hpd","text_zzF9JU","email_popup_input_jDktzk","text_WFntdU","social_links_erNJwm"],"name":"Email popup","settings":{"enabled":true,"edit_mode":"email","color_scheme":"scheme-2","show_home_only":false,"show_only_visitors":false,"delay":5,"frequency":1,"dialog_width":720,"content_padding":44,"position_mobile":"center","position":"center","alignment":"center","border_radius":0,"input_border_radius":0,"image_ratio":"square","hide_image_on_mobile":false,"headline":"Take 10% off your first order","subtext":"Become a subscriber to instantly get 10% off your first purchase. We'll also let you know about every new release, sale, and exclusive offer","success_headline":"You're in!","success_subtext":"Thanks for subscribing. Check your email for your discount code.","success_message":"You're subscribed! Check your email for your discount.","discount_code":"WELCOM10","discount_code_label":"Your discount code:","success_content_gap":16,"success_headline_size":32,"success_subtext_size":14,"success_message_size":14,"success_discount_label_size":12,"success_discount_code_size":14}}},"order":["section_trHnqQ","footer_m9NzUG","footer_utilities_jLGE8U","email_popup_zMyDT3"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "footer",
+  "name": "Footer",
+  "sections": {
+    "footer_m9NzUG": {
+      "type": "footer",
+      "blocks": {
+        "group_WdffzD": {
+          "type": "group",
+          "name": "t:names.group",
+          "settings": {
+            "content_direction": "column",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "flex-start",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center",
+            "gap": 47,
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "background_media": "none",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_color_mode": "default",
+            "border_color": "#000000",
+            "border_radius": 0,
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "link": "",
+            "open_in_new_tab": false,
+            "placeholder": "",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "ancher_id": ""
+          },
+          "blocks": {
+            "group_EgtK7y": {
+              "type": "group",
+              "name": "t:names.group",
+              "settings": {
+                "content_direction": "row",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "flex-start",
+                "vertical_alignment": "center",
+                "align_baseline": false,
+                "horizontal_alignment_flex_direction_column": "flex-start",
+                "vertical_alignment_flex_direction_column": "center",
+                "gap": 12,
+                "width": "custom",
+                "custom_width": 100,
+                "width_mobile": "fill",
+                "custom_width_mobile": 100,
+                "height": "fill",
+                "custom_height": 100,
+                "inherit_color_scheme": true,
+                "color_scheme": "",
+                "background_media": "none",
+                "video_position": "cover",
+                "background_image_position": "cover",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_color_mode": "default",
+                "border_color": "#000000",
+                "border_radius": 0,
+                "toggle_overlay": false,
+                "overlay_color": "#00000026",
+                "overlay_style": "solid",
+                "gradient_direction": "to top",
+                "link": "",
+                "open_in_new_tab": false,
+                "placeholder": "",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0,
+                "ancher_id": ""
+              },
+              "blocks": {
+                "menu_zWQJQq": {
+                  "type": "menu",
+                  "name": "t:names.menu",
+                  "settings": {
+                    "menu": "main-menu",
+                    "heading": "Shop",
+                    "menu_spacing": 12,
+                    "show_as_accordion": false,
+                    "accordion_icon": "plus",
+                    "accordion_dividers": false,
+                    "inherit_color_scheme": true,
+                    "color_scheme": "",
+                    "heading_preset": "h3",
+                    "link_preset": "paragraph",
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                },
+                "menu_waqcbJ": {
+                  "type": "menu",
+                  "name": "t:names.menu",
+                  "settings": {
+                    "menu": "footer",
+                    "heading": "Legal",
+                    "menu_spacing": 12,
+                    "show_as_accordion": true,
+                    "accordion_icon": "plus",
+                    "accordion_dividers": true,
+                    "inherit_color_scheme": true,
+                    "color_scheme": "",
+                    "heading_preset": "h3",
+                    "link_preset": "paragraph",
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                },
+                "menu_jUdDEi": {
+                  "type": "menu",
+                  "name": "t:names.menu",
+                  "settings": {
+                    "menu": "main-menu",
+                    "heading": "New Product",
+                    "menu_spacing": 12,
+                    "show_as_accordion": true,
+                    "accordion_icon": "plus",
+                    "accordion_dividers": false,
+                    "inherit_color_scheme": true,
+                    "color_scheme": "",
+                    "heading_preset": "h3",
+                    "link_preset": "paragraph",
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "menu_zWQJQq",
+                "menu_waqcbJ",
+                "menu_jUdDEi"
+              ]
+            }
+          },
+          "block_order": [
+            "group_EgtK7y"
+          ]
+        }
+      },
+      "block_order": [
+        "group_WdffzD"
+      ],
+      "name": "t:names.footer",
+      "settings": {
+        "section_width": "page-width",
+        "gap": 20,
+        "color_scheme": "scheme-5",
+        "padding-block-start": 30,
+        "padding-block-end": 30
+      }
+    },
+    "footer_utilities_jLGE8U": {
+      "type": "footer-utilities",
+      "blocks": {
+        "footer_copyright_jweRK8": {
+          "type": "footer-copyright",
+          "settings": {
+            "show_powered_by": true,
+            "copyright_info": "",
+            "font_size": "0.75rem",
+            "case": "none"
+          },
+          "blocks": {}
+        },
+        "footer_policy_list_VCdnpa": {
+          "type": "footer-policy-list",
+          "settings": {
+            "font_size": "0.75rem",
+            "case": "uppercase"
+          },
+          "blocks": {}
+        },
+        "social_links_Ew63Kq": {
+          "type": "social-links",
+          "settings": {
+            "facebook_url": "https://www.facebook.com/",
+            "instagram_url": "https://www.instagram.com/",
+            "youtube_url": "https://www.youtube.com/",
+            "tiktok_url": "https://www.tiktok.com/",
+            "twitter_url": "https://x.com/",
+            "threads_url": "",
+            "linkedin_url": "",
+            "bluesky_url": "",
+            "snapchat_url": "",
+            "pinterest_url": "",
+            "tumblr_url": "",
+            "vimeo_url": "",
+            "custom_url": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "footer_copyright_jweRK8",
+        "footer_policy_list_VCdnpa",
+        "social_links_Ew63Kq"
+      ],
+      "name": "t:names.utilities",
+      "settings": {
+        "section_width": "page-width",
+        "gap": 24,
+        "divider_thickness": 1.5,
+        "color_scheme": "scheme-5",
+        "padding-block-start": 20,
+        "padding-block-end": 48
+      }
+    },
+    "email_popup_zMyDT3": {
+      "type": "email-popup",
+      "blocks": {
+        "text_JT4Hpd": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Take 10% off your first order</p>",
+            "enable_text_truncation": false,
+            "truncate_lines": 3,
+            "truncate_view_more_label": "View more",
+            "truncate_view_less_label": "View less",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "h3",
+            "font": "var(--font-body--family)",
+            "custom_typography_font": "work_sans_n4",
+            "enable_bold_typography_font": false,
+            "bold_typography_font": "work_sans_n7",
+            "enable_italic_typography_font": false,
+            "italic_typography_font": "work_sans_i4",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color_mode": "default",
+            "color": "var(--color-foreground)",
+            "custom_color_style": "solid",
+            "custom_text_color": "#000000",
+            "custom_gradient_color_start": "#000000",
+            "custom_gradient_color_end": "#666666",
+            "custom_gradient_direction": "to right",
+            "custom_color_bold": "#000000",
+            "custom_color_italic": "#000000",
+            "custom_color_underline": "#000000",
+            "custom_color_background_bold": "rgba(0,0,0,0)",
+            "custom_color_background_italic": "rgba(0,0,0,0)",
+            "custom_color_background_underline": "rgba(0,0,0,0)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "ancher_id": ""
+          },
+          "blocks": {}
+        },
+        "text_zzF9JU": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Become a subscriber to instantly get 10% off your first purchase.</p>",
+            "enable_text_truncation": false,
+            "truncate_lines": 3,
+            "truncate_view_more_label": "View more",
+            "truncate_view_less_label": "View less",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "custom_typography_font": "work_sans_n4",
+            "enable_bold_typography_font": false,
+            "bold_typography_font": "work_sans_n7",
+            "enable_italic_typography_font": false,
+            "italic_typography_font": "work_sans_i4",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color_mode": "default",
+            "color": "var(--color-foreground)",
+            "custom_color_style": "solid",
+            "custom_text_color": "#000000",
+            "custom_gradient_color_start": "#000000",
+            "custom_gradient_color_end": "#666666",
+            "custom_gradient_direction": "to right",
+            "custom_color_bold": "#000000",
+            "custom_color_italic": "#000000",
+            "custom_color_underline": "#000000",
+            "custom_color_background_bold": "rgba(0,0,0,0)",
+            "custom_color_background_italic": "rgba(0,0,0,0)",
+            "custom_color_background_underline": "rgba(0,0,0,0)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "ancher_id": ""
+          },
+          "blocks": {}
+        },
+        "email_popup_input_jDktzk": {
+          "type": "_email-popup-input",
+          "settings": {
+            "placeholder": "Email address",
+            "button_text": "SUBMIT"
+          },
+          "blocks": {}
+        },
+        "text_WFntdU": {
+          "type": "text",
+          "settings": {
+            "text": "<p>*Join the 2.0 movement. Unsubscribe at any time.</p>",
+            "enable_text_truncation": false,
+            "truncate_lines": 3,
+            "truncate_view_more_label": "View more",
+            "truncate_view_less_label": "View less",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "custom_typography_font": "work_sans_n4",
+            "enable_bold_typography_font": false,
+            "bold_typography_font": "work_sans_n7",
+            "enable_italic_typography_font": false,
+            "italic_typography_font": "work_sans_i4",
+            "font_size": "0.75rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color_mode": "custom",
+            "color": "var(--color-foreground)",
+            "custom_color_style": "solid",
+            "custom_text_color": "#666666",
+            "custom_gradient_color_start": "#000000",
+            "custom_gradient_color_end": "#666666",
+            "custom_gradient_direction": "to right",
+            "custom_color_bold": "#000000",
+            "custom_color_italic": "#000000",
+            "custom_color_underline": "#000000",
+            "custom_color_background_bold": "rgba(0,0,0,0)",
+            "custom_color_background_italic": "rgba(0,0,0,0)",
+            "custom_color_background_underline": "rgba(0,0,0,0)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "ancher_id": ""
+          },
+          "blocks": {}
+        },
+        "social_links_erNJwm": {
+          "type": "social-links",
+          "name": "t:names.social_media_links",
+          "settings": {
+            "facebook_url": "#",
+            "instagram_url": "#",
+            "youtube_url": "",
+            "tiktok_url": "#",
+            "twitter_url": "#",
+            "threads_url": "#",
+            "linkedin_url": "",
+            "bluesky_url": "",
+            "snapchat_url": "",
+            "pinterest_url": "#",
+            "tumblr_url": "",
+            "vimeo_url": "",
+            "custom_url": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_JT4Hpd",
+        "text_zzF9JU",
+        "email_popup_input_jDktzk",
+        "text_WFntdU",
+        "social_links_erNJwm"
+      ],
+      "name": "Email popup",
+      "settings": {
+        "enabled": true,
+        "edit_mode": "email",
+        "color_scheme": "scheme-2",
+        "show_home_only": false,
+        "show_only_visitors": false,
+        "delay": 5,
+        "frequency": 1,
+        "dialog_width": 720,
+        "content_padding": 44,
+        "position_mobile": "center",
+        "position": "center",
+        "alignment": "center",
+        "border_radius": 0,
+        "input_border_radius": 0,
+        "image_ratio": "square",
+        "hide_image_on_mobile": false,
+        "headline": "Take 10% off your first order",
+        "subtext": "Become a subscriber to instantly get 10% off your first purchase. We'll also let you know about every new release, sale, and exclusive offer",
+        "success_headline": "You're in!",
+        "success_subtext": "Thanks for subscribing. Check your email for your discount code.",
+        "success_message": "You're subscribed! Check your email for your discount.",
+        "discount_code": "WELCOM10",
+        "discount_code_label": "Your discount code:",
+        "success_content_gap": 16,
+        "success_headline_size": 32,
+        "success_subtext_size": 14,
+        "success_message_size": 14,
+        "success_discount_label_size": 12,
+        "success_discount_code_size": 14
+      }
+    }
+  },
+  "order": [
+    "footer_m9NzUG",
+    "footer_utilities_jLGE8U",
+    "email_popup_zMyDT3"
+  ]
+}
