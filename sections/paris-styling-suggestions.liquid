@@ -30,6 +30,7 @@
           <div class="paris-styling-item" {{ block.shopify_attributes }}>
             <div class="paris-styling-item__media">
               {%- if block.settings.image != blank -%}
+                {%- assign sug_img_alt = block.settings.image.alt | default: block.settings.name | escape -%}
                 {{
                   block.settings.image
                   | image_url: width: 700
@@ -37,7 +38,7 @@
                     loading: 'lazy',
                     widths: '350, 500, 700',
                     sizes: '(max-width: 768px) 90vw, 30vw',
-                    alt: block.settings.image.alt | default: block.settings.name | escape
+                    alt: sug_img_alt
                 }}
               {%- else -%}
                 <div style="background: var(--pf-beige); width: 100%; height: 100%;"></div>

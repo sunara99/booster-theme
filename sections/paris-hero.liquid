@@ -9,6 +9,7 @@
   {%- comment -%} Background Image {%- endcomment -%}
   <div class="paris-hero__media" aria-hidden="true">
     {%- if section.settings.image != blank -%}
+      {%- assign hero_alt = section.settings.image.alt | default: section.settings.heading | escape -%}
       {{
         section.settings.image
         | image_url: width: 2000
@@ -17,7 +18,7 @@
           fetchpriority: 'high',
           widths: '750, 1100, 1500, 2000',
           sizes: '100vw',
-          alt: section.settings.image.alt | default: section.settings.heading | escape,
+          alt: hero_alt,
           class: 'paris-hero__bg-image'
       }}
     {%- else -%}

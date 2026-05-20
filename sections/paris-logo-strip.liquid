@@ -30,12 +30,13 @@
             <span class="paris-logo-strip__item" {{ block.shopify_attributes }}>
           {%- endif -%}
             {%- if block.settings.image != blank -%}
+              {%- assign logo_alt = block.settings.name | default: '' | escape -%}
               {{
                 block.settings.image
                 | image_url: width: 200
                 | image_tag:
                   loading: 'lazy',
-                  alt: block.settings.name | default: '' | escape,
+                  alt: logo_alt,
                   width: block.settings.image.width,
                   height: block.settings.image.height
               }}

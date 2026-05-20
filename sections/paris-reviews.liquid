@@ -52,10 +52,11 @@
             <div class="paris-review-card__author">
               <div class="paris-review-card__avatar" aria-hidden="true">
                 {%- if block.settings.avatar != blank -%}
+                  {%- assign reviewer_alt = block.settings.name | escape -%}
                   {{
                     block.settings.avatar
                     | image_url: width: 76
-                    | image_tag: loading: 'lazy', alt: block.settings.name | escape
+                    | image_tag: loading: 'lazy', alt: reviewer_alt
                   }}
                 {%- else -%}
                   {{ block.settings.name | slice: 0 | upcase }}
