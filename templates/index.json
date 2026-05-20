@@ -11,12 +11,6 @@
   "sections": {
     "paris-announcement": {
       "type": "paris-announcement-bar",
-      "settings": {
-        "show_section": true,
-        "bg_color": "#1a1a1a",
-        "text_color": "#ffffff",
-        "show_close": true
-      },
       "blocks": {
         "item-1": {
           "type": "item",
@@ -40,25 +34,37 @@
           }
         }
       },
-      "block_order": ["item-1", "item-2", "item-3"]
+      "block_order": [
+        "item-1",
+        "item-2",
+        "item-3"
+      ],
+      "settings": {
+        "show_section": true,
+        "bg_color": "#1a1a1a",
+        "text_color": "#ffffff",
+        "show_close": true
+      }
     },
     "paris-hero": {
       "type": "paris-hero",
       "settings": {
         "show_section": true,
+        "fallback_bg": "#f0ebe3",
+        "overlay_color": "#1a1a1a",
+        "overlay_opacity": 30,
         "eyebrow": "Nouvelle collection",
         "heading": "Élégance parisienne, au quotidien",
         "subheading": "Des pièces pensées pour sublimer votre style, saison après saison.",
         "content_position": "left",
         "content_width": 560,
         "text_color": "#ffffff",
-        "overlay_color": "#1a1a1a",
-        "overlay_opacity": 30,
-        "fallback_bg": "#f0ebe3",
         "button_label": "Découvrir la collection",
+        "button_link": "",
         "button_bg": "#ffffff",
         "button_text": "#1a1a1a",
         "button_secondary_label": "Voir les nouveautés",
+        "button_secondary_link": "",
         "height": "large",
         "padding_top": 0,
         "padding_bottom": 0
@@ -66,6 +72,50 @@
     },
     "paris-logo-strip": {
       "type": "paris-logo-strip",
+      "blocks": {
+        "logo-1": {
+          "type": "logo",
+          "settings": {
+            "name": "Le Figaro",
+            "link": ""
+          }
+        },
+        "logo-2": {
+          "type": "logo",
+          "settings": {
+            "name": "Vogue Paris",
+            "link": ""
+          }
+        },
+        "logo-3": {
+          "type": "logo",
+          "settings": {
+            "name": "Marie Claire",
+            "link": ""
+          }
+        },
+        "logo-4": {
+          "type": "logo",
+          "settings": {
+            "name": "Elle France",
+            "link": ""
+          }
+        },
+        "logo-5": {
+          "type": "logo",
+          "settings": {
+            "name": "L'Officiel",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "logo-1",
+        "logo-2",
+        "logo-3",
+        "logo-4",
+        "logo-5"
+      ],
       "settings": {
         "show_section": true,
         "label": "Vu dans la presse",
@@ -75,25 +125,20 @@
         "text_color": "#b5a595",
         "padding_top": 36,
         "padding_bottom": 36
-      },
-      "blocks": {
-        "logo-1": { "type": "logo", "settings": { "name": "Le Figaro" } },
-        "logo-2": { "type": "logo", "settings": { "name": "Vogue Paris" } },
-        "logo-3": { "type": "logo", "settings": { "name": "Marie Claire" } },
-        "logo-4": { "type": "logo", "settings": { "name": "Elle France" } },
-        "logo-5": { "type": "logo", "settings": { "name": "L'Officiel" } }
-      },
-      "block_order": ["logo-1", "logo-2", "logo-3", "logo-4", "logo-5"]
+      }
     },
     "paris-featured": {
       "type": "paris-featured-collection",
       "settings": {
         "show_section": true,
+        "collection": "",
+        "products_to_show": 4,
+        "show_vendor": false,
         "eyebrow": "Sélection coup de cœur",
         "heading": "Nouvelle collection",
-        "products_to_show": 8,
-        "show_vendor": false,
+        "subheading": "",
         "button_label": "Voir toute la collection",
+        "button_link": "",
         "bg_color": "#ffffff",
         "text_color": "#1a1a1a",
         "button_color": "#1a1a1a",
@@ -103,22 +148,6 @@
     },
     "paris-editorial": {
       "type": "paris-editorial",
-      "settings": {
-        "show_section": true,
-        "eyebrow": "Notre engagement",
-        "heading": "Des pièces pensées pour vous",
-        "text": "<p>Chaque création naît d'une attention particulière portée aux matières, aux coupes et aux détails. Nos collections sont conçues pour accompagner votre quotidien avec élégance.</p>",
-        "image_position": "left",
-        "button_label": "Découvrir notre histoire",
-        "bg_color": "#f9f6f1",
-        "eyebrow_color": "#b5a595",
-        "text_color": "#1a1a1a",
-        "body_color": "#6b6b6b",
-        "button_color": "#1a1a1a",
-        "placeholder_color": "#f0ebe3",
-        "padding_top": 80,
-        "padding_bottom": 80
-      },
       "blocks": {
         "feat-1": {
           "type": "feature",
@@ -142,17 +171,41 @@
           }
         }
       },
-      "block_order": ["feat-1", "feat-2", "feat-3"]
+      "block_order": [
+        "feat-1",
+        "feat-2",
+        "feat-3"
+      ],
+      "settings": {
+        "show_section": true,
+        "placeholder_color": "#f0ebe3",
+        "image_position": "left",
+        "eyebrow": "Notre engagement",
+        "heading": "Des pièces pensées pour vous",
+        "text": "<p>Chaque création naît d'une attention particulière portée aux matières, aux coupes et aux détails. Nos collections sont conçues pour accompagner votre quotidien avec élégance.</p>",
+        "button_label": "Découvrir notre histoire",
+        "button_link": "",
+        "bg_color": "#f9f6f1",
+        "eyebrow_color": "#b5a595",
+        "text_color": "#1a1a1a",
+        "body_color": "#6b6b6b",
+        "button_color": "#1a1a1a",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
     },
     "paris-bestsellers": {
       "type": "paris-bestsellers",
       "settings": {
         "show_section": true,
-        "eyebrow": "Les incontournables",
-        "heading": "Nos meilleures ventes",
+        "collection": "",
         "products_to_show": 4,
         "show_vendor": false,
+        "eyebrow": "Les incontournables",
+        "heading": "Nos meilleures ventes",
+        "subheading": "",
         "button_label": "Voir tout",
+        "button_link": "",
         "bg_color": "#ffffff",
         "padding_top": 72,
         "padding_bottom": 72
@@ -160,6 +213,46 @@
     },
     "paris-category-cards": {
       "type": "paris-category-cards",
+      "blocks": {
+        "card-1": {
+          "type": "card",
+          "settings": {
+            "title": "Robes",
+            "cta_text": "Découvrir",
+            "link": ""
+          }
+        },
+        "card-2": {
+          "type": "card",
+          "settings": {
+            "title": "Vestes",
+            "cta_text": "Découvrir",
+            "link": ""
+          }
+        },
+        "card-3": {
+          "type": "card",
+          "settings": {
+            "title": "Hauts",
+            "cta_text": "Découvrir",
+            "link": ""
+          }
+        },
+        "card-4": {
+          "type": "card",
+          "settings": {
+            "title": "Pantalons",
+            "cta_text": "Découvrir",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "card-1",
+        "card-2",
+        "card-3",
+        "card-4"
+      ],
       "settings": {
         "show_section": true,
         "eyebrow": "Explorez",
@@ -167,36 +260,10 @@
         "bg_color": "#ffffff",
         "padding_top": 72,
         "padding_bottom": 72
-      },
-      "blocks": {
-        "card-1": {
-          "type": "card",
-          "settings": { "title": "Robes", "cta_text": "Découvrir" }
-        },
-        "card-2": {
-          "type": "card",
-          "settings": { "title": "Vestes", "cta_text": "Découvrir" }
-        },
-        "card-3": {
-          "type": "card",
-          "settings": { "title": "Hauts", "cta_text": "Découvrir" }
-        },
-        "card-4": {
-          "type": "card",
-          "settings": { "title": "Pantalons", "cta_text": "Découvrir" }
-        }
-      },
-      "block_order": ["card-1", "card-2", "card-3", "card-4"]
+      }
     },
     "paris-trust": {
       "type": "paris-trust-strip",
-      "settings": {
-        "show_section": true,
-        "bg_color": "#f9f6f1",
-        "border_color": "#e0d8cf",
-        "title_color": "#1a1a1a",
-        "text_color": "#6b6b6b"
-      },
       "blocks": {
         "trust-1": {
           "type": "item",
@@ -231,20 +298,22 @@
           }
         }
       },
-      "block_order": ["trust-1", "trust-2", "trust-3", "trust-4"]
+      "block_order": [
+        "trust-1",
+        "trust-2",
+        "trust-3",
+        "trust-4"
+      ],
+      "settings": {
+        "show_section": true,
+        "bg_color": "#f9f6f1",
+        "border_color": "#e0d8cf",
+        "title_color": "#1a1a1a",
+        "text_color": "#6b6b6b"
+      }
     },
     "paris-reviews": {
       "type": "paris-reviews",
-      "settings": {
-        "show_section": true,
-        "eyebrow": "Témoignages",
-        "heading": "Ce qu'elles disent",
-        "show_rating_summary": true,
-        "rating_summary": "4,9 / 5 — Plus de 500 avis vérifiés",
-        "bg_color": "#ffffff",
-        "padding_top": 72,
-        "padding_bottom": 72
-      },
       "blocks": {
         "rev-1": {
           "type": "review",
@@ -274,7 +343,22 @@
           }
         }
       },
-      "block_order": ["rev-1", "rev-2", "rev-3"]
+      "block_order": [
+        "rev-1",
+        "rev-2",
+        "rev-3"
+      ],
+      "settings": {
+        "show_section": true,
+        "eyebrow": "Témoignages",
+        "heading": "Ce qu'elles disent",
+        "subheading": "",
+        "show_rating_summary": true,
+        "rating_summary": "4,9 / 5 — Plus de 500 avis vérifiés",
+        "bg_color": "#ffffff",
+        "padding_top": 72,
+        "padding_bottom": 72
+      }
     },
     "paris-newsletter": {
       "type": "paris-newsletter",
