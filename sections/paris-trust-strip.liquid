@@ -1,0 +1,161 @@
+{%- if section.settings.show_section -%}
+<section
+  class="paris-section paris-trust-strip"
+  style="
+    background-color: {{ section.settings.bg_color }};
+    border-top: 1px solid {{ section.settings.border_color }};
+    border-bottom: 1px solid {{ section.settings.border_color }};
+  "
+  aria-label="Pourquoi nous choisir"
+>
+  <div class="paris-trust-strip__inner">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'item' -%}
+        <div class="paris-trust-item" {{ block.shopify_attributes }}>
+          <div class="paris-trust-item__icon" aria-hidden="true">
+            {%- case block.settings.icon -%}
+              {%- when 'truck' -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="3" width="15" height="13"/>
+                  <path d="M16 8h4l3 3v5h-7V8z"/>
+                  <circle cx="5.5" cy="18.5" r="2.5"/>
+                  <circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+              {%- when 'shield' -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <polyline points="9 12 11 14 15 10"/>
+                </svg>
+              {%- when 'return' -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <polyline points="1 4 1 10 7 10"/>
+                  <path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
+                </svg>
+              {%- when 'star' -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              {%- when 'heart' -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+              {%- when 'leaf' -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 22 C 4 16, 12 10, 22 2 C 16 14, 10 18, 2 22Z"/>
+                  <line x1="12" y1="12" x2="2" y2="22"/>
+                </svg>
+              {%- when 'lock' -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              {%- else -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+            {%- endcase -%}
+          </div>
+
+          {%- if block.settings.title != blank -%}
+            <p class="paris-trust-item__title" style="color: {{ section.settings.title_color }};">
+              {{ block.settings.title }}
+            </p>
+          {%- endif -%}
+          {%- if block.settings.text != blank -%}
+            <p class="paris-trust-item__text" style="color: {{ section.settings.text_color }};">
+              {{ block.settings.text }}
+            </p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Bande de confiance",
+  "tag": "div",
+  "class": "paris-section-wrap",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_section",
+      "label": "Afficher la section",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fond de section",
+      "default": "#f9f6f1"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Couleur des bordures",
+      "default": "#e0d8cf"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Couleur des titres",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Couleur du texte",
+      "default": "#6b6b6b"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Argument de confiance",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icône",
+          "options": [
+            { "value": "truck",  "label": "Livraison" },
+            { "value": "return", "label": "Retour" },
+            { "value": "shield", "label": "Bouclier" },
+            { "value": "lock",   "label": "Cadenas" },
+            { "value": "star",   "label": "Étoile" },
+            { "value": "heart",  "label": "Cœur" },
+            { "value": "leaf",   "label": "Feuille" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre",
+          "default": "Livraison suivie"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Description",
+          "default": "Recevez votre commande en 2 à 5 jours ouvrés."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bande de confiance",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "truck",  "title": "Livraison suivie",        "text": "Livraison rapide avec numéro de suivi." } },
+        { "type": "item", "settings": { "icon": "return", "title": "Retours sous 14 jours",   "text": "Retours gratuits, sans questions." } },
+        { "type": "item", "settings": { "icon": "lock",   "title": "Paiement sécurisé",       "text": "Vos données sont protégées." } },
+        { "type": "item", "settings": { "icon": "heart",  "title": "Service client",           "text": "Une équipe disponible 6j/7." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,169 @@
+{%- if section.settings.show_section -%}
+<section
+  class="paris-section paris-product-reviews-section"
+  style="
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+  aria-labelledby="paris-pr-title-{{ section.id }}"
+>
+  <div class="paris-section-header">
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="paris-section-header__eyebrow">{{ section.settings.eyebrow }}</span>
+    {%- endif -%}
+    {%- if section.settings.heading != blank -%}
+      <h2 class="paris-section-header__title" id="paris-pr-title-{{ section.id }}">
+        {{ section.settings.heading }}
+      </h2>
+    {%- endif -%}
+    {%- if section.settings.rating_summary != blank -%}
+      <p class="paris-section-header__subtitle">{{ section.settings.rating_summary }}</p>
+    {%- endif -%}
+  </div>
+
+  <div class="paris-reviews__grid">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'review' -%}
+        <article class="paris-review-card" {{ block.shopify_attributes }}>
+          <div class="paris-review-card__stars" aria-label="{{ block.settings.rating }} étoiles sur 5">
+            {%- assign rating = block.settings.rating | default: 5 -%}
+            {%- for i in (1..5) -%}
+              {%- if i <= rating -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              {%- else -%}
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="opacity:0.2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+
+          {%- if block.settings.text != blank -%}
+            <blockquote class="paris-review-card__text">"{{ block.settings.text }}"</blockquote>
+          {%- endif -%}
+
+          <div class="paris-review-card__author">
+            <div class="paris-review-card__avatar" aria-hidden="true">
+              {{ block.settings.name | slice: 0 | upcase }}
+            </div>
+            <div>
+              <span class="paris-review-card__name">{{ block.settings.name | default: 'Cliente' }}</span>
+              {%- if block.settings.date != blank -%}
+                <span class="paris-review-card__location">{{ block.settings.date }}</span>
+              {%- endif -%}
+            </div>
+          </div>
+        </article>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Avis produit",
+  "tag": "div",
+  "class": "paris-section-wrap",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_section",
+      "label": "Afficher la section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Surtitre",
+      "default": "Avis clients"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre",
+      "default": "Ce qu'elles en pensent"
+    },
+    {
+      "type": "text",
+      "id": "rating_summary",
+      "label": "Résumé des notes",
+      "default": "4,9 / 5 basé sur 248 avis"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fond de section",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Marge intérieure haut",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Marge intérieure bas",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Avis",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Note",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Texte de l'avis",
+          "default": "Parfaite, la coupe est flatteuse et le tissu est magnifique."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Prénom",
+          "default": "Claire M."
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date",
+          "default": "Mai 2025"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Avis produit",
+      "blocks": [
+        { "type": "review", "settings": { "rating": 5, "text": "Parfaite. Le tissu est d'une grande qualité et la coupe est absolument superbe.", "name": "Sophie B.", "date": "Avril 2025" } },
+        { "type": "review", "settings": { "rating": 5, "text": "J'ai reçu tellement de compliments ! Je recommande à 100%.", "name": "Lucie R.", "date": "Mars 2025" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

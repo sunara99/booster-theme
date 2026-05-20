@@ -1,0 +1,232 @@
+{%- if section.settings.show_section -%}
+{%- assign collection = section.settings.collection -%}
+{%- assign products_limit = section.settings.products_to_show | default: 8 -%}
+
+<section
+  class="paris-section"
+  style="
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+  aria-labelledby="paris-fc-title-{{ section.id }}"
+>
+  <div class="paris-featured-collection">
+
+    {%- comment -%} Section header {%- endcomment -%}
+    <div class="paris-section-header">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="paris-section-header__eyebrow" style="color: {{ section.settings.text_color }};">
+          {{ section.settings.eyebrow }}
+        </span>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="paris-section-header__title" id="paris-fc-title-{{ section.id }}" style="color: {{ section.settings.text_color }};">
+          {{ section.settings.heading }}
+        </h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="paris-section-header__subtitle" style="color: {{ section.settings.text_color }};">
+          {{ section.settings.subheading }}
+        </p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Carousel {%- endcomment -%}
+    <div
+      data-paris-carousel
+      id="paris-carousel-{{ section.id }}"
+    >
+      <div class="paris-featured-collection__wrapper" data-carousel-wrapper>
+        <div class="paris-featured-collection__track" data-carousel-track>
+          {%- if collection != blank and collection.products.size > 0 -%}
+            {%- for product in collection.products limit: products_limit -%}
+              {%- assign card_product = product -%}
+              {%- assign show_vendor = section.settings.show_vendor -%}
+              {% render 'paris-product-card', card_product: card_product, show_vendor: show_vendor %}
+            {%- endfor -%}
+          {%- else -%}
+            {%- for i in (1..6) -%}
+              {% render 'paris-product-card' %}
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="paris-carousel-controls">
+        <button
+          class="paris-carousel-btn"
+          data-carousel-prev
+          aria-label="Produits précédents"
+          type="button"
+        >
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+
+        <div class="paris-carousel-dots" role="tablist" aria-label="Diapositives">
+          {%- assign dot_count = products_limit | default: 8 -%}
+          {%- for i in (1..dot_count) -%}
+            <button
+              class="paris-carousel-dot{% if forloop.first %} is-active{% endif %}"
+              data-carousel-dot
+              role="tab"
+              aria-label="Diapositive {{ forloop.index }}"
+              type="button"
+            ></button>
+          {%- endfor -%}
+        </div>
+
+        <button
+          class="paris-carousel-btn"
+          data-carousel-next
+          aria-label="Produits suivants"
+          type="button"
+        >
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {%- comment -%} View all link {%- endcomment -%}
+    {%- if section.settings.button_label != blank -%}
+      <div style="text-align: center; margin-top: 36px;">
+        <a
+          href="{{ section.settings.button_link | default: collection.url | default: '/collections/all' }}"
+          class="paris-btn paris-btn--outline"
+          style="color: {{ section.settings.button_color }}; border-color: {{ section.settings.button_color }};"
+        >
+          {{ section.settings.button_label }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Collection en vedette",
+  "tag": "div",
+  "class": "paris-section-wrap",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_section",
+      "label": "Afficher la section",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Sélectionner une collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Nombre de produits",
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Afficher le fournisseur",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Textes"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Surtitre",
+      "default": "Sélection coup de cœur"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre",
+      "default": "Nouvelle collection"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Sous-titre"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Bouton — texte",
+      "default": "Voir toute la collection"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Bouton — lien"
+    },
+    {
+      "type": "header",
+      "content": "Couleurs"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fond de section",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Couleur du texte",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Couleur du bouton",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "header",
+      "content": "Espacement"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Marge intérieure haut",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Marge intérieure bas",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 72
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection en vedette"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,159 @@
+{%- if section.settings.show_section -%}
+<section
+  class="paris-section paris-logo-strip"
+  style="
+    background-color: {{ section.settings.bg_color }};
+    border-top-color: {{ section.settings.border_color }};
+    border-bottom-color: {{ section.settings.border_color }};
+    border-top-style: solid;
+    border-bottom-style: solid;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+  aria-label="Presse &amp; partenaires"
+>
+  <div class="paris-logo-strip__inner">
+    {%- if section.settings.label != blank -%}
+      <p class="paris-logo-strip__label" style="color: {{ section.settings.label_color }};">
+        {{ section.settings.label }}
+      </p>
+    {%- endif -%}
+
+    <div class="paris-logo-strip__logos">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'logo' -%}
+          {%- if block.settings.link != blank -%}
+            <a href="{{ block.settings.link }}" class="paris-logo-strip__item" {{ block.shopify_attributes }} rel="noopener" target="_blank" aria-label="{{ block.settings.name | escape }}">
+          {%- else -%}
+            <span class="paris-logo-strip__item" {{ block.shopify_attributes }}>
+          {%- endif -%}
+            {%- if block.settings.image != blank -%}
+              {{
+                block.settings.image
+                | image_url: width: 200
+                | image_tag:
+                  loading: 'lazy',
+                  alt: block.settings.name | default: '' | escape,
+                  width: block.settings.image.width,
+                  height: block.settings.image.height
+              }}
+            {%- else -%}
+              <span class="paris-logo-strip__item-text" style="color: {{ section.settings.text_color }};">
+                {{ block.settings.name | default: 'Publication' }}
+              </span>
+            {%- endif -%}
+          {%- if block.settings.link != blank -%}
+            </a>
+          {%- else -%}
+            </span>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Bandeau logos / presse",
+  "tag": "div",
+  "class": "paris-section-wrap",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_section",
+      "label": "Afficher la section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Texte de présentation",
+      "default": "Vu dans la presse"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Couleur de fond",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Couleur des bordures",
+      "default": "#e0d8cf"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Couleur du texte label",
+      "default": "#b5a595"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Couleur du texte logos",
+      "default": "#b5a595"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Marge intérieure haut",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Marge intérieure bas",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Logo",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Nom (texte si pas d'image)",
+          "default": "Le Figaro"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image du logo"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Lien (optionnel)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bandeau logos / presse",
+      "blocks": [
+        { "type": "logo", "settings": { "name": "Le Figaro" } },
+        { "type": "logo", "settings": { "name": "Vogue Paris" } },
+        { "type": "logo", "settings": { "name": "Marie Claire" } },
+        { "type": "logo", "settings": { "name": "Elle France" } },
+        { "type": "logo", "settings": { "name": "L'Officiel" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

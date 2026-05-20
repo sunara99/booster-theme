@@ -1,0 +1,604 @@
+{{ 'paris-fashion.css' | asset_url | stylesheet_tag }}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign product_form_id = 'paris-product-form-' | append: section.id -%}
+
+<section
+  class="paris-section"
+  style="
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="paris-product-hero">
+    <div class="paris-product-hero__grid">
+
+      {%- comment -%} ====================== GALLERY ====================== {%- endcomment -%}
+      <div class="paris-gallery" id="paris-gallery-{{ section.id }}">
+
+        {%- comment -%} Main image {%- endcomment -%}
+        <div class="paris-gallery__main" aria-live="polite">
+          {%- if product.featured_media -%}
+            {{
+              product.featured_media
+              | image_url: width: 1000
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                widths: '600, 800, 1000',
+                sizes: '(max-width: 768px) 100vw, 50vw',
+                alt: product.featured_media.alt | default: product.title | escape,
+                class: 'paris-gallery__main-img',
+                id: 'paris-main-image-' | append: section.id
+            }}
+          {%- else -%}
+            <div class="paris-gallery__main-img" style="background: var(--pf-beige); width: 100%; height: 100%;"></div>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} Thumbnails {%- endcomment -%}
+        {%- if product.media.size > 1 -%}
+          <div class="paris-gallery__thumbs" role="list" aria-label="Images du produit">
+            {%- for media in product.media -%}
+              <button
+                class="paris-gallery__thumb{% if forloop.first %} is-active{% endif %}"
+                type="button"
+                role="listitem"
+                data-src="{{ media | image_url: width: 1000 }}"
+                data-alt="{{ media.alt | default: product.title | escape }}"
+                aria-label="Image {{ forloop.index }} de {{ product.media.size }}"
+                aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+              >
+                {{
+                  media
+                  | image_url: width: 200
+                  | image_tag:
+                    loading: 'lazy',
+                    alt: media.alt | default: product.title | escape,
+                    widths: '100, 200'
+                }}
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} ====================== PRODUCT INFO ====================== {%- endcomment -%}
+      <div class="paris-product-info">
+
+        {%- comment -%} Vendor {%- endcomment -%}
+        {%- if section.settings.show_vendor and product.vendor != blank -%}
+          <a href="{{ product.vendor | url_for_vendor }}" class="paris-product-info__vendor">
+            {{ product.vendor }}
+          </a>
+        {%- endif -%}
+
+        {%- comment -%} Title {%- endcomment -%}
+        <h1 class="paris-product-info__title">{{ product.title }}</h1>
+
+        {%- comment -%} Price {%- endcomment -%}
+        <div class="paris-product-info__price" id="paris-price-{{ section.id }}">
+          <span
+            class="paris-product-info__price-current{% if current_variant.compare_at_price > current_variant.price %} on-sale{% endif %}"
+            data-paris-price
+          >
+            {{ current_variant.price | money }}
+          </span>
+          <span
+            class="paris-product-info__price-compare"
+            data-paris-compare-price
+            {% unless current_variant.compare_at_price > current_variant.price %}style="display:none;"{% endunless %}
+          >
+            {{ current_variant.compare_at_price | money }}
+          </span>
+          {%- if current_variant.compare_at_price > current_variant.price -%}
+            {%- assign saving_pct = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price -%}
+            <span class="paris-product-info__price-badge">-{{ saving_pct }}%</span>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} Product form {%- endcomment -%}
+        <form
+          action="/cart/add"
+          method="post"
+          enctype="multipart/form-data"
+          id="{{ product_form_id }}"
+          class="paris-product-form"
+          data-paris-variant-form
+          data-variants="{{ product.variants | json | escape }}"
+          novalidate
+        >
+          {%- comment -%} Hidden variant ID — updated by JS {%- endcomment -%}
+          <input
+            type="hidden"
+            name="id"
+            value="{{ current_variant.id }}"
+            data-variant-id
+          >
+
+          {%- comment -%} Variant options {%- endcomment -%}
+          {%- if product.has_only_default_variant == false -%}
+            <div class="paris-variant-picker">
+              {%- for option in product.options_with_values -%}
+                <div
+                  class="paris-option-group"
+                  data-option-index="{{ forloop.index0 }}"
+                  data-option-name="{{ option.name | escape }}"
+                >
+                  <div class="paris-option-label">
+                    {{ option.name }}:
+                    <span class="paris-selected-value">{{ option.selected_value }}</span>
+
+                    {%- comment -%} Show size guide link for size option {%- endcomment -%}
+                    {%- if option.name == 'Taille' or option.name == 'Size' or option.name == 'Pointure' -%}
+                      {%- if section.settings.show_size_guide -%}
+                        <button
+                          type="button"
+                          class="paris-size-guide-link"
+                          data-size-guide-open
+                          aria-haspopup="dialog"
+                          style="margin-left: auto;"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path d="M3 7h18M3 12h18M3 17h18"/>
+                          </svg>
+                          Guide des tailles
+                        </button>
+                      {%- endif -%}
+                    {%- endif -%}
+                  </div>
+
+                  <div class="paris-option-buttons" role="radiogroup" aria-label="{{ option.name }}">
+                    {%- for value in option.values -%}
+                      <button
+                        type="button"
+                        class="paris-option-btn{% if option.selected_value == value %} is-active{% endif %}"
+                        data-value="{{ value | escape }}"
+                        role="radio"
+                        aria-checked="{{ option.selected_value == value }}"
+                      >{{ value }}</button>
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          {%- comment -%} Quantity {%- endcomment -%}
+          {%- if section.settings.show_quantity -%}
+            <div class="paris-quantity-selector" aria-label="Sélectionner une quantité">
+              <button
+                type="button"
+                class="paris-quantity-btn"
+                data-qty-minus
+                aria-label="Diminuer la quantité"
+              >−</button>
+              <input
+                type="number"
+                name="quantity"
+                id="paris-qty-{{ section.id }}"
+                class="paris-quantity-input"
+                value="1"
+                min="1"
+                aria-label="Quantité"
+              >
+              <button
+                type="button"
+                class="paris-quantity-btn"
+                data-qty-plus
+                aria-label="Augmenter la quantité"
+              >+</button>
+            </div>
+          {%- endif -%}
+
+          {%- comment -%} Add to cart button {%- endcomment -%}
+          <div class="paris-product-atc">
+            <div class="paris-product-atc__actions">
+              <button
+                type="submit"
+                name="add"
+                class="paris-btn paris-btn--atc"
+                {% unless current_variant.available %}disabled{% endunless %}
+                data-text-add="{{ section.settings.add_to_cart_text | default: 'Ajouter au panier' | escape }}"
+                data-text-soldout="{{ section.settings.sold_out_text | default: 'Épuisé' | escape }}"
+                aria-label="{% if current_variant.available %}{{ section.settings.add_to_cart_text | default: 'Ajouter au panier' }}{% else %}Épuisé{% endif %}"
+              >
+                {%- if current_variant.available -%}
+                  {{ section.settings.add_to_cart_text | default: 'Ajouter au panier' }}
+                {%- else -%}
+                  {{ section.settings.sold_out_text | default: 'Épuisé' }}
+                {%- endif -%}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {%- comment -%} Trust badges {%- endcomment -%}
+        {%- if section.blocks.size > 0 -%}
+          <div class="paris-product-trust">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'trust_badge' -%}
+                <span class="paris-product-trust__item" {{ block.shopify_attributes }}>
+                  {%- case block.settings.icon -%}
+                    {%- when 'truck' -%}
+                      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    {%- when 'shield' -%}
+                      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                    {%- when 'return' -%}
+                      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+                    {%- when 'lock' -%}
+                      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    {%- else -%}
+                      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+                  {%- endcase -%}
+                  {{ block.settings.text }}
+                </span>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} Accordion: Description {%- endcomment -%}
+        {%- if product.description != blank or section.settings.show_description_accordion -%}
+          <div class="paris-accordion" role="list">
+            {%- if product.description != blank -%}
+              <div class="paris-accordion__item" role="listitem">
+                <button
+                  class="paris-accordion__trigger"
+                  aria-expanded="false"
+                  aria-controls="paris-desc-panel-{{ section.id }}"
+                  type="button"
+                >
+                  <span class="paris-accordion__label">{{ section.settings.description_label | default: 'Description' }}</span>
+                  <span class="paris-accordion__icon" aria-hidden="true"></span>
+                </button>
+                <div
+                  class="paris-accordion__panel"
+                  id="paris-desc-panel-{{ section.id }}"
+                  role="region"
+                >
+                  <div class="paris-accordion__panel-inner">
+                    {{ product.description }}
+                  </div>
+                </div>
+              </div>
+            {%- endif -%}
+
+            {%- comment -%} Custom accordion blocks {%- endcomment -%}
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'accordion' -%}
+                <div class="paris-accordion__item" role="listitem" {{ block.shopify_attributes }}>
+                  <button
+                    class="paris-accordion__trigger"
+                    aria-expanded="false"
+                    aria-controls="paris-acc-panel-{{ section.id }}-{{ forloop.index }}"
+                    type="button"
+                  >
+                    <span class="paris-accordion__label">{{ block.settings.label | default: 'Information' }}</span>
+                    <span class="paris-accordion__icon" aria-hidden="true"></span>
+                  </button>
+                  <div
+                    class="paris-accordion__panel"
+                    id="paris-acc-panel-{{ section.id }}-{{ forloop.index }}"
+                    role="region"
+                  >
+                    <div class="paris-accordion__panel-inner">
+                      {{ block.settings.content }}
+                    </div>
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+      </div>{%- comment -%} end product-info {%- endcomment -%}
+    </div>{%- comment -%} end grid {%- endcomment -%}
+  </div>{%- comment -%} end paris-product-hero {%- endcomment -%}
+</section>
+
+{%- comment -%} Size guide modal {%- endcomment -%}
+{%- if section.settings.show_size_guide -%}
+  <div
+    class="paris-size-guide-modal"
+    id="paris-size-guide"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="paris-sg-title"
+  >
+    <div class="paris-size-guide-modal__backdrop" aria-hidden="true"></div>
+    <div class="paris-size-guide-modal__dialog">
+      <button
+        type="button"
+        class="paris-size-guide-modal__close"
+        data-size-guide-close
+        aria-label="Fermer le guide des tailles"
+      >&times;</button>
+
+      <h2 class="paris-size-guide-modal__title" id="paris-sg-title">
+        {{ section.settings.size_guide_title | default: 'Guide des tailles' }}
+      </h2>
+      {%- if section.settings.size_guide_note != blank -%}
+        <p class="paris-size-guide-modal__note">{{ section.settings.size_guide_note }}</p>
+      {%- endif -%}
+
+      <table class="paris-size-table" aria-label="Tableau des tailles">
+        <thead>
+          <tr>
+            {%- if section.settings.size_table_headers != blank -%}
+              {%- assign headers = section.settings.size_table_headers | split: ',' -%}
+              {%- for header in headers -%}
+                <th scope="col">{{ header | strip }}</th>
+              {%- endfor -%}
+            {%- else -%}
+              <th scope="col">Taille FR</th>
+              <th scope="col">Tour de poitrine</th>
+              <th scope="col">Tour de taille</th>
+              <th scope="col">Tour de hanches</th>
+            {%- endif -%}
+          </tr>
+        </thead>
+        <tbody>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'size_row' -%}
+              <tr {{ block.shopify_attributes }}>
+                <td>{{ block.settings.size }}</td>
+                <td>{{ block.settings.chest }}</td>
+                <td>{{ block.settings.waist }}</td>
+                <td>{{ block.settings.hips }}</td>
+              </tr>
+            {%- endif -%}
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{%- endif -%}
+
+{%- comment -%} Sticky mobile ATC {%- endcomment -%}
+{%- if section.settings.show_sticky_atc -%}
+<div class="paris-sticky-atc" id="paris-sticky-atc" aria-hidden="true">
+  <div class="paris-sticky-atc__inner">
+    <div class="paris-sticky-atc__info">
+      <span class="paris-sticky-atc__title">{{ product.title }}</span>
+      <span class="paris-sticky-atc__price">{{ current_variant.price | money }}</span>
+    </div>
+    <button
+      type="button"
+      class="paris-sticky-atc__btn"
+      {% unless current_variant.available %}disabled{% endunless %}
+    >
+      {{ section.settings.add_to_cart_text | default: 'Ajouter au panier' }}
+    </button>
+  </div>
+</div>
+{%- endif -%}
+
+<script src="{{ 'paris-fashion.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Produit — héros",
+  "tag": "div",
+  "class": "paris-section-wrap",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Affichage produit"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Afficher le fournisseur",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "Afficher le sélecteur de quantité",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_text",
+      "label": "Texte Ajouter au panier",
+      "default": "Ajouter au panier"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_text",
+      "label": "Texte produit épuisé",
+      "default": "Épuisé"
+    },
+    {
+      "type": "header",
+      "content": "Accordéon description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description_accordion",
+      "label": "Afficher la description en accordéon",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "description_label",
+      "label": "Titre accordéon description",
+      "default": "Détails du produit"
+    },
+    {
+      "type": "header",
+      "content": "Guide des tailles"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_size_guide",
+      "label": "Afficher le guide des tailles",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "size_guide_title",
+      "label": "Titre de la modale",
+      "default": "Guide des tailles"
+    },
+    {
+      "type": "text",
+      "id": "size_guide_note",
+      "label": "Note sous le titre",
+      "default": "Toutes les mesures sont en centimètres."
+    },
+    {
+      "type": "text",
+      "id": "size_table_headers",
+      "label": "En-têtes du tableau (séparés par des virgules)",
+      "default": "Taille FR, Tour de poitrine, Tour de taille, Tour de hanches"
+    },
+    {
+      "type": "header",
+      "content": "ATC mobile fixe"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sticky_atc",
+      "label": "Afficher le bouton ATC fixe (mobile)",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Couleurs et espacement"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fond de section",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Marge intérieure haut",
+      "min": 0,
+      "max": 80,
+      "step": 8,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Marge intérieure bas",
+      "min": 0,
+      "max": 80,
+      "step": 8,
+      "unit": "px",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "trust_badge",
+      "name": "Badge de confiance",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icône",
+          "options": [
+            { "value": "truck",  "label": "Livraison" },
+            { "value": "return", "label": "Retour" },
+            { "value": "shield", "label": "Sécurité" },
+            { "value": "lock",   "label": "Cadenas" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texte",
+          "default": "Livraison suivie"
+        }
+      ]
+    },
+    {
+      "type": "accordion",
+      "name": "Accordéon",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Titre de l'accordéon",
+          "default": "Livraison & retours"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Contenu",
+          "default": "<p>Livraison standard sous 2 à 5 jours ouvrés. Retours acceptés sous 14 jours suivant la réception.</p>"
+        }
+      ]
+    },
+    {
+      "type": "size_row",
+      "name": "Ligne du guide des tailles",
+      "settings": [
+        {
+          "type": "text",
+          "id": "size",
+          "label": "Taille",
+          "default": "36 (XS)"
+        },
+        {
+          "type": "text",
+          "id": "chest",
+          "label": "Tour de poitrine (cm)",
+          "default": "82-86"
+        },
+        {
+          "type": "text",
+          "id": "waist",
+          "label": "Tour de taille (cm)",
+          "default": "62-66"
+        },
+        {
+          "type": "text",
+          "id": "hips",
+          "label": "Tour de hanches (cm)",
+          "default": "88-92"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Produit — héros",
+      "blocks": [
+        { "type": "trust_badge", "settings": { "icon": "truck",  "text": "Livraison suivie" } },
+        { "type": "trust_badge", "settings": { "icon": "return", "text": "Retours 14 jours" } },
+        { "type": "trust_badge", "settings": { "icon": "lock",   "text": "Paiement sécurisé" } },
+        {
+          "type": "accordion",
+          "settings": {
+            "label": "Livraison & retours",
+            "content": "<p>Livraison standard sous 2 à 5 jours ouvrés. Retours gratuits sous 14 jours.</p>"
+          }
+        },
+        {
+          "type": "accordion",
+          "settings": {
+            "label": "Entretien du vêtement",
+            "content": "<p>Lavage à 30°C. Ne pas sécher en machine. Repassage doux recommandé.</p>"
+          }
+        },
+        { "type": "size_row", "settings": { "size": "36 (XS)", "chest": "82-86", "waist": "62-66", "hips": "88-92" } },
+        { "type": "size_row", "settings": { "size": "38 (S)",  "chest": "87-91", "waist": "67-71", "hips": "93-97" } },
+        { "type": "size_row", "settings": { "size": "40 (M)",  "chest": "92-96", "waist": "72-76", "hips": "98-102" } },
+        { "type": "size_row", "settings": { "size": "42 (L)",  "chest": "97-101","waist": "77-81", "hips": "103-107" } },
+        { "type": "size_row", "settings": { "size": "44 (XL)", "chest": "102-107","waist": "82-87","hips": "108-113" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

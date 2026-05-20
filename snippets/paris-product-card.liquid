@@ -1,0 +1,74 @@
+{%- comment -%}
+  Snippet: paris-product-card.liquid
+  Renders a single product card.
+  Expects: product (product object), show_vendor (bool), badge_label (string)
+{%- endcomment -%}
+
+{%- assign card_product = card_product | default: product -%}
+{%- assign show_vendor = show_vendor | default: false -%}
+
+{%- if card_product == blank -%}
+  {%- comment -%} Placeholder card for editor {%- endcomment -%}
+  <div class="paris-product-card">
+    <div class="paris-product-card__media" style="background: var(--pf-beige);"></div>
+    <div class="paris-product-card__info">
+      <span class="paris-product-card__title" style="color: var(--pf-taupe);">Nom du produit</span>
+      <div class="paris-product-card__price">
+        <span class="paris-product-card__price-current">00,00 €</span>
+      </div>
+    </div>
+  </div>
+{%- else -%}
+  {%- assign first_available_variant = card_product.first_available_variant -%}
+  {%- assign on_sale = false -%}
+  {%- if card_product.compare_at_price > card_product.price -%}
+    {%- assign on_sale = true -%}
+  {%- endif -%}
+
+  <div class="paris-product-card">
+    <a href="{{ card_product.url }}" class="paris-product-card__media" aria-label="{{ card_product.title | escape }}">
+      {%- if on_sale -%}
+        <span class="paris-product-card__badge paris-product-card__badge--sale">Promo</span>
+      {%- elsif card_product.available == false -%}
+        <span class="paris-product-card__badge">Épuisé</span>
+      {%- elsif card_product.created_at > 'now' | date: '%s' | minus: 2592000 | date: '%Y-%m-%dT%H:%M:%S' -%}
+        <span class="paris-product-card__badge">Nouveau</span>
+      {%- endif -%}
+
+      {%- if card_product.featured_media -%}
+        {{
+          card_product.featured_media
+          | image_url: width: 600
+          | image_tag:
+            loading: 'lazy',
+            widths: '300, 450, 600',
+            sizes: '(max-width: 480px) 45vw, (max-width: 768px) 40vw, 25vw',
+            alt: card_product.featured_media.alt | default: card_product.title | escape
+        }}
+      {%- else -%}
+        <div style="background: var(--pf-beige); width: 100%; height: 100%;"></div>
+      {%- endif -%}
+    </a>
+
+    <div class="paris-product-card__info">
+      {%- if show_vendor and card_product.vendor != blank -%}
+        <span class="paris-product-card__vendor">{{ card_product.vendor }}</span>
+      {%- endif -%}
+
+      <a href="{{ card_product.url }}" class="paris-product-card__title">
+        {{ card_product.title }}
+      </a>
+
+      <div class="paris-product-card__price">
+        <span class="paris-product-card__price-current{% if on_sale %} on-sale{% endif %}">
+          {{ card_product.price | money }}
+        </span>
+        {%- if on_sale -%}
+          <span class="paris-product-card__price-compare">
+            {{ card_product.compare_at_price | money }}
+          </span>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}

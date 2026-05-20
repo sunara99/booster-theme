@@ -1,0 +1,100 @@
+{
+  "sections": {
+    "paris-product-hero": {
+      "type": "paris-product-hero",
+      "settings": {
+        "show_vendor": false,
+        "show_quantity": true,
+        "add_to_cart_text": "Ajouter au panier",
+        "sold_out_text": "Épuisé",
+        "show_description_accordion": true,
+        "description_label": "Détails du produit",
+        "show_size_guide": true,
+        "size_guide_title": "Guide des tailles",
+        "size_guide_note": "Toutes les mesures sont en centimètres. En cas de doute, choisissez la taille supérieure.",
+        "size_table_headers": "Taille FR, Tour de poitrine, Tour de taille, Tour de hanches",
+        "show_sticky_atc": true,
+        "bg_color": "#ffffff",
+        "padding_top": 40,
+        "padding_bottom": 60
+      },
+      "blocks": {
+        "badge-1": { "type": "trust_badge", "settings": { "icon": "truck",  "text": "Livraison suivie" } },
+        "badge-2": { "type": "trust_badge", "settings": { "icon": "return", "text": "Retours 14 jours" } },
+        "badge-3": { "type": "trust_badge", "settings": { "icon": "lock",   "text": "Paiement sécurisé" } },
+        "acc-1": {
+          "type": "accordion",
+          "settings": {
+            "label": "Livraison & retours",
+            "content": "<p>Livraison standard en 2 à 5 jours ouvrés. Retours gratuits acceptés sous 14 jours suivant la réception, dans leur état d'origine.</p>"
+          }
+        },
+        "acc-2": {
+          "type": "accordion",
+          "settings": {
+            "label": "Entretien du vêtement",
+            "content": "<p>Lavage délicat à 30°C. Ne pas sécher en machine. Repassage sur l'envers à basse température. Ne pas utiliser de javel.</p>"
+          }
+        },
+        "size-xs": { "type": "size_row", "settings": { "size": "36 (XS)", "chest": "82-86", "waist": "62-66", "hips": "88-92"   } },
+        "size-s":  { "type": "size_row", "settings": { "size": "38 (S)",  "chest": "87-91", "waist": "67-71", "hips": "93-97"   } },
+        "size-m":  { "type": "size_row", "settings": { "size": "40 (M)",  "chest": "92-96", "waist": "72-76", "hips": "98-102"  } },
+        "size-l":  { "type": "size_row", "settings": { "size": "42 (L)",  "chest": "97-101","waist": "77-81", "hips": "103-107" } },
+        "size-xl": { "type": "size_row", "settings": { "size": "44 (XL)", "chest": "102-107","waist": "82-87","hips": "108-113" } }
+      },
+      "block_order": ["badge-1", "badge-2", "badge-3", "acc-1", "acc-2", "size-xs", "size-s", "size-m", "size-l", "size-xl"]
+    },
+    "paris-styling": {
+      "type": "paris-styling-suggestions",
+      "settings": {
+        "show_section": true,
+        "eyebrow": "Style éditorial",
+        "heading": "Complétez votre look",
+        "bg_color": "#f9f6f1",
+        "padding_top": 72,
+        "padding_bottom": 72
+      },
+      "blocks": {
+        "sug-1": { "type": "suggestion", "settings": { "label": "À associer avec", "name": "Blazer Parisien",  "price": "89,00 €" } },
+        "sug-2": { "type": "suggestion", "settings": { "label": "Accessoire idéal", "name": "Ceinture dorée", "price": "34,00 €" } },
+        "sug-3": { "type": "suggestion", "settings": { "label": "Sac de saison",    "name": "Sac en cuir",    "price": "129,00 €" } }
+      },
+      "block_order": ["sug-1", "sug-2", "sug-3"]
+    },
+    "paris-product-reviews": {
+      "type": "paris-product-reviews",
+      "settings": {
+        "show_section": true,
+        "eyebrow": "Avis clients",
+        "heading": "Ce qu'elles en pensent",
+        "rating_summary": "4,9 / 5 basé sur 248 avis",
+        "bg_color": "#ffffff",
+        "padding_top": 64,
+        "padding_bottom": 64
+      },
+      "blocks": {
+        "pr-1": { "type": "review", "settings": { "rating": 5, "text": "Parfaite. Le tissu est d'une grande qualité et la coupe est absolument superbe.", "name": "Sophie B.", "date": "Avril 2025" } },
+        "pr-2": { "type": "review", "settings": { "rating": 5, "text": "J'ai reçu tellement de compliments ! Je recommande à 100%.", "name": "Lucie R.", "date": "Mars 2025" } }
+      },
+      "block_order": ["pr-1", "pr-2"]
+    },
+    "paris-related": {
+      "type": "paris-related-products",
+      "settings": {
+        "show_section": true,
+        "eyebrow": "Vous aimerez aussi",
+        "heading": "Pièces similaires",
+        "products_to_show": 4,
+        "bg_color": "#f9f6f1",
+        "padding_top": 72,
+        "padding_bottom": 72
+      }
+    }
+  },
+  "order": [
+    "paris-product-hero",
+    "paris-styling",
+    "paris-product-reviews",
+    "paris-related"
+  ]
+}

@@ -1,0 +1,159 @@
+{%- if section.settings.show_section -%}
+<section
+  class="paris-section"
+  style="
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+  aria-labelledby="paris-cat-title-{{ section.id }}"
+>
+  <div class="paris-category-cards">
+
+    <div class="paris-section-header">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="paris-section-header__eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="paris-section-header__title" id="paris-cat-title-{{ section.id }}">
+          {{ section.settings.heading }}
+        </h2>
+      {%- endif -%}
+    </div>
+
+    <div class="paris-category-cards__grid">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'card' -%}
+          <a
+            href="{{ block.settings.link | default: '#' }}"
+            class="paris-category-card"
+            {{ block.shopify_attributes }}
+            aria-label="{{ block.settings.title | escape }}"
+          >
+            {%- if block.settings.image != blank -%}
+              {{
+                block.settings.image
+                | image_url: width: 700
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '400, 550, 700',
+                  sizes: '(max-width: 480px) 50vw, (max-width: 768px) 50vw, 20vw',
+                  alt: block.settings.image.alt | default: block.settings.title | escape
+              }}
+            {%- else -%}
+              <div style="background-color: #e8ddd0; width: 100%; height: 100%;"></div>
+            {%- endif -%}
+
+            <div class="paris-category-card__overlay" aria-hidden="true"></div>
+
+            <div class="paris-category-card__label">
+              {%- if block.settings.title != blank -%}
+                <span class="paris-category-card__title">{{ block.settings.title }}</span>
+              {%- endif -%}
+              {%- if block.settings.cta_text != blank -%}
+                <span class="paris-category-card__sub">{{ block.settings.cta_text }}</span>
+              {%- endif -%}
+            </div>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cartes catégories",
+  "tag": "div",
+  "class": "paris-section-wrap",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_section",
+      "label": "Afficher la section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Surtitre",
+      "default": "Explorez"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre",
+      "default": "Nos univers"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fond de section",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Marge intérieure haut",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Marge intérieure bas",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 72
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Carte catégorie",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titre catégorie",
+          "default": "Robes"
+        },
+        {
+          "type": "text",
+          "id": "cta_text",
+          "label": "Texte du lien",
+          "default": "Découvrir"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Lien"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cartes catégories",
+      "blocks": [
+        { "type": "card", "settings": { "title": "Robes",      "cta_text": "Découvrir" } },
+        { "type": "card", "settings": { "title": "Vestes",     "cta_text": "Découvrir" } },
+        { "type": "card", "settings": { "title": "Hauts",      "cta_text": "Découvrir" } },
+        { "type": "card", "settings": { "title": "Pantalons",  "cta_text": "Découvrir" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

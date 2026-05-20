@@ -1,0 +1,257 @@
+{%- if section.settings.show_section -%}
+{%- assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0 -%}
+
+<section
+  class="paris-section paris-hero paris-hero--{{ section.settings.height }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+  aria-label="{{ section.settings.heading | default: 'Hero' | escape }}"
+>
+  {%- comment -%} Background Image {%- endcomment -%}
+  <div class="paris-hero__media" aria-hidden="true">
+    {%- if section.settings.image != blank -%}
+      {{
+        section.settings.image
+        | image_url: width: 2000
+        | image_tag:
+          loading: 'eager',
+          fetchpriority: 'high',
+          widths: '750, 1100, 1500, 2000',
+          sizes: '100vw',
+          alt: section.settings.image.alt | default: section.settings.heading | escape,
+          class: 'paris-hero__bg-image'
+      }}
+    {%- else -%}
+      <div style="background-color: {{ section.settings.fallback_bg }}; width: 100%; height: 100%;"></div>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} Overlay {%- endcomment -%}
+  <div
+    class="paris-hero__overlay"
+    style="background-color: {{ section.settings.overlay_color }}; opacity: {{ overlay_opacity }};"
+    aria-hidden="true"
+  ></div>
+
+  {%- comment -%} Content {%- endcomment -%}
+  <div class="paris-hero__content paris-hero__content--{{ section.settings.content_position }}">
+    <div style="max-width: {{ section.settings.content_width }}px;">
+      {%- if section.settings.eyebrow != blank -%}
+        <span
+          class="paris-hero__eyebrow"
+          style="color: {{ section.settings.text_color }};"
+        >{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+
+      {%- if section.settings.heading != blank -%}
+        <h1
+          class="paris-hero__heading"
+          style="color: {{ section.settings.text_color }};"
+        >{{ section.settings.heading }}</h1>
+      {%- endif -%}
+
+      {%- if section.settings.subheading != blank -%}
+        <p
+          class="paris-hero__subheading"
+          style="color: {{ section.settings.text_color }};"
+        >{{ section.settings.subheading }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.button_label != blank or section.settings.button_secondary_label != blank -%}
+        <div class="paris-hero__cta-group">
+          {%- if section.settings.button_label != blank -%}
+            <a
+              href="{{ section.settings.button_link | default: '#' }}"
+              class="paris-btn paris-btn--light"
+              style="background-color: {{ section.settings.button_bg }}; color: {{ section.settings.button_text }}; border-color: {{ section.settings.button_bg }};"
+            >
+              {{ section.settings.button_label }}
+            </a>
+          {%- endif -%}
+          {%- if section.settings.button_secondary_label != blank -%}
+            <a
+              href="{{ section.settings.button_secondary_link | default: '#' }}"
+              class="paris-btn paris-btn--ghost"
+              style="color: {{ section.settings.text_color }}; border-color: {{ section.settings.text_color }};"
+            >
+              {{ section.settings.button_secondary_label }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Hero mode",
+  "tag": "div",
+  "class": "paris-section-wrap",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_section",
+      "label": "Afficher la section",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image de fond"
+    },
+    {
+      "type": "color",
+      "id": "fallback_bg",
+      "label": "Couleur de fond (si pas d'image)",
+      "default": "#f0ebe3"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Couleur du calque",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Opacité du calque",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Contenu"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Texte surtitre",
+      "default": "Nouvelle collection"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Titre principal",
+      "default": "Élégance parisienne, au quotidien"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Sous-titre",
+      "default": "Des pièces pensées pour sublimer votre style, saison après saison."
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Alignement du contenu",
+      "options": [
+        { "value": "left",   "label": "Gauche" },
+        { "value": "center", "label": "Centre" },
+        { "value": "right",  "label": "Droite" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Largeur max du contenu (px)",
+      "min": 300,
+      "max": 800,
+      "step": 20,
+      "default": 560
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Couleur du texte",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Boutons"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Bouton principal — texte",
+      "default": "Découvrir la collection"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Bouton principal — lien"
+    },
+    {
+      "type": "color",
+      "id": "button_bg",
+      "label": "Bouton principal — fond",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Bouton principal — texte",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "text",
+      "id": "button_secondary_label",
+      "label": "Bouton secondaire — texte",
+      "default": "Voir les nouveautés"
+    },
+    {
+      "type": "url",
+      "id": "button_secondary_link",
+      "label": "Bouton secondaire — lien"
+    },
+    {
+      "type": "header",
+      "content": "Mise en page"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Hauteur",
+      "options": [
+        { "value": "full",   "label": "Plein écran" },
+        { "value": "large",  "label": "Grande (80vh)" },
+        { "value": "medium", "label": "Moyenne (60vh)" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Marge intérieure haut",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Marge intérieure bas",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero mode"
+    }
+  ]
+}
+{% endschema %}
