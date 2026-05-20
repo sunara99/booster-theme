@@ -19,13 +19,22 @@
         "padding_bottom": 60
       },
       "blocks": {
-        "badge-1": { "type": "trust_badge", "settings": { "icon": "truck",  "text": "Livraison suivie" } },
-        "badge-2": { "type": "trust_badge", "settings": { "icon": "return", "text": "Retours 14 jours" } },
-        "badge-3": { "type": "trust_badge", "settings": { "icon": "lock",   "text": "Paiement sécurisé" } },
+        "badge-1": {
+          "type": "trust_badge",
+          "settings": { "icon": "truck", "text": "Livraison suivie" }
+        },
+        "badge-2": {
+          "type": "trust_badge",
+          "settings": { "icon": "return", "text": "Retours 14 jours" }
+        },
+        "badge-3": {
+          "type": "trust_badge",
+          "settings": { "icon": "lock", "text": "Paiement sécurisé" }
+        },
         "acc-1": {
           "type": "accordion",
           "settings": {
-            "label": "Livraison & retours",
+            "label": "Livraison et retours",
             "content": "<p>Livraison standard en 2 à 5 jours ouvrés. Retours gratuits acceptés sous 14 jours suivant la réception, dans leur état d'origine.</p>"
           }
         },
@@ -36,13 +45,32 @@
             "content": "<p>Lavage délicat à 30°C. Ne pas sécher en machine. Repassage sur l'envers à basse température. Ne pas utiliser de javel.</p>"
           }
         },
-        "size-xs": { "type": "size_row", "settings": { "size": "36 (XS)", "chest": "82-86", "waist": "62-66", "hips": "88-92"   } },
-        "size-s":  { "type": "size_row", "settings": { "size": "38 (S)",  "chest": "87-91", "waist": "67-71", "hips": "93-97"   } },
-        "size-m":  { "type": "size_row", "settings": { "size": "40 (M)",  "chest": "92-96", "waist": "72-76", "hips": "98-102"  } },
-        "size-l":  { "type": "size_row", "settings": { "size": "42 (L)",  "chest": "97-101","waist": "77-81", "hips": "103-107" } },
-        "size-xl": { "type": "size_row", "settings": { "size": "44 (XL)", "chest": "102-107","waist": "82-87","hips": "108-113" } }
+        "size-xs": {
+          "type": "size_row",
+          "settings": { "size": "36 (XS)", "chest": "82-86", "waist": "62-66", "hips": "88-92" }
+        },
+        "size-s": {
+          "type": "size_row",
+          "settings": { "size": "38 (S)", "chest": "87-91", "waist": "67-71", "hips": "93-97" }
+        },
+        "size-m": {
+          "type": "size_row",
+          "settings": { "size": "40 (M)", "chest": "92-96", "waist": "72-76", "hips": "98-102" }
+        },
+        "size-l": {
+          "type": "size_row",
+          "settings": { "size": "42 (L)", "chest": "97-101", "waist": "77-81", "hips": "103-107" }
+        },
+        "size-xl": {
+          "type": "size_row",
+          "settings": { "size": "44 (XL)", "chest": "102-107", "waist": "82-87", "hips": "108-113" }
+        }
       },
-      "block_order": ["badge-1", "badge-2", "badge-3", "acc-1", "acc-2", "size-xs", "size-s", "size-m", "size-l", "size-xl"]
+      "block_order": [
+        "badge-1", "badge-2", "badge-3",
+        "acc-1", "acc-2",
+        "size-xs", "size-s", "size-m", "size-l", "size-xl"
+      ]
     },
     "paris-styling": {
       "type": "paris-styling-suggestions",
@@ -55,9 +83,18 @@
         "padding_bottom": 72
       },
       "blocks": {
-        "sug-1": { "type": "suggestion", "settings": { "label": "À associer avec", "name": "Blazer Parisien",  "price": "89,00 €" } },
-        "sug-2": { "type": "suggestion", "settings": { "label": "Accessoire idéal", "name": "Ceinture dorée", "price": "34,00 €" } },
-        "sug-3": { "type": "suggestion", "settings": { "label": "Sac de saison",    "name": "Sac en cuir",    "price": "129,00 €" } }
+        "sug-1": {
+          "type": "suggestion",
+          "settings": { "label": "À associer avec", "name": "Blazer Parisien", "price": "89,00 €" }
+        },
+        "sug-2": {
+          "type": "suggestion",
+          "settings": { "label": "Accessoire idéal", "name": "Ceinture dorée", "price": "34,00 €" }
+        },
+        "sug-3": {
+          "type": "suggestion",
+          "settings": { "label": "Sac de saison", "name": "Sac en cuir", "price": "129,00 €" }
+        }
       },
       "block_order": ["sug-1", "sug-2", "sug-3"]
     },
@@ -73,8 +110,24 @@
         "padding_bottom": 64
       },
       "blocks": {
-        "pr-1": { "type": "review", "settings": { "rating": 5, "text": "Parfaite. Le tissu est d'une grande qualité et la coupe est absolument superbe.", "name": "Sophie B.", "date": "Avril 2025" } },
-        "pr-2": { "type": "review", "settings": { "rating": 5, "text": "J'ai reçu tellement de compliments ! Je recommande à 100%.", "name": "Lucie R.", "date": "Mars 2025" } }
+        "pr-1": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "text": "Parfaite. Le tissu est d'une grande qualité et la coupe est absolument superbe.",
+            "name": "Sophie B.",
+            "date": "Avril 2025"
+          }
+        },
+        "pr-2": {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "text": "J'ai reçu tellement de compliments ! Je recommande à 100%.",
+            "name": "Lucie R.",
+            "date": "Mars 2025"
+          }
+        }
       },
       "block_order": ["pr-1", "pr-2"]
     },
