@@ -1,80 +1,357 @@
 ﻿{
   "sections": {
     "main": {
-      "type": "paris-product-hero",
-      "settings": {
-        "show_vendor": false,
-        "show_quantity": true,
-        "add_to_cart_text": "Ajouter au panier",
-        "sold_out_text": "Epuise",
-        "show_description_accordion": true,
-        "description_label": "Details du produit",
-        "show_size_guide": true,
-        "size_guide_title": "Guide des tailles",
-        "size_guide_note": "Toutes les mesures sont en centimetres.",
-        "size_table_headers": "Taille FR, Tour de poitrine, Tour de taille, Tour de hanches",
-        "show_sticky_atc": true,
-        "bg_color": "#ffffff",
-        "padding_top": 40,
-        "padding_bottom": 60
-      },
+      "type": "product-information",
       "blocks": {
-        "trust_1": { "type": "trust_badge", "settings": { "icon": "truck",  "text": "Livraison offerte des 80 euros" } },
-        "trust_2": { "type": "trust_badge", "settings": { "icon": "return", "text": "Retours gratuits sous 14 jours" } },
-        "trust_3": { "type": "trust_badge", "settings": { "icon": "lock",   "text": "Paiement 100 % securise" } },
-        "acc_livraison": {
-          "type": "accordion",
+        "media-gallery": {
+          "type": "_product-media-gallery",
+          "static": true,
           "settings": {
-            "label": "Livraison et retours",
-            "content": "<p>Livraison standard en 2 a 5 jours ouvres. Livraison offerte des 80 euros. Retours gratuits acceptes sous 14 jours suivant la reception, dans leur etat d origine avec etiquettes.</p>"
-          }
+            "media_presentation": "carousel",
+            "media_columns": "one",
+            "image_gap": 8,
+            "large_first_image": false,
+            "icons_style": "arrow",
+            "slideshow_controls_style": "thumbnails",
+            "slideshow_mobile_controls_style": "thumbnails",
+            "thumbnail_position": "left",
+            "thumbnail_width": 80,
+            "thumbnail_radius": 0,
+            "aspect_ratio": "3/4",
+            "constrain_to_viewport": true,
+            "media_fit": "cover",
+            "media_radius": 0,
+            "extend_media": false,
+            "zoom": true,
+            "video_loop": false,
+            "video_autoplay": false,
+            "hide_variants": true,
+            "show_only_selected_variant": true,
+            "enabled_products": [],
+            "filter_option_index": "1",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "padding-block-start-mobile": 0,
+            "padding-block-end-mobile": 0,
+            "padding-inline-start-mobile": 0,
+            "padding-inline-end-mobile": 0
+          },
+          "blocks": {}
         },
-        "acc_entretien": {
-          "type": "accordion",
+        "product-details": {
+          "type": "_product-details",
+          "static": true,
           "settings": {
-            "label": "Entretien du vetement",
-            "content": "<p>Lavage delicat a 30 degres a l envers. Ne pas secher en machine. Repassage sur l envers a basse temperature. Ne pas utiliser de javel.</p>"
-          }
-        },
-        "acc_matieres": {
-          "type": "accordion",
-          "settings": {
-            "label": "Matiere et coupe",
-            "content": "<p>Composition : 100 % coton biologique. Coupe fluide et legerement evasee, pensee pour sublimer toutes les silhouettes. Fabrique en Europe dans des ateliers certifies.</p>"
-          }
-        },
-        "size_xs": { "type": "size_row", "settings": { "size": "36 (XS)", "chest": "82-86",  "waist": "62-66", "hips": "88-92"   } },
-        "size_s":  { "type": "size_row", "settings": { "size": "38 (S)",  "chest": "87-91",  "waist": "67-71", "hips": "93-97"   } },
-        "size_m":  { "type": "size_row", "settings": { "size": "40 (M)",  "chest": "92-96",  "waist": "72-76", "hips": "98-102"  } },
-        "size_l":  { "type": "size_row", "settings": { "size": "42 (L)",  "chest": "97-101", "waist": "77-81", "hips": "103-107" } },
-        "size_xl": { "type": "size_row", "settings": { "size": "44 (XL)", "chest": "102-107","waist": "82-87", "hips": "108-113" } }
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "details_position": "flex-start",
+            "gap": 20,
+            "sticky_details_desktop": true,
+            "inherit_color_scheme": true,
+            "color_scheme": "scheme-1",
+            "background_media": "none",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "clear_mobile_inline_padding_page_width": true,
+            "padding-block-start": 0,
+            "padding-block-end": 24,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "review_summary": {
+              "type": "short-review-block",
+              "settings": {
+                "lrw_text": "4,9 — Plus de 248 avis",
+                "text_size": 13,
+                "star_style": "star",
+                "star_size": 0.6,
+                "star_rating": 4.9,
+                "lrw_star_color": "#1a1a1a",
+                "lrw_star_color_disable": "#e0d8cf",
+                "lrw_color": "#6b6b6b",
+                "margin_top": 0,
+                "margin_bottom": 0,
+                "show_happy_customers_tag": false
+              }
+            },
+            "header_group": {
+              "type": "group",
+              "settings": {
+                "content_direction": "column",
+                "vertical_on_mobile": true,
+                "horizontal_alignment": "flex-start",
+                "vertical_alignment": "flex-start",
+                "horizontal_alignment_flex_direction_column": "flex-start",
+                "vertical_alignment_flex_direction_column": "center",
+                "gap": 8,
+                "width": "fill",
+                "custom_width": 100,
+                "width_mobile": "fill",
+                "custom_width_mobile": 100,
+                "height": "fit",
+                "inherit_color_scheme": true,
+                "color_scheme": "",
+                "background_media": "none",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "product_title": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<h1>{{ closest.product.title }}</h1>",
+                    "width": "100%",
+                    "alignment": "left",
+                    "type_preset": "h2",
+                    "font": "var(--font-primary--family)",
+                    "font_size": "",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "color_mode": "default",
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                },
+                "product_price": {
+                  "type": "price",
+                  "settings": {
+                    "show_sale_price_first": true,
+                    "show_installments": false,
+                    "show_tax_info": false,
+                    "show_sale_badge": true,
+                    "sale_badge_type": "percentage",
+                    "type_preset": "paragraph",
+                    "font": "var(--font-primary--family)",
+                    "font_size": "1.4rem",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "color_mode": "default",
+                    "padding-block-start": 4,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": ["product_title", "product_price"]
+            },
+            "variant_picker": {
+              "type": "variant-picker",
+              "settings": {
+                "option_style_per_option": false,
+                "variant_style": "lumin",
+                "option_1_style": "buttons",
+                "option_2_style": "buttons",
+                "option_3_style": "buttons",
+                "show_swatches": true,
+                "show_variant_name_with_swatches": true,
+                "alignment": "left",
+                "lumin_option_radius": 0,
+                "lumin_label_padding_top": 12,
+                "lumin_label_padding_right": 16,
+                "lumin_label_padding_bottom": 12,
+                "lumin_label_padding_left": 16,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "buy_buttons": {
+              "type": "buy-buttons",
+              "settings": {
+                "stacking": true,
+                "show_pickup_availability": false,
+                "gift_card_form": false,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "quantity": {
+                  "type": "quantity",
+                  "static": true,
+                  "settings": {},
+                  "blocks": {}
+                },
+                "add-to-cart": {
+                  "type": "add-to-cart",
+                  "static": true,
+                  "settings": {},
+                  "blocks": {}
+                }
+              },
+              "block_order": []
+            },
+            "trust_text": {
+              "type": "text",
+              "settings": {
+                "text": "<p>Livraison gratuite en France  ·  Retours sous 14 jours  ·  Paiement sécurisé</p>",
+                "width": "100%",
+                "alignment": "center",
+                "type_preset": "paragraph",
+                "font_size": "0.8rem",
+                "color_mode": "custom",
+                "custom_text_color": "#888888",
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "accordion": {
+              "type": "accordion",
+              "settings": {
+                "icon": "plus",
+                "dividers": true,
+                "type_preset": "h5",
+                "summary_padding": "small",
+                "inherit_color_scheme": false,
+                "color_scheme": "scheme-1",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 10,
+                "border_radius": 0,
+                "padding-block-start": 8,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "acc_livraison": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Livraison & retours",
+                    "content": "<p>Livraison standard en 2 à 5 jours ouvrés. Livraison offerte dès 80 €. Retours gratuits acceptés sous 14 jours suivant la réception, dans leur état d’origine avec étiquettes.</p>",
+                    "open_by_default": false,
+                    "icon": "none"
+                  }
+                },
+                "acc_tailles": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Guide des tailles",
+                    "content": "<p>Nos vêtements suivent les tailles françaises standard. En cas de doute entre deux tailles, choisissez la taille supérieure.</p><table><tr><th>Taille FR</th><th>Poitrine</th><th>Taille</th><th>Hanches</th></tr><tr><td>36 (XS)</td><td>82–86 cm</td><td>62–66 cm</td><td>88–92 cm</td></tr><tr><td>38 (S)</td><td>87–91 cm</td><td>67–71 cm</td><td>93–97 cm</td></tr><tr><td>40 (M)</td><td>92–96 cm</td><td>72–76 cm</td><td>98–102 cm</td></tr><tr><td>42 (L)</td><td>97–101 cm</td><td>77–81 cm</td><td>103–107 cm</td></tr><tr><td>44 (XL)</td><td>102–107 cm</td><td>82–87 cm</td><td>108–113 cm</td></tr></table>",
+                    "open_by_default": false,
+                    "icon": "none"
+                  }
+                },
+                "acc_entretien": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Matière & entretien",
+                    "content": "<p>Composition : 100 % coton biologique. Coupe fluide et légèrement évasée.</p><p>Lavage délicat à 30°C à l’envers. Ne pas sécher en machine. Repassage sur l’envers à basse température. Ne pas utiliser de javel.</p>",
+                    "open_by_default": false,
+                    "icon": "none"
+                  }
+                },
+                "acc_style": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Conseils de style",
+                    "content": "<p>Portez cette pièce avec un blazer ajusté et des escarpins pour un look parisien sophistiqué, ou associez-la à des sandales plates pour une allure décontractée chic.</p>",
+                    "open_by_default": false,
+                    "icon": "none"
+                  }
+                }
+              },
+              "block_order": ["acc_livraison", "acc_tailles", "acc_entretien", "acc_style"]
+            }
+          },
+          "block_order": [
+            "review_summary",
+            "header_group",
+            "variant_picker",
+            "buy_buttons",
+            "trust_text",
+            "accordion"
+          ]
+        }
       },
-      "block_order": ["trust_1","trust_2","trust_3","acc_livraison","acc_entretien","acc_matieres","size_xs","size_s","size_m","size_l","size_xl"]
+      "settings": {
+        "content_width": "content-center-aligned",
+        "desktop_media_position": "left",
+        "equal_columns": false,
+        "limit_details_width": false,
+        "gap": 48,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 0,
+        "padding-block-end": 60,
+        "padding-block-start-mobile": 0,
+        "padding-block-end-mobile": 0
+      },
+      "block_order": ["media-gallery", "product-details"]
     },
     "paris-styling": {
       "type": "paris-styling-suggestions",
-      "settings": { "show_section": true, "eyebrow": "Style editorial", "heading": "Completez votre look", "bg_color": "#f9f6f1", "padding_top": 72, "padding_bottom": 72 },
-      "blocks": {
-        "sug-1": { "type": "suggestion", "settings": { "label": "A associer avec", "name": "Blazer Parisien", "price": "89,00" } },
-        "sug-2": { "type": "suggestion", "settings": { "label": "Accessoire ideal", "name": "Ceinture doree", "price": "34,00" } },
-        "sug-3": { "type": "suggestion", "settings": { "label": "Sac de saison", "name": "Sac en cuir", "price": "129,00" } }
+      "settings": {
+        "show_section": true,
+        "eyebrow": "Style éditorial",
+        "heading": "Complétez votre look",
+        "bg_color": "#f9f6f1",
+        "padding_top": 72,
+        "padding_bottom": 72
       },
-      "block_order": ["sug-1","sug-2","sug-3"]
+      "blocks": {
+        "sug-1": { "type": "suggestion", "settings": { "label": "À associer avec", "name": "Blazer Parisien", "price": "89,00 €" } },
+        "sug-2": { "type": "suggestion", "settings": { "label": "Accessoire idéal", "name": "Ceinture dorée", "price": "34,00 €" } },
+        "sug-3": { "type": "suggestion", "settings": { "label": "Sac de saison", "name": "Sac en cuir", "price": "129,00 €" } }
+      },
+      "block_order": ["sug-1", "sug-2", "sug-3"]
     },
     "paris-product-reviews": {
       "type": "paris-product-reviews",
-      "settings": { "show_section": true, "eyebrow": "Avis clients", "heading": "Ce qu elles en pensent", "rating_summary": "4,9 / 5 base sur 248 avis", "bg_color": "#ffffff", "padding_top": 64, "padding_bottom": 64 },
-      "blocks": {
-        "pr-1": { "type": "review", "settings": { "rating": 5, "text": "Parfaite. Le tissu est d une grande qualite et la coupe est absolument superbe.", "name": "Sophie B.", "date": "Avril 2025" } },
-        "pr-2": { "type": "review", "settings": { "rating": 5, "text": "Elegante, confortable et parfaitement coupee. Livraison rapide, emballage soigne.", "name": "Lucie R.", "date": "Mars 2025" } },
-        "pr-3": { "type": "review", "settings": { "rating": 5, "text": "La couleur est exactement comme sur les photos. Je recommande a 100 %.", "name": "Camille D.", "date": "Mars 2025" } }
+      "settings": {
+        "show_section": true,
+        "eyebrow": "Avis clients",
+        "heading": "Ce qu’elles en pensent",
+        "rating_summary": "4,9 / 5 basé sur 248 avis",
+        "bg_color": "#ffffff",
+        "padding_top": 64,
+        "padding_bottom": 64
       },
-      "block_order": ["pr-1","pr-2","pr-3"]
+      "blocks": {
+        "pr-1": { "type": "review", "settings": { "rating": 5, "text": "Parfaite. Le tissu est d’une grande qualité et la coupe est absolument superbe.", "name": "Sophie B.", "date": "Avril 2025" } },
+        "pr-2": { "type": "review", "settings": { "rating": 5, "text": "Élégante, confortable et parfaitement coupée. Livraison rapide, emballage soigné.", "name": "Lucie R.", "date": "Mars 2025" } },
+        "pr-3": { "type": "review", "settings": { "rating": 5, "text": "La couleur est exactement comme sur les photos. Je recommande à 100 %.", "name": "Camille D.", "date": "Mars 2025" } }
+      },
+      "block_order": ["pr-1", "pr-2", "pr-3"]
     },
     "paris-related": {
       "type": "paris-related-products",
-      "settings": { "show_section": true, "eyebrow": "Vous aimerez aussi", "heading": "Pieces similaires", "products_to_show": 4, "bg_color": "#f9f6f1", "padding_top": 72, "padding_bottom": 72 }
+      "settings": {
+        "show_section": true,
+        "eyebrow": "Vous aimerez aussi",
+        "heading": "Pièces similaires",
+        "products_to_show": 4,
+        "bg_color": "#f9f6f1",
+        "padding_top": 72,
+        "padding_bottom": 72
+      }
     }
   },
-  "order": ["main","paris-styling","paris-product-reviews","paris-related"]
+  "order": ["main", "paris-styling", "paris-product-reviews", "paris-related"]
 }
