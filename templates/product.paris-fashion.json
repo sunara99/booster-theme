@@ -77,60 +77,6 @@
             "padding-inline-end": 0
           },
           "blocks": {
-            "circular_text_QNfBcE": {
-              "type": "circular-text",
-              "name": "t:names.circular_text",
-              "settings": {
-                "text": "100% money back guarantee",
-                "text_repeat_mode": "auto",
-                "diameter": 100,
-                "font_size": 20,
-                "letter_spacing": 20,
-                "enable_uppercase": true,
-                "font": "body",
-                "text_color": "#000000",
-                "background": false,
-                "background_color": "#00000026",
-                "use_absolute_position": true,
-                "absolute_alignment_horizontal": "right",
-                "absolute_alignment_vertical": "top",
-                "absolute_z_index": 2,
-                "rotation_direction": "clockwise",
-                "rotation_seconds": 4,
-                "icon": "snowflake",
-                "icon_width": 28,
-                "link": "",
-                "open_in_new_tab": false
-              },
-              "blocks": {}
-            },
-            "short_review_block_cVy7nN": {
-              "type": "short-review-block",
-              "name": "Lumin Review",
-              "settings": {
-                "lrw_text": "4.8 From 136 Reviews",
-                "text_size": 14,
-                "star_style": "star",
-                "star_size": 0.6,
-                "star_rating": 4.5,
-                "lrw_star_color": "#000000",
-                "lrw_star_color_disable": "#eeeeee",
-                "lrw_color": "#000000",
-                "margin_top": 0,
-                "margin_bottom": -8,
-                "show_happy_customers_tag": false,
-                "happy_customers_text": "Happy Customers",
-                "happy_customers_bg_color": "#efefef",
-                "happy_customers_text_color": "#050505",
-                "happy_customers_text_size": 12,
-                "happy_customers_border_radius": 6,
-                "happy_customers_padding_top": 6,
-                "happy_customers_padding_bottom": 6,
-                "happy_customers_padding_left": 12,
-                "happy_customers_padding_right": 12
-              },
-              "blocks": {}
-            },
             "group_icgrde": {
               "type": "group",
               "name": "Header",
@@ -783,61 +729,16 @@
                 }
               },
               "block_order": []
-            },
-            "upsell_product_8tG9QK": {
-              "type": "_upsell-product",
-              "name": "t:sections._upsell-product.name",
-              "settings": {
-                "upsell_product": "",
-                "show_variant_selector": false,
-                "show_description": true,
-                "description_truncate": 60,
-                "show_badge": true,
-                "badge_text": "Popular",
-                "content_vertical_align": "center",
-                "desktop_width_percent": 100,
-                "inner_padding_block_start": 16,
-                "inner_padding_block_end": 16,
-                "inner_padding_inline_start": 16,
-                "inner_padding_inline_end": 16,
-                "border_radius": 8,
-                "border_width": 2,
-                "checkbox_size": 20,
-                "checkbox_color": "#000000",
-                "show_image": true,
-                "image_ratio": "adapt",
-                "image_size": 100,
-                "image_border_radius": 4,
-                "title_size": 16,
-                "price_size": 14,
-                "price_bold": true,
-                "description_size": 12,
-                "background_color": "#f5f5f5",
-                "border_color": "#f5f5f5",
-                "text_color": "#000000",
-                "price_color": "#000000",
-                "compare_price_color": "#666666",
-                "badge_background": "#000000",
-                "badge_text_color": "#ffffff",
-                "padding-block-start": 28,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
             }
           },
           "block_order": [
-            "circular_text_QNfBcE",
-            "short_review_block_cVy7nN",
             "group_icgrde",
             "benefits_CqadLL",
             "text_aEtTtq",
             "bullet_points_hgceaU",
             "variant_picker_R3rGDr",
             "quantity_breaks_UThdxg",
-            "buy_buttons_eYQEYi",
-            "upsell_product_8tG9QK"
+            "buy_buttons_eYQEYi"
           ]
         }
       },
