@@ -129,10 +129,10 @@
           "settings": {
             "menu": "main-menu",
             "color_scheme": "",
-            "type_font_primary_size": "0.875rem",
+            "type_font_primary_size": "1rem",
             "menu_font_style": "inverse",
-            "type_font_primary_link": "body",
-            "type_case_primary_link": "none",
+            "type_font_primary_link": "accent",
+            "type_case_primary_link": "uppercase",
             "menu_style": "featured_products",
             "custom_image_link": "",
             "custom_image_aspect_ratio": "4 / 5",
@@ -152,7 +152,7 @@
         }
       },
       "settings": {
-        "logo_position": "center",
+        "logo_position": "right",
         "menu_position": "left",
         "menu_row": "top",
         "show_search": true,
@@ -173,8 +173,8 @@
         "border_width": 0,
         "actions_display_style": "icon",
         "actions_font_size": "0.875rem",
-        "actions_font": "body",
-        "actions_text_case": "none",
+        "actions_font": "accent",
+        "actions_text_case": "uppercase",
         "color_scheme_top": "scheme-1",
         "color_scheme_bottom": "",
         "color_scheme_transparent": "scheme-6",
