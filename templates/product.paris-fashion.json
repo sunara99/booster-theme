@@ -26,14 +26,14 @@
           "type": "accordion",
           "settings": {
             "label": "Livraison et retours",
-            "content": "<p>Livraison standard en 2 à 5 jours ouvrés. Retours gratuits acceptés sous 14 jours suivant la réception, dans leur état d'origine.</p>"
+            "content": "<p>Livraison standard en 2 à 5 jours ouvrés. Retours gratuits sous 14 jours.</p>"
           }
         },
         "acc-2": {
           "type": "accordion",
           "settings": {
             "label": "Entretien du vêtement",
-            "content": "<p>Lavage délicat à 30°C. Ne pas sécher en machine. Repassage sur l'envers à basse température. Ne pas utiliser de javel.</p>"
+            "content": "<p>Lavage délicat à 30°C. Ne pas sécher en machine. Repassage sur l'envers à basse température.</p>"
           }
         },
         "size-xs": { "type": "size_row", "settings": { "size": "36 (XS)", "chest": "82-86",   "waist": "62-66", "hips": "88-92"   } },
