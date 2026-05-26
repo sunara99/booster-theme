@@ -125,15 +125,15 @@
         "feat-1": {
           "type": "feature",
           "settings": {
-            "title": "Matières naturelles",
-            "text": "Lin, soie et coton biologique sélectionnés avec soin."
+            "title": "Matières raffinées",
+            "text": "Des tissus légers et agréables à porter au quotidien."
           }
         },
         "feat-2": {
           "type": "feature",
           "settings": {
-            "title": "Coupe flatteuse",
-            "text": "Des silhouettes pensées pour toutes les morphologies."
+            "title": "Coupe élégante",
+            "text": "Des silhouettes pensées pour sublimer chaque femme."
           }
         },
         "feat-3": {
@@ -151,6 +151,7 @@
       ],
       "settings": {
         "show_section": true,
+        "image": "shopify://shop_images/HP_about.png",
         "placeholder_color": "#f0ebe3",
         "image_position": "left",
         "eyebrow": "Notre engagement",
