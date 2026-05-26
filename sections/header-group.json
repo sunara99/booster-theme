@@ -16,6 +16,7 @@
       "blocks": {
         "text_eQJ4zL": {
           "type": "text",
+          "disabled": true,
           "settings": {
             "text": "<p>We make things that work better and last longer.</p>",
             "enable_text_truncation": false,
@@ -67,8 +68,8 @@
       ],
       "name": "t:names.marquee_section",
       "settings": {
-        "movement_direction": "normal",
-        "speed_factor": 25,
+        "movement_direction": "reverse",
+        "speed_factor": 40,
         "color_scheme": "scheme-5",
         "padding-block-start": 12,
         "padding-block-end": 12,
