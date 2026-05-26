@@ -38,7 +38,7 @@
         "button_text": "#1a1a1a",
         "button_secondary_label": "Voir les nouveautés",
         "button_secondary_link": "",
-        "height": "large",
+        "height": "full",
         "padding_top": 0,
         "padding_bottom": 0
       }
