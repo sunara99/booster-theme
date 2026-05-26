@@ -4172,8 +4172,3 @@ summary {
   font-family: var(--font-body-family) !important;
   font-weight: 400 !important;
 }
-
-.scrolling-text,
-.scrolling-text * {
-  font-family: var(--font-body-family) !important;
-}
