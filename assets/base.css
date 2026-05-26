@@ -4173,6 +4173,9 @@ summary {
   font-weight: 400 !important;
 }
 
-h2 {
-  font-family: var(--font-body-family);
+
+.marquee__content p {
+  font-family: var(--font-body-family) !important;
+  font-weight: 400 !important;
+  letter-spacing: 1px !important;
 }
