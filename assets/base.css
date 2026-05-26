@@ -4172,3 +4172,11 @@ summary {
   font-family: var(--font-body-family) !important;
   font-weight: 400 !important;
 }
+
+.marquee h2,
+.marquee-text h2,
+.scrolling-text h2 {
+  font-family: var(--font-body-family) !important;
+  font-weight: 400 !important;
+  letter-spacing: 1px;
+}
