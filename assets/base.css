@@ -4173,7 +4173,7 @@ summary {
   font-weight: 400 !important;
 }
 
-.marquee-text,
-.marquee-text * {
+.scrolling-text,
+.scrolling-text * {
   font-family: var(--font-body-family) !important;
 }
