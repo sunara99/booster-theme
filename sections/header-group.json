@@ -16,7 +16,6 @@
       "blocks": {
         "text_eQJ4zL": {
           "type": "text",
-          "disabled": true,
           "settings": {
             "text": "<p>We make things that work better and last longer.</p>",
             "enable_text_truncation": false,
@@ -66,7 +65,6 @@
       "block_order": [
         "text_eQJ4zL"
       ],
-      "disabled": true,
       "name": "t:names.marquee_section",
       "settings": {
         "movement_direction": "normal",
@@ -129,7 +127,7 @@
         "country_selector_style": true,
         "show_language": true,
         "localization_font": "heading",
-        "localization_font_size": "1.125rem",
+        "localization_font_size": "0.875rem",
         "localization_position": "right",
         "localization_row": "top",
         "section_width": "page-width",
