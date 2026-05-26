@@ -16,7 +16,6 @@
       "blocks": {
         "text_eQJ4zL": {
           "type": "text",
-          "disabled": true,
           "settings": {
             "text": "<p>We make things that work better and last longer.</p>",
             "enable_text_truncation": false,
