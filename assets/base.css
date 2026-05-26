@@ -4165,7 +4165,10 @@ text-component {
   margin-top: 16px;
 }
 
-.accordion,
-.accordion * {
+details summary,
+details summary span,
+.accordion__title,
+summary {
   font-family: var(--font-body-family) !important;
+  font-weight: 400 !important;
 }
