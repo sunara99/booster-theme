@@ -334,6 +334,22 @@
         "padding_bottom": 72
       }
     },
+    "paris-newsletter": {
+      "type": "paris-newsletter",
+      "settings": {
+        "show_section": true,
+        "heading": "Rejoignez notre univers",
+        "subheading": "Accédez en avant-première aux nouvelles collections, conseils de style et offres exclusives.",
+        "input_placeholder": "Votre adresse e-mail",
+        "button_label": "S'inscrire",
+        "success_message": "Merci ! Vous êtes maintenant inscrite.",
+        "note": "Pas de spam, désabonnement en un clic.",
+        "bg_color": "#f0ebe3",
+        "text_color": "#1a1a1a",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
     "hero_rYGTk7": {
       "type": "hero",
       "blocks": {
@@ -586,6 +602,7 @@
       "name": "t:names.hero_bottom_aligned",
       "settings": {
         "media_type_1": "image",
+        "image_1": "shopify://shop_images/Hero_Down.png",
         "media_type_2": "image",
         "stack_media_on_mobile": false,
         "custom_mobile_media": false,
@@ -614,22 +631,6 @@
         "padding-block-start": 40,
         "padding-block-end": 40
       }
-    },
-    "paris-newsletter": {
-      "type": "paris-newsletter",
-      "settings": {
-        "show_section": true,
-        "heading": "Rejoignez notre univers",
-        "subheading": "Accédez en avant-première aux nouvelles collections, conseils de style et offres exclusives.",
-        "input_placeholder": "Votre adresse e-mail",
-        "button_label": "S'inscrire",
-        "success_message": "Merci ! Vous êtes maintenant inscrite.",
-        "note": "Pas de spam, désabonnement en un clic.",
-        "bg_color": "#f0ebe3",
-        "text_color": "#1a1a1a",
-        "padding_top": 80,
-        "padding_bottom": 80
-      }
     }
   },
   "order": [
@@ -642,7 +643,7 @@
     "paris-category-cards",
     "paris-trust",
     "paris-reviews",
-    "hero_rYGTk7",
-    "paris-newsletter"
+    "paris-newsletter",
+    "hero_rYGTk7"
   ]
 }
