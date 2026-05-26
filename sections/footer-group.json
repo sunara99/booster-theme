@@ -112,7 +112,7 @@
                     "accordion_dividers": false,
                     "inherit_color_scheme": true,
                     "color_scheme": "",
-                    "heading_preset": "h3",
+                    "heading_preset": "h5",
                     "link_preset": "paragraph",
                     "padding-block-start": 0,
                     "padding-block-end": 0,
@@ -133,8 +133,8 @@
                     "accordion_dividers": true,
                     "inherit_color_scheme": true,
                     "color_scheme": "",
-                    "heading_preset": "h3",
-                    "link_preset": "paragraph",
+                    "heading_preset": "h5",
+                    "link_preset": "",
                     "padding-block-start": 0,
                     "padding-block-end": 0,
                     "padding-inline-start": 0,
@@ -142,24 +142,27 @@
                   },
                   "blocks": {}
                 },
-                "menu_jUdDEi": {
-                  "type": "menu",
-                  "name": "t:names.menu",
+                "icon_text_7VKMqW": {
+                  "type": "icon-text",
+                  "name": "t:names.icon_text",
                   "settings": {
-                    "menu": "main-menu",
-                    "heading": "New Product",
-                    "menu_spacing": 12,
-                    "show_as_accordion": true,
-                    "accordion_icon": "plus",
-                    "accordion_dividers": false,
-                    "inherit_color_scheme": true,
-                    "color_scheme": "",
-                    "heading_preset": "h3",
-                    "link_preset": "paragraph",
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
+                    "icon": "none",
+                    "image_corner_radius": 0,
+                    "icon_width": 24,
+                    "text": "<p>Chez Gigié, nous nous consacrons à la création de pièces intemporelles pour femme et homme qui associent confort, style et qualité. Chaque création est soigneusement conçue pour s'adapter au mode de vie moderne, que ce soit pour le quotidien, le travail ou les occasions spéciales. Avec une attention particulière aux détails et une passion pour l'élégance durable, nous concevons des collections à la fois pratiques et raffinées. De plus, profitez de la livraison gratuite partout en France.<br/><br/></p>",
+                    "font_size": "",
+                    "layout": "row",
+                    "vertical_alignment": "center",
+                    "vertical_on_mobile": true,
+                    "gap": 12,
+                    "background_color": "",
+                    "text_color": "",
+                    "corner_radius": 0,
+                    "padding_top": 0,
+                    "padding_bottom": 0,
+                    "padding_sides": 0,
+                    "link": "",
+                    "open_in_new_tab": false
                   },
                   "blocks": {}
                 }
@@ -167,39 +170,12 @@
               "block_order": [
                 "menu_zWQJQq",
                 "menu_waqcbJ",
-                "menu_jUdDEi"
+                "icon_text_7VKMqW"
               ]
-            },
-            "email_signup_gnLBi7": {
-              "type": "email-signup",
-              "name": "t:names.email_signup",
-              "settings": {
-                "width": "fill",
-                "custom_width": 100,
-                "inherit_color_scheme": true,
-                "color_scheme": "",
-                "heading": "",
-                "heading_preset": "h3",
-                "border_style": "all",
-                "border_width": 1,
-                "border_radius": 100,
-                "input_type_preset": "paragraph",
-                "style_class": "button",
-                "display_type": "text",
-                "label": "Sign up",
-                "integrated_button": false,
-                "button_type_preset": "paragraph",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
             }
           },
           "block_order": [
-            "group_EgtK7y",
-            "email_signup_gnLBi7"
+            "group_EgtK7y"
           ]
         }
       },
@@ -221,18 +197,10 @@
         "footer_copyright_jweRK8": {
           "type": "footer-copyright",
           "settings": {
-            "show_powered_by": true,
+            "show_powered_by": false,
             "copyright_info": "",
             "font_size": "0.75rem",
             "case": "none"
-          },
-          "blocks": {}
-        },
-        "footer_policy_list_VCdnpa": {
-          "type": "footer-policy-list",
-          "settings": {
-            "font_size": "0.75rem",
-            "case": "uppercase"
           },
           "blocks": {}
         },
@@ -258,7 +226,6 @@
       },
       "block_order": [
         "footer_copyright_jweRK8",
-        "footer_policy_list_VCdnpa",
         "social_links_Ew63Kq"
       ],
       "name": "t:names.utilities",
