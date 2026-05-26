@@ -11,34 +11,6 @@
   "sections": {
     "paris-announcement": {
       "type": "paris-announcement-bar",
-      "blocks": {
-        "item-1": {
-          "type": "item",
-          "settings": {
-            "text": "Livraison offerte dès 80 €",
-            "icon": "truck"
-          }
-        },
-        "item-2": {
-          "type": "item",
-          "settings": {
-            "text": "Retours sous 14 jours",
-            "icon": "return"
-          }
-        },
-        "item-3": {
-          "type": "item",
-          "settings": {
-            "text": "Paiement 100 % sécurisé",
-            "icon": "shield"
-          }
-        }
-      },
-      "block_order": [
-        "item-1",
-        "item-2",
-        "item-3"
-      ],
       "settings": {
         "show_section": true,
         "bg_color": "#1a1a1a",
