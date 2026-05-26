@@ -11,70 +11,6 @@
   "type": "header",
   "name": "Header",
   "sections": {
-    "marquee_WTCxEr": {
-      "type": "marquee",
-      "blocks": {
-        "text_eQJ4zL": {
-          "type": "text",
-          "settings": {
-            "text": "<p>We make things that work better and last longer.</p>",
-            "enable_text_truncation": false,
-            "truncate_lines": 3,
-            "truncate_view_more_label": "View more",
-            "truncate_view_less_label": "View less",
-            "width": "fit-content",
-            "max_width": "normal",
-            "alignment": "left",
-            "type_preset": "custom",
-            "font": "var(--font-body--family)",
-            "custom_typography_font": "work_sans_n4",
-            "enable_bold_typography_font": false,
-            "bold_typography_font": "work_sans_n7",
-            "enable_italic_typography_font": false,
-            "italic_typography_font": "work_sans_i4",
-            "font_size": "1rem",
-            "line_height": "tight",
-            "letter_spacing": "tight",
-            "case": "none",
-            "wrap": "nowrap",
-            "color_mode": "default",
-            "color": "var(--color-foreground)",
-            "custom_color_style": "solid",
-            "custom_text_color": "#000000",
-            "custom_gradient_color_start": "#000000",
-            "custom_gradient_color_end": "#666666",
-            "custom_gradient_direction": "to right",
-            "custom_color_bold": "#000000",
-            "custom_color_italic": "#000000",
-            "custom_color_underline": "#000000",
-            "custom_color_background_bold": "rgba(0,0,0,0)",
-            "custom_color_background_italic": "rgba(0,0,0,0)",
-            "custom_color_background_underline": "rgba(0,0,0,0)",
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0,
-            "ancher_id": ""
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "text_eQJ4zL"
-      ],
-      "name": "t:names.marquee_section",
-      "settings": {
-        "movement_direction": "normal",
-        "speed_factor": 25,
-        "color_scheme": "scheme-5",
-        "padding-block-start": 12,
-        "padding-block-end": 12,
-        "gap_between_elements": 42
-      }
-    },
     "header_announcements_9jGBFp": {
       "type": "header-announcements",
       "blocks": {
@@ -189,7 +125,6 @@
     }
   },
   "order": [
-    "marquee_WTCxEr",
     "header_announcements_9jGBFp",
     "header_section"
   ]
