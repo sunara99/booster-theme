@@ -68,7 +68,7 @@
       "name": "t:names.marquee_section",
       "settings": {
         "movement_direction": "reverse",
-        "speed_factor": 40,
+        "speed_factor": 60,
         "color_scheme": "scheme-5",
         "padding-block-start": 12,
         "padding-block-end": 12,
