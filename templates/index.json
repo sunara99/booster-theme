@@ -104,7 +104,7 @@
       "type": "paris-featured-collection",
       "settings": {
         "show_section": true,
-        "collection": "",
+        "collection": "jupes",
         "products_to_show": 4,
         "show_vendor": false,
         "eyebrow": "Sélection coup de cœur",
