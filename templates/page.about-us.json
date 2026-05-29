@@ -1204,7 +1204,7 @@
             "link_icon_overlay_opacity": 35,
             "link_icon_show_background": false,
             "link_icon_background_color": "#f5e6c8",
-            "image_ratio": "square",
+            "image_ratio": "landscape",
             "width": "fill",
             "custom_width": 100,
             "width_mobile": "fill",
