@@ -1088,7 +1088,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>Take a look behind the scenes of our latest product launch.</p>",
+                "text": "<p>Découvrez l’histoire et l’inspiration derrière notre nouvelle collection.</p>",
                 "enable_text_truncation": false,
                 "truncate_lines": 3,
                 "truncate_view_more_label": "View more",
@@ -1136,7 +1136,7 @@
               "type": "button",
               "name": "t:names.button",
               "settings": {
-                "label": "Discover the collection",
+                "label": "Découvrez la collection",
                 "link": "shopify://collections/all",
                 "open_in_new_tab": false,
                 "style_class": "link",
