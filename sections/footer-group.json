@@ -105,7 +105,7 @@
                   "name": "t:names.menu",
                   "settings": {
                     "menu": "main-menu",
-                    "heading": "Shop",
+                    "heading": "`Boutique",
                     "menu_spacing": 12,
                     "show_as_accordion": false,
                     "accordion_icon": "plus",
@@ -126,7 +126,7 @@
                   "name": "t:names.menu",
                   "settings": {
                     "menu": "footer",
-                    "heading": "Legal",
+                    "heading": "Service Clientèle",
                     "menu_spacing": 12,
                     "show_as_accordion": true,
                     "accordion_icon": "plus",
