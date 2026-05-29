@@ -480,7 +480,7 @@
                   "type": "text",
                   "name": "t:names.text",
                   "settings": {
-                    "text": "<p>We will work quickly to ship your order as soon as possible. Once your order has shipped, you will receive an email with further information. Delivery times vary depending on your location.</p>",
+                    "text": "<p>Nous mettrons tout en œuvre pour expédier votre commande dans les meilleurs délais. Une fois votre commande expédiée, vous recevrez un e-mail contenant de plus amples informations. Les délais de livraison varient en fonction de votre lieu de résidence.</p>",
                     "enable_text_truncation": false,
                     "truncate_lines": 3,
                     "truncate_view_more_label": "View more",
