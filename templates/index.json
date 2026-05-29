@@ -191,6 +191,7 @@
         "card-1": {
           "type": "card",
           "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_29_mei_2026_05_28_25.png",
             "title": "Robes",
             "cta_text": "Découvrir",
             "link": ""
@@ -199,6 +200,7 @@
         "card-2": {
           "type": "card",
           "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_29_mei_2026_05_29_05.png",
             "title": "Jupes",
             "cta_text": "Découvrir",
             "link": ""
@@ -207,6 +209,7 @@
         "card-3": {
           "type": "card",
           "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_29_mei_2026_05_30_20.png",
             "title": "Blouses",
             "cta_text": "Découvrir",
             "link": ""
@@ -215,6 +218,7 @@
         "card-4": {
           "type": "card",
           "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_29_mei_2026_05_30_49.png",
             "title": "Ensembles deux pièces",
             "cta_text": "Découvrir",
             "link": ""
