@@ -341,7 +341,7 @@
           "type": "text",
           "name": "t:names.heading",
           "settings": {
-            "text": "<h3>Frequently asked questions</h3>",
+            "text": "<p>Foire aux questions</p>",
             "enable_text_truncation": false,
             "truncate_lines": 3,
             "truncate_view_more_label": "View more",
@@ -349,7 +349,7 @@
             "width": "fit-content",
             "max_width": "narrow",
             "alignment": "left",
-            "type_preset": "rte",
+            "type_preset": "h3",
             "font": "var(--font-body--family)",
             "custom_typography_font": "work_sans_n4",
             "enable_bold_typography_font": false,
