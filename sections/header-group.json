@@ -142,7 +142,7 @@
         "actions_text_case": "uppercase",
         "color_scheme_top": "scheme-1",
         "color_scheme_bottom": "",
-        "color_scheme_transparent": "scheme-6",
+        "color_scheme_transparent": "scheme-5",
         "enable_transparent_header_home": true,
         "home_color_scheme": "inverse",
         "enable_sticky_header_blur": false,
