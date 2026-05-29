@@ -742,7 +742,7 @@
                   "type": "text",
                   "name": "t:names.heading",
                   "settings": {
-                    "text": "<h2><em>Introducing</em></h2>",
+                    "text": "<p>Présentation de</p>",
                     "enable_text_truncation": false,
                     "truncate_lines": 3,
                     "truncate_view_more_label": "View more",
@@ -790,7 +790,7 @@
                   "type": "text",
                   "name": "t:names.heading",
                   "settings": {
-                    "text": "<h1>New arrivals</h1>",
+                    "text": "<p>Nouveautés</p>",
                     "enable_text_truncation": false,
                     "truncate_lines": 3,
                     "truncate_view_more_label": "View more",
@@ -844,7 +844,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p>We make things that work better and last longer. Our products solve real problems with clean design and honest materials.</p>",
+                "text": "<p>Nous créons des objets durables et performants, conçus pour résoudre des problèmes concrets grâce à un design épuré et des matériaux de qualité.</p>",
                 "enable_text_truncation": false,
                 "truncate_lines": 3,
                 "truncate_view_more_label": "View more",
