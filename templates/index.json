@@ -199,7 +199,7 @@
         "card-2": {
           "type": "card",
           "settings": {
-            "title": "Vestes",
+            "title": "Jupes",
             "cta_text": "Découvrir",
             "link": ""
           }
@@ -207,7 +207,7 @@
         "card-3": {
           "type": "card",
           "settings": {
-            "title": "Hauts",
+            "title": "Ensembles deux pièces",
             "cta_text": "Découvrir",
             "link": ""
           }
@@ -215,7 +215,7 @@
         "card-4": {
           "type": "card",
           "settings": {
-            "title": "Pantalons",
+            "title": "Blouses",
             "cta_text": "Découvrir",
             "link": ""
           }
