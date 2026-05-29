@@ -408,7 +408,7 @@
             "accordion_row_DBhnUB": {
               "type": "_accordion-row",
               "settings": {
-                "heading": "What is the return policy?",
+                "heading": "Quelle est la politique de retour ?",
                 "open_by_default": false,
                 "icon": "none",
                 "width": 20
@@ -466,72 +466,11 @@
                 "text_r7jWJh"
               ]
             },
-            "accordion_row_VzTixc": {
-              "type": "_accordion-row",
-              "settings": {
-                "heading": "Are any purchases final sale?",
-                "open_by_default": false,
-                "icon": "none",
-                "width": 20
-              },
-              "blocks": {
-                "text_rzmGY8": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>We are unable to accept returns on certain items. These will be carefully marked before purchase.</p>",
-                    "enable_text_truncation": false,
-                    "truncate_lines": 3,
-                    "truncate_view_more_label": "View more",
-                    "truncate_view_less_label": "View less",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "rte",
-                    "font": "var(--font-body--family)",
-                    "custom_typography_font": "work_sans_n4",
-                    "enable_bold_typography_font": false,
-                    "bold_typography_font": "work_sans_n7",
-                    "enable_italic_typography_font": false,
-                    "italic_typography_font": "work_sans_i4",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "color_mode": "default",
-                    "color": "var(--color-foreground)",
-                    "custom_color_style": "solid",
-                    "custom_text_color": "#000000",
-                    "custom_gradient_color_start": "#000000",
-                    "custom_gradient_color_end": "#666666",
-                    "custom_gradient_direction": "to right",
-                    "custom_color_bold": "#000000",
-                    "custom_color_italic": "#000000",
-                    "custom_color_underline": "#000000",
-                    "custom_color_background_bold": "rgba(0,0,0,0)",
-                    "custom_color_background_italic": "rgba(0,0,0,0)",
-                    "custom_color_background_underline": "rgba(0,0,0,0)",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0,
-                    "ancher_id": ""
-                  },
-                  "blocks": {}
-                }
-              },
-              "block_order": [
-                "text_rzmGY8"
-              ]
-            },
             "accordion_row_nLqaq3": {
               "type": "_accordion-row",
               "name": "t:names.accordion_row",
               "settings": {
-                "heading": "When will I get my order?",
+                "heading": "Quand vais-je recevoir ma commande ?",
                 "open_by_default": false,
                 "icon": "none",
                 "width": 20
@@ -590,74 +529,11 @@
                 "text_y3fpfg"
               ]
             },
-            "accordion_row_Eh8rr4": {
-              "type": "_accordion-row",
-              "name": "t:names.accordion_row",
-              "settings": {
-                "heading": "Where are your products manufactured?",
-                "open_by_default": false,
-                "icon": "none",
-                "width": 20
-              },
-              "blocks": {
-                "text_QCFyGa": {
-                  "type": "text",
-                  "name": "t:names.text",
-                  "settings": {
-                    "text": "<p>Our products are manufactured both locally and globally. We carefully select our manufacturing partners to ensure our products are high quality and a fair value.</p>",
-                    "enable_text_truncation": false,
-                    "truncate_lines": 3,
-                    "truncate_view_more_label": "View more",
-                    "truncate_view_less_label": "View less",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "rte",
-                    "font": "var(--font-body--family)",
-                    "custom_typography_font": "work_sans_n4",
-                    "enable_bold_typography_font": false,
-                    "bold_typography_font": "work_sans_n7",
-                    "enable_italic_typography_font": false,
-                    "italic_typography_font": "work_sans_i4",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "color_mode": "default",
-                    "color": "var(--color-foreground)",
-                    "custom_color_style": "solid",
-                    "custom_text_color": "#000000",
-                    "custom_gradient_color_start": "#000000",
-                    "custom_gradient_color_end": "#666666",
-                    "custom_gradient_direction": "to right",
-                    "custom_color_bold": "#000000",
-                    "custom_color_italic": "#000000",
-                    "custom_color_underline": "#000000",
-                    "custom_color_background_bold": "rgba(0,0,0,0)",
-                    "custom_color_background_italic": "rgba(0,0,0,0)",
-                    "custom_color_background_underline": "rgba(0,0,0,0)",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0,
-                    "ancher_id": ""
-                  },
-                  "blocks": {}
-                }
-              },
-              "block_order": [
-                "text_QCFyGa"
-              ]
-            },
             "accordion_row_Jjxtzw": {
               "type": "_accordion-row",
               "name": "t:names.accordion_row",
               "settings": {
-                "heading": "How much does shipping cost?",
+                "heading": "Combien coûte la livraison ?",
                 "open_by_default": false,
                 "icon": "none",
                 "width": 20
@@ -719,9 +595,7 @@
           },
           "block_order": [
             "accordion_row_DBhnUB",
-            "accordion_row_VzTixc",
             "accordion_row_nLqaq3",
-            "accordion_row_Eh8rr4",
             "accordion_row_Jjxtzw"
           ]
         }
