@@ -417,12 +417,12 @@
                 "text_r7jWJh": {
                   "type": "text",
                   "settings": {
-                    "text": "<p>Our goal is for every customer to be totally satisfied with their purchase. If this isn't the case, let us know and we'll do our best to work with you to make it right.</p>",
+                    "text": "<p>Notre objectif est que chaque client soit pleinement satisfait de son achat. Si ce n'est pas le cas, n'hésitez pas à nous en faire part et nous ferons tout notre possible pour trouver une solution avec vous.<br/><br/></p>",
                     "enable_text_truncation": false,
                     "truncate_lines": 3,
                     "truncate_view_more_label": "View more",
                     "truncate_view_less_label": "View less",
-                    "width": "100%",
+                    "width": "fit-content",
                     "max_width": "normal",
                     "alignment": "left",
                     "type_preset": "rte",
