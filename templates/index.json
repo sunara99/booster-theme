@@ -543,7 +543,7 @@
                   "type": "text",
                   "name": "t:names.text",
                   "settings": {
-                    "text": "<p>Shipping is calculated based on your location and the items in your order. You will always know the shipping price before you purchase.</p>",
+                    "text": "<p>Les frais de livraison sont calculés en fonction de votre lieu de résidence et des articles de votre commande. Vous connaîtrez toujours le montant des frais de livraison avant de finaliser votre achat.</p>",
                     "enable_text_truncation": false,
                     "truncate_lines": 3,
                     "truncate_view_more_label": "View more",
