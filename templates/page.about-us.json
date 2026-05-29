@@ -1137,7 +1137,7 @@
               "name": "t:names.button",
               "settings": {
                 "label": "Découvrez la collection",
-                "link": "shopify://collections/all",
+                "link": "shopify://pages/about-us",
                 "open_in_new_tab": false,
                 "style_class": "link",
                 "sticky_on_scroll": "none",
