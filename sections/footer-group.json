@@ -237,80 +237,10 @@
         "padding-block-start": 20,
         "padding-block-end": 48
       }
-    },
-    "email_popup_zMyDT3": {
-      "type": "email-popup",
-      "blocks": {
-        "email_popup_input_jDktzk": {
-          "type": "_email-popup-input",
-          "settings": {
-            "placeholder": "Email address",
-            "button_text": "SUBMIT"
-          },
-          "blocks": {}
-        },
-        "social_links_erNJwm": {
-          "type": "social-links",
-          "name": "t:names.social_media_links",
-          "settings": {
-            "facebook_url": "#",
-            "instagram_url": "#",
-            "youtube_url": "",
-            "tiktok_url": "#",
-            "twitter_url": "#",
-            "threads_url": "#",
-            "linkedin_url": "",
-            "bluesky_url": "",
-            "snapchat_url": "",
-            "pinterest_url": "#",
-            "tumblr_url": "",
-            "vimeo_url": "",
-            "custom_url": ""
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "email_popup_input_jDktzk",
-        "social_links_erNJwm"
-      ],
-      "name": "Email popup",
-      "settings": {
-        "enabled": true,
-        "edit_mode": "success",
-        "color_scheme": "scheme-2",
-        "show_home_only": false,
-        "show_only_visitors": false,
-        "delay": 5,
-        "frequency": 1,
-        "dialog_width": 720,
-        "content_padding": 44,
-        "position_mobile": "center",
-        "position": "center",
-        "alignment": "center",
-        "border_radius": 0,
-        "input_border_radius": 0,
-        "image_ratio": "square",
-        "hide_image_on_mobile": false,
-        "headline": "Bénéficiez de 10 % de réduction sur votre première commande",
-        "subtext": "Abonnez-vous pour bénéficier immédiatement de 10 % de réduction sur votre premier achat. Nous vous tiendrons également informé de toutes les nouveautés, promotions et offres exclusives.",
-        "success_headline": "C'est bon, tu es inscrit !",
-        "success_subtext": "Merci de vous être abonné. Vérifiez votre boîte mail pour obtenir votre code de réduction.",
-        "success_message": "Vous êtes inscrit ! Consultez votre boîte mail pour obtenir votre réduction.",
-        "discount_code": "WELCOM10",
-        "discount_code_label": "Votre code de réduction :",
-        "success_content_gap": 16,
-        "success_headline_size": 32,
-        "success_subtext_size": 14,
-        "success_message_size": 14,
-        "success_discount_label_size": 12,
-        "success_discount_code_size": 14
-      }
     }
   },
   "order": [
     "footer_m9NzUG",
-    "footer_utilities_jLGE8U",
-    "email_popup_zMyDT3"
+    "footer_utilities_jLGE8U"
   ]
 }
